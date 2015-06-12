@@ -103,10 +103,10 @@ namespace Toggl.Joey.UI.Activities
 
             MainToolbar = FindViewById<Toolbar> (Resource.Id.MainToolbar);
             SetSupportActionBar (MainToolbar);
-            MainToolbar.SetNavigationIcon (Resource.Drawable.IcDrawer);
-            SupportActionBar.SetTitle (Resource.String.MainDrawerTimer);
-            SupportActionBar.SetCustomView (Timer.Root, lp);
-            SupportActionBar.SetDisplayShowCustomEnabled (true);
+//            MainToolbar.SetNavigationIcon (Resource.Drawable.IcDrawer);
+//            SupportActionBar.SetTitle (Resource.String.MainDrawerTimer);
+//            SupportActionBar.SetCustomView (Timer.Root, lp);
+//            SupportActionBar.SetDisplayShowCustomEnabled (true);
 
             var bus = ServiceContainer.Resolve<MessageBus> ();
             drawerSyncStarted = bus.Subscribe<SyncStartedMessage> (SyncStarted);

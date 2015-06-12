@@ -18,6 +18,7 @@ using Toggl.Phoebe.Data;
 using Toggl.Phoebe.Data.Utils;
 using Toggl.Phoebe.Data.Views;
 using XPlatUtils;
+using StickyHeader;
 
 namespace Toggl.Joey.UI.Fragments
 {
@@ -34,6 +35,7 @@ namespace Toggl.Joey.UI.Fragments
         private FrameLayout undoBar;
         private Button undoButton;
         private bool isUndoShowed;
+        private ViewGroup cont;
 
         // Recycler setup
         private DividerItemDecoration dividerDecoration;
@@ -52,16 +54,32 @@ namespace Toggl.Joey.UI.Fragments
             recyclerView = view.FindViewById<RecyclerView> (Resource.Id.LogRecyclerView);
             recyclerView.SetLayoutManager (new LinearLayoutManager (Activity));
 
+
             undoBar = view.FindViewById<FrameLayout> (Resource.Id.UndoBar);
             undoButton = view.FindViewById<Button> (Resource.Id.UndoButton);
             undoButton.Click += UndoBtnClicked;
-
+            cont = container;
             return view;
         }
 
         public override void OnViewCreated (View view, Bundle savedInstanceState)
         {
             base.OnViewCreated (view, savedInstanceState);
+
+            var linearLayout = new LinearLayoutManager (Activity);
+            var swipeTouchListener = new SwipeDismissTouchListener (recyclerView, this);
+            var itemTouchListener = new ItemTouchListener (recyclerView, this);
+
+            recyclerView.SetLayoutManager (linearLayout);
+            recyclerView.AddOnItemTouchListener (swipeTouchListener);
+            recyclerView.AddOnItemTouchListener (itemTouchListener);
+            recyclerView.AddOnScrollListener (new RecyclerViewScrollDetector (this));
+            recyclerView.GetItemAnimator ().SupportsChangeAnimations = false;
+
+            StickyHeaderBuilder
+            .StickTo (recyclerView)
+            .SetHeader (Resource.Id.LogEntriesHeader, cont)
+            .Apply ();
 
             var bus = ServiceContainer.Resolve<MessageBus> ();
             subscriptionSettingChanged = bus.Subscribe<SettingChangedMessage> (OnSettingChanged);

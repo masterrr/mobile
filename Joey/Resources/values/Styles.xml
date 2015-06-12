@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <resources>
     <style name="Theme.Toggl.Base" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowActionBarOverlay">true</item>
     </style>
     <style name="Theme.Toggl.Splash"  parent="Theme.Toggl.Base">
         <item name="android:windowBackground">@drawable/splashscreen</item>

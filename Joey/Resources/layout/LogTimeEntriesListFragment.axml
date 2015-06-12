@@ -7,6 +7,13 @@
         android:id="@+id/LogRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+    <FrameLayout
+        android:id="@+id/LogEntriesHeader"
+        android:layout_width="match_parent"
+        android:layout_height="330dp">
+        <include
+            layout="@layout/ManualEditForm" />
+    </FrameLayout>
     <LinearLayout
         android:id="@+id/EmptyMessageView"
         android:layout_width="match_parent"
@@ -27,6 +34,6 @@
             android:text="@string/NoItemsText"
             android:gravity="center" />
     </LinearLayout>
-    <include layout="@layout/UndoBar" />    
+    <include
+        layout="@layout/UndoBar" />
 </FrameLayout>
-
