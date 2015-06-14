@@ -147,7 +147,6 @@
     <Compile Include="UI\Adapters\RecycledDataViewAdapter.cs" />
     <Compile Include="UI\Utils\RecycledBindableViewHolder.cs" />
     <Compile Include="UI\Adapters\LogTimeEntriesAdapter.cs" />
-    <Compile Include="UI\Fragments\LogTimeEntriesListFragment.cs" />
     <Compile Include="UI\Activities\ProjectListActivity.cs" />
     <Compile Include="UI\Fragments\ProjectListFragment.cs" />
     <Compile Include="UI\Adapters\ProjectListAdapter.cs" />
@@ -169,6 +168,8 @@
     <Compile Include="UI\Utils\SimpleHeaderStickyAnimator.cs" />
     <Compile Include="UI\Views\StickyHeaderListView.cs" />
     <Compile Include="UI\Views\StickyHeaderScrollView.cs" />
+    <Compile Include="UI\Fragments\ManualEditTimeEntryFragment.cs" />
+    <Compile Include="UI\Fragments\HomeScreenFragment.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />
@@ -639,7 +640,6 @@
     <AndroidResource Include="Resources\layout\ColorPicker.axml" />
     <AndroidResource Include="Resources\layout\TogglField.axml" />
     <AndroidResource Include="Resources\layout\DurationTextView.axml" />
-    <AndroidResource Include="Resources\layout\LogTimeEntriesListFragment.axml" />
     <AndroidResource Include="Resources\layout\ProjectListActivityLayout.axml" />
     <AndroidResource Include="Resources\layout\ProjectListFragment.axml" />
     <AndroidResource Include="Resources\layout\UndoBar.axml" />
@@ -688,6 +688,7 @@
     <AndroidResource Include="Resources\drawable-hdpi\icTasksSelected.png" />
     <AndroidResource Include="Resources\drawable\TasksButtonBackground.xml" />
     <AndroidResource Include="Resources\layout\ManualEditForm.axml" />
+    <AndroidResource Include="Resources\layout\HomeScreenFragment.axml" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Novell\Novell.MonoDroid.CSharp.targets" />
   <ItemGroup>

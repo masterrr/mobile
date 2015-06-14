@@ -39,7 +39,7 @@ namespace Toggl.Joey.UI.Activities
         private const string LastSyncArgument = "com.toggl.timer.last_sync";
         private const string LastSyncResultArgument = "com.toggl.timer.last_sync_result";
         private readonly TimerComponent barTimer = new TimerComponent ();
-        private readonly Lazy<LogTimeEntriesListFragment> trackingFragment = new Lazy<LogTimeEntriesListFragment> ();
+        private readonly Lazy<HomeScreenFragment> trackingFragment = new Lazy<HomeScreenFragment> ();
         private readonly Lazy<SettingsListFragment> settingsFragment = new Lazy<SettingsListFragment> ();
         private readonly Lazy<ReportsPagerFragment> reportFragment = new Lazy<ReportsPagerFragment> ();
         private readonly Lazy<FeedbackFragment> feedbackFragment = new Lazy<FeedbackFragment> ();

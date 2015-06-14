@@ -22,7 +22,7 @@ using StickyHeader;
 
 namespace Toggl.Joey.UI.Fragments
 {
-    public class LogTimeEntriesListFragment : Fragment, SwipeDismissCallback.IDismissListener, ItemTouchListener.IItemTouchListener
+    public class HomeScreenFragment : Fragment, SwipeDismissTouchListener.IDismissCallbacks, ItemTouchListener.IItemTouchListener
     {
         private static readonly int UndbarVisibleTime = 6000;
         private static readonly int UndbarScrollThreshold = 100;
@@ -45,13 +45,13 @@ namespace Toggl.Joey.UI.Fragments
 
         public override View OnCreateView (LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
-            var view = inflater.Inflate (Resource.Layout.LogTimeEntriesListFragment, container, false);
+            var view = inflater.Inflate (Resource.Layout.HomeScreenFragment, container, false);
             view.FindViewById<TextView> (Resource.Id.EmptyTitleTextView).SetFont (Font.Roboto);
             view.FindViewById<TextView> (Resource.Id.EmptyTextTextView).SetFont (Font.RobotoLight);
 
             emptyMessageView = view.FindViewById<View> (Resource.Id.EmptyMessageView);
             emptyMessageView.Visibility = ViewStates.Gone;
-            recyclerView = view.FindViewById<RecyclerView> (Resource.Id.LogRecyclerView);
+            recyclerView = view.FindViewById<RecyclerView> (Resource.Id.HomeRecyclerView);
             recyclerView.SetLayoutManager (new LinearLayoutManager (Activity));
 
 
@@ -78,7 +78,7 @@ namespace Toggl.Joey.UI.Fragments
 
             StickyHeaderBuilder
             .StickTo (recyclerView)
-            .SetHeader (Resource.Id.LogEntriesHeader, cont)
+            .SetHeader (Resource.Id.ManualAddTimeEntry, cont)
             .Apply ();
 
             var bus = ServiceContainer.Resolve<MessageBus> ();
@@ -294,9 +294,9 @@ namespace Toggl.Joey.UI.Fragments
 
         private class RecyclerViewScrollDetector : RecyclerView.OnScrollListener
         {
-            private readonly LogTimeEntriesListFragment owner;
+            private readonly HomeScreenFragment owner;
 
-            public RecyclerViewScrollDetector (LogTimeEntriesListFragment owner)
+            public RecyclerViewScrollDetector (HomeScreenFragment owner)
             {
                 this.owner = owner;
                 ScrollThreshold = UndbarScrollThreshold;

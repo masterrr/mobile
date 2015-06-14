@@ -4,12 +4,13 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/LogRecyclerView"
+        android:id="@+id/HomeRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
     <FrameLayout
-        android:id="@+id/LogEntriesHeader"
+        android:id="@+id/ManualAddTimeEntry"
         android:layout_width="match_parent"
+        android:visibility="gone"
         android:layout_height="330dp">
         <include
             layout="@layout/ManualEditForm" />
