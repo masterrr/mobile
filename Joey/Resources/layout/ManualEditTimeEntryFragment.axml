@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@drawable/BgArrowsPattern">
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
@@ -97,12 +98,12 @@
             <Toggl.Joey.UI.Views.TogglField
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:id="@+id/Project"
+                android:id="@+id/Description"
                 android:layout_marginTop="20dp" />
             <Toggl.Joey.UI.Views.TogglField
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:id="@+id/Description"
+                android:id="@+id/Project"
                 android:layout_marginTop="20dp" />
             <Toggl.Joey.UI.Views.TogglTagsField
                 android:layout_width="match_parent"
