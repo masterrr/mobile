@@ -63,6 +63,12 @@ namespace Toggl.Joey.UI.Views
             return this;
         }
 
+        public TogglField ShowTitle (bool show)
+        {
+            titleText.Visibility = show ? ViewStates.Visible : ViewStates.Gone;
+            return this;
+        }
+
         public TogglField SetAssistViewTitle (string title)
         {
             assistView.Text = title;
