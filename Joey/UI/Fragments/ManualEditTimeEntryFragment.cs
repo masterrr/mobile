@@ -13,6 +13,9 @@ using Toggl.Phoebe.Data.Views;
 using Toggl.Phoebe.Logging;
 using XPlatUtils;
 using Fragment = Android.Support.V4.App.Fragment;
+using Toggl.Phoebe;
+using Toggl.Phoebe.Data.DataObjects;
+using System.ComponentModel;
 
 namespace Toggl.Joey.UI.Fragments
 {
@@ -20,6 +23,10 @@ namespace Toggl.Joey.UI.Fragments
     {
         private readonly Handler handler = new Handler ();
         private TimeEntryTagsView tagsView;
+        private ITimeEntryModel model;
+        private EditTimeEntryView viewModel;
+        private ActiveTimeEntryManager timeEntryManager;
+        private ITimeEntryModel backingActiveTimeEntry;
         private bool canRebind;
         private bool descriptionChanging;
         private bool autoCommitScheduled;
@@ -30,10 +37,69 @@ namespace Toggl.Joey.UI.Fragments
 
         public ManualEditTimeEntryFragment ()
         {
+            Initialize ();
         }
 
         public ManualEditTimeEntryFragment (IntPtr jref, Android.Runtime.JniHandleOwnership xfer) : base (jref, xfer)
         {
+            Initialize();
+        }
+
+        private void Initialize()
+        {
+            if (timeEntryManager == null) {
+                timeEntryManager = ServiceContainer.Resolve<ActiveTimeEntryManager> ();
+                timeEntryManager.PropertyChanged += OnActiveTimeEntryManagerPropertyChanged;
+            }
+            TimeEntry = ActiveTimeEntry;
+            canRebind = true;
+        }
+
+        private void OnActiveTimeEntryManagerPropertyChanged (object sender, PropertyChangedEventArgs args)
+        {
+            TimeEntry = ActiveTimeEntry;
+            if (args.PropertyName == ActiveTimeEntryManager.PropertyActive) {
+                if (SyncModel ()) {
+                    Rebind ();
+                }
+            }
+        }
+
+        private bool SyncModel ()
+        {
+            var shouldRebind = true;
+
+            var data = ActiveTimeEntryData;
+            if (data != null) {
+                if (backingActiveTimeEntry == null) {
+                    backingActiveTimeEntry = new TimeEntryModel (data);
+                } else {
+                    backingActiveTimeEntry.Data = data;
+                    shouldRebind = false;
+                }
+            }
+
+            return shouldRebind;
+        }
+
+        private TimeEntryData ActiveTimeEntryData
+        {
+            get {
+                if (timeEntryManager == null) {
+                    return null;
+                }
+                return timeEntryManager.Active;
+            }
+        }
+
+        private ITimeEntryModel ActiveTimeEntry
+        {
+            get {
+                if (ActiveTimeEntryData == null) {
+                    return null;
+                }
+                return backingActiveTimeEntry;
+            }
         }
 
         protected bool CanRebind
@@ -41,9 +107,106 @@ namespace Toggl.Joey.UI.Fragments
             get { return canRebind || TimeEntry == null; }
         }
 
-        public ITimeEntryModel TimeEntry { get; set; }
+        public ITimeEntryModel TimeEntry
+        {
+            get { return model; }
+            set {
+                DiscardDescriptionChanges ();
 
-        protected TextView DurationTextView { get; private set; }
+                if (tagsView != null && (value == null || value.Id != tagsView.TimeEntryId)) {
+                    tagsView.Updated -= OnTimeEntryTagsUpdated;
+                    tagsView = null;
+                }
+
+                model = value;
+
+                if (model != null && tagsView == null) {
+                    tagsView = new TimeEntryTagsView (model.Id);
+                    tagsView.Updated += OnTimeEntryTagsUpdated;
+                }
+
+                Rebind ();
+                RebindTags ();
+            }
+        }
+
+        protected virtual void Rebind ()
+        {
+            if (TimeEntry == null || !canRebind) {
+                return;
+            }
+
+            DateTime startTime;
+            var useTimer = TimeEntry.StartTime == DateTime.MinValue;
+            startTime = useTimer ? Time.Now : TimeEntry.StartTime.ToLocalTime ();
+
+            StartTimeEditText.Text = startTime.ToDeviceTimeString ();
+
+            // Only update DescriptionEditText when content differs, else the user is unable to edit it
+            if (!descriptionChanging && DescriptionEditText.Text != TimeEntry.Description) {
+                DescriptionEditText.Text = TimeEntry.Description;
+                DescriptionEditText.SetSelection (DescriptionEditText.Text.Length);
+            }
+            DescriptionEditText.SetHint (useTimer
+                                         ? Resource.String.CurrentTimeEntryEditDescriptionHint
+                                         : Resource.String.CurrentTimeEntryEditDescriptionPastHint);
+
+            if (TimeEntry.StopTime.HasValue) {
+                StopTimeEditText.Text = TimeEntry.StopTime.Value.ToLocalTime ().ToDeviceTimeString ();
+                StopTimeEditText.Visibility = ViewStates.Visible;
+            } else {
+                StopTimeEditText.Text = Time.Now.ToDeviceTimeString ();
+                if (TimeEntry.StartTime == DateTime.MinValue || TimeEntry.State == TimeEntryState.Running) {
+                    StopTimeEditText.Visibility = ViewStates.Invisible;
+                    StopTimeEditLabel.Visibility = ViewStates.Invisible;
+                } else {
+                    StopTimeEditLabel.Visibility = ViewStates.Visible;
+                    StopTimeEditText.Visibility = ViewStates.Visible;
+                }
+            }
+
+            if (TimeEntry.Project != null) {
+                ProjectEditText.Text = TimeEntry.Project.Name;
+                if (TimeEntry.Project.Client != null) {
+                    ProjectBit.SetAssistViewTitle (TimeEntry.Project.Client.Name);
+                } else {
+                    ProjectBit.DestroyAssistView ();
+                }
+            } else {
+                ProjectEditText.Text = String.Empty;
+                ProjectBit.DestroyAssistView ();
+            }
+
+            BillableCheckBox.Checked = !TimeEntry.IsBillable;
+            if (TimeEntry.IsBillable) {
+                BillableCheckBox.SetText (Resource.String.CurrentTimeEntryEditBillableChecked);
+            } else {
+                BillableCheckBox.SetText (Resource.String.CurrentTimeEntryEditBillableUnchecked);
+            }
+            if (TimeEntry.Workspace == null || !TimeEntry.Workspace.IsPremium) {
+                BillableCheckBox.Visibility = ViewStates.Gone;
+            } else {
+                BillableCheckBox.Visibility = ViewStates.Visible;
+            }
+        }
+
+        private void OnTimeEntryTagsUpdated (object sender, EventArgs args)
+        {
+            RebindTags ();
+        }
+
+        private void RebindTags()
+        {
+            if (TimeEntry == null || !canRebind) {
+                return;
+            }
+
+            if (TagsBit == null) {
+                return;
+            }
+
+            TagsBit.RebindTags (tagsView);
+        }
 
         protected EditText StartTimeEditText { get; private set; }
 
@@ -69,26 +232,24 @@ namespace Toggl.Joey.UI.Fragments
         {
             var view = inflater.Inflate (Resource.Layout.ManualEditTimeEntryFragment, container, false);
 
-            DurationTextView = view.FindViewById<TextView> (Resource.Id.DurationTextViewTextView);
             StartTimeEditText = view.FindViewById<EditText> (Resource.Id.StartTimeEditText).SetFont (Font.Roboto);
             StopTimeEditText = view.FindViewById<EditText> (Resource.Id.StopTimeEditText).SetFont (Font.Roboto);
             StopTimeEditLabel = view.FindViewById<TextView> (Resource.Id.StopTimeEditLabel);
 
             DescriptionBit = view.FindViewById<TogglField> (Resource.Id.Description)
-                             .DestroyAssistView().DestroyArrow()
+                             .DestroyAssistView ().DestroyArrow ().ShowTitle (false)
                              .SetName (Resource.String.BaseEditTimeEntryFragmentDescription);
             DescriptionEditText = DescriptionBit.TextField;
 
             ProjectBit = view.FindViewById<TogglField> (Resource.Id.Project)
-                         .SetName (Resource.String.BaseEditTimeEntryFragmentProject)
-                         .SimulateButton();
+                         .ShowTitle (false).SimulateButton()
+                         .SetName (Resource.String.BaseEditTimeEntryFragmentProject);
             ProjectEditText = ProjectBit.TextField;
 
-            TagsBit = view.FindViewById<TogglTagsField> (Resource.Id.TagsBit);
+            TagsBit = view.FindViewById<TogglTagsField> (Resource.Id.TagsBit).ShowTitle (false);
 
             BillableCheckBox = view.FindViewById<CheckBox> (Resource.Id.BillableCheckBox).SetFont (Font.RobotoLight);
 
-            DurationTextView.Click += OnDurationTextViewClick;
             StartTimeEditText.Click += OnStartTimeEditTextClick;
             StopTimeEditText.Click += OnStopTimeEditTextClick;
             DescriptionEditText.TextChanged += OnDescriptionTextChanged;
