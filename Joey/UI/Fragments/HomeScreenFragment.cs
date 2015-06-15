@@ -19,6 +19,8 @@ using Toggl.Phoebe.Data.Utils;
 using Toggl.Phoebe.Data.Views;
 using XPlatUtils;
 using StickyHeader;
+using Activity = Android.Support.V7.App.AppCompatActivity;
+
 
 namespace Toggl.Joey.UI.Fragments
 {
@@ -33,9 +35,12 @@ namespace Toggl.Joey.UI.Fragments
         private LogTimeEntriesAdapter logAdapter;
         private readonly Handler handler = new Handler ();
         private FrameLayout undoBar;
+        private FrameLayout manualEntry;
         private Button undoButton;
         private bool isUndoShowed;
         private ViewGroup cont;
+        private ManualEditTimeEntryFragment manualEditFragment;
+
 
         // Recycler setup
         private DividerItemDecoration dividerDecoration;
@@ -53,7 +58,8 @@ namespace Toggl.Joey.UI.Fragments
             emptyMessageView.Visibility = ViewStates.Gone;
             recyclerView = view.FindViewById<RecyclerView> (Resource.Id.HomeRecyclerView);
             recyclerView.SetLayoutManager (new LinearLayoutManager (Activity));
-
+            manualEntry = view.FindViewById<FrameLayout> (Resource.Id.ManualAddTimeEntry);
+            manualEditFragment = (ManualEditTimeEntryFragment) ChildFragmentManager.FindFragmentById (Resource.Id.ManualEditTimeEntryFragment);
 
             undoBar = view.FindViewById<FrameLayout> (Resource.Id.UndoBar);
             undoButton = view.FindViewById<Button> (Resource.Id.UndoButton);
@@ -71,6 +77,8 @@ namespace Toggl.Joey.UI.Fragments
             var itemTouchListener = new ItemTouchListener (recyclerView, this);
 
             recyclerView.SetLayoutManager (linearLayout);
+            recyclerView.AddItemDecoration (new DividerItemDecoration (Activity, DividerItemDecoration.VerticalList));
+            recyclerView.AddItemDecoration (new ShadowItemDecoration (Activity));
             recyclerView.AddOnItemTouchListener (swipeTouchListener);
             recyclerView.AddOnItemTouchListener (itemTouchListener);
             recyclerView.AddOnScrollListener (new RecyclerViewScrollDetector (this));
@@ -78,7 +86,7 @@ namespace Toggl.Joey.UI.Fragments
 
             StickyHeaderBuilder
             .StickTo (recyclerView)
-            .SetHeader (Resource.Id.ManualAddTimeEntry, cont)
+            .SetHeader (manualEntry)
             .Apply ();
 
             var bus = ServiceContainer.Resolve<MessageBus> ();
