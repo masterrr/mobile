@@ -16,6 +16,7 @@ using Fragment = Android.Support.V4.App.Fragment;
 using Toggl.Phoebe;
 using Toggl.Phoebe.Data.DataObjects;
 using System.ComponentModel;
+using Toggl.Phoebe.Data.Utils;
 
 namespace Toggl.Joey.UI.Fragments
 {
@@ -27,17 +28,14 @@ namespace Toggl.Joey.UI.Fragments
         private EditTimeEntryView viewModel;
         private ActiveTimeEntryManager timeEntryManager;
         private ITimeEntryModel backingActiveTimeEntry;
+        private PropertyChangeTracker propertyTracker;
         private bool canRebind;
         private bool descriptionChanging;
         private bool autoCommitScheduled;
 
-        public event EventHandler OnPressedProjectSelector;
-
-        public event EventHandler OnPressedTagSelector;
-
         public ManualEditTimeEntryFragment ()
         {
-            Initialize ();
+            Initialize();
         }
 
         public ManualEditTimeEntryFragment (IntPtr jref, Android.Runtime.JniHandleOwnership xfer) : base (jref, xfer)
@@ -47,10 +45,13 @@ namespace Toggl.Joey.UI.Fragments
 
         private void Initialize()
         {
+            propertyTracker = new PropertyChangeTracker ();
+
             if (timeEntryManager == null) {
                 timeEntryManager = ServiceContainer.Resolve<ActiveTimeEntryManager> ();
                 timeEntryManager.PropertyChanged += OnActiveTimeEntryManagerPropertyChanged;
             }
+
             TimeEntry = ActiveTimeEntry;
             canRebind = true;
         }
@@ -62,6 +63,31 @@ namespace Toggl.Joey.UI.Fragments
                 if (SyncModel ()) {
                     Rebind ();
                 }
+            }
+        }
+
+        private void ResetTrackedObservables ()
+        {
+            if (propertyTracker == null) {
+                return;
+            }
+
+            propertyTracker.MarkAllStale ();
+
+            var model = ActiveTimeEntry;
+            if (model != null) {
+                propertyTracker.Add (model, HandleTimeEntryPropertyChanged);
+            }
+
+            propertyTracker.ClearStale ();
+        }
+
+        private void HandleTimeEntryPropertyChanged (string prop)
+        {
+            if (prop == TimeEntryModel.PropertyState
+                    || prop == TimeEntryModel.PropertyStartTime
+                    || prop == TimeEntryModel.PropertyStopTime) {
+                Rebind ();
             }
         }
 
@@ -132,6 +158,8 @@ namespace Toggl.Joey.UI.Fragments
 
         protected virtual void Rebind ()
         {
+            ResetTrackedObservables ();
+
             if (TimeEntry == null || !canRebind) {
                 return;
             }
@@ -257,7 +285,7 @@ namespace Toggl.Joey.UI.Fragments
             DescriptionEditText.FocusChange += OnDescriptionFocusChange;
             ProjectBit.Click += OnProjectSelected;
             ProjectEditText.Click += OnProjectSelected;
-            TagsBit.FullClick += OnTagsEditTextClick;
+            TagsBit.FullClick += OnTagSelected;
             BillableCheckBox.CheckedChange += OnBillableCheckBoxCheckedChange;
 
             return view;
@@ -328,13 +356,6 @@ namespace Toggl.Joey.UI.Fragments
             e.Handled = false;
         }
 
-        private void OnProjectEditTextClick (object sender, EventArgs e)
-        {
-            if (OnPressedProjectSelector != null) {
-                OnPressedProjectSelector.Invoke (sender, e);
-            }
-        }
-
         private void OnProjectSelected (object sender, EventArgs e)
         {
             if (TimeEntry == null) {
@@ -346,11 +367,12 @@ namespace Toggl.Joey.UI.Fragments
             StartActivity (intent);
         }
 
-        private void OnTagsEditTextClick (object sender, EventArgs e)
+        private void OnTagSelected (object sender, EventArgs e)
         {
-            if (OnPressedTagSelector != null) {
-                OnPressedTagSelector.Invoke (sender, e);
+            if (TimeEntry == null) {
+                return;
             }
+            new ChooseTimeEntryTagsDialogFragment (TimeEntry.Workspace.Id, new List<TimeEntryData> {TimeEntry.Data}).Show (FragmentManager, "tags_dialog");
         }
 
         private void OnBillableCheckBoxCheckedChange (object sender, CompoundButton.CheckedChangeEventArgs e)
