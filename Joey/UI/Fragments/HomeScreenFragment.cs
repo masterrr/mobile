@@ -21,7 +21,6 @@ using XPlatUtils;
 using StickyHeader;
 using Activity = Android.Support.V7.App.AppCompatActivity;
 
-
 namespace Toggl.Joey.UI.Fragments
 {
     public class HomeScreenFragment : Fragment, SwipeDismissTouchListener.IDismissCallbacks, ItemTouchListener.IItemTouchListener
@@ -83,6 +82,10 @@ namespace Toggl.Joey.UI.Fragments
             recyclerView.AddOnItemTouchListener (itemTouchListener);
             recyclerView.AddOnScrollListener (new RecyclerViewScrollDetector (this));
             recyclerView.GetItemAnimator ().SupportsChangeAnimations = false;
+
+            manualEditFragment = new ManualEditTimeEntryFragment();
+            FragmentTransaction transaction = ChildFragmentManager.BeginTransaction();
+            transaction.Add (Resource.Id.ManualAddTimeEntry, manualEditFragment).Commit();
 
             StickyHeaderBuilder
             .StickTo (recyclerView)
