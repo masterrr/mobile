@@ -351,9 +351,9 @@ namespace Toggl.Joey.UI.Activities
 
             // Configure timer component for selected page:
             if (e.Id != DrawerListAdapter.TimerPageId) {
-                ToolbarModes = MainDrawerActivity.ToolbarModes.Normal;
+                ToolbarMode = MainDrawerActivity.ToolbarModes.Normal;
             } else {
-                ToolbarModes = MainDrawerActivity.ToolbarModes.DurationOnly;
+                ToolbarMode = MainDrawerActivity.ToolbarModes.DurationOnly;
             }
 
             if (e.Id == DrawerListAdapter.TimerPageId) {

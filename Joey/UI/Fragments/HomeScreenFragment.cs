@@ -84,10 +84,12 @@ namespace Toggl.Joey.UI.Fragments
             recyclerView.AddOnScrollListener (new RecyclerViewScrollDetector (this));
             recyclerView.GetItemAnimator ().SupportsChangeAnimations = false;
 
-            manualEditFragment = new ManualEditTimeEntryFragment();
-            FragmentTransaction transaction = ChildFragmentManager.BeginTransaction();
-            transaction.Add (Resource.Id.ManualAddTimeEntry, manualEditFragment).Commit();
-            EditFormVisible = true;
+            if (manualEditFragment == null) {
+                manualEditFragment = new ManualEditTimeEntryFragment();
+                FragmentTransaction transaction = ChildFragmentManager.BeginTransaction();
+                transaction.Add (Resource.Id.ManualAddTimeEntry, manualEditFragment).Commit();
+                EditFormVisible = true;
+            }
 
 
             StickyHeaderBuilder
@@ -314,7 +316,7 @@ namespace Toggl.Joey.UI.Fragments
                 }
                 isEditShowed = value;
                 var activity = (MainDrawerActivity)Activity ;
-                activity.ToolbarModes = isEditShowed ? MainDrawerActivity.ToolbarModes.DurationOnly : MainDrawerActivity.ToolbarModes.Compact;
+                activity.ToolbarMode = isEditShowed ? MainDrawerActivity.ToolbarModes.DurationOnly : MainDrawerActivity.ToolbarModes.Compact;
             }
         }
 
