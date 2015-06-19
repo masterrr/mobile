@@ -15,7 +15,8 @@
             android:id="@+id/ManualAddTimeEntry"
             android:layout_width="match_parent"
             android:layout_height="280dp"
-            android:background="@drawable/BgArrowsPattern" />
+            android:background="@drawable/BgArrowsPattern"
+            android:paddingTop="?android:attr/actionBarSize" />
         <LinearLayout
             android:id="@+id/EmptyMessageView"
             android:layout_width="match_parent"

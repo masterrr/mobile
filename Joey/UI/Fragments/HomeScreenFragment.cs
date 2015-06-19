@@ -37,6 +37,7 @@ namespace Toggl.Joey.UI.Fragments
         private FrameLayout manualEntry;
         private Button undoButton;
         private bool isUndoShowed;
+        private bool isEditShowed;
         private ViewGroup cont;
         private ManualEditTimeEntryFragment manualEditFragment;
 
@@ -86,6 +87,8 @@ namespace Toggl.Joey.UI.Fragments
             manualEditFragment = new ManualEditTimeEntryFragment();
             FragmentTransaction transaction = ChildFragmentManager.BeginTransaction();
             transaction.Add (Resource.Id.ManualAddTimeEntry, manualEditFragment).Commit();
+            EditFormVisible = true;
+
 
             StickyHeaderBuilder
             .StickTo (recyclerView)
@@ -301,6 +304,20 @@ namespace Toggl.Joey.UI.Fragments
             }
         }
 
+        public bool EditFormVisible
+        {
+            get {
+                return isEditShowed;
+            } set {
+                if (isEditShowed == value) {
+                    return;
+                }
+                isEditShowed = value;
+                var activity = (MainDrawerActivity)Activity ;
+                activity.ToolbarModes = isEditShowed ? MainDrawerActivity.ToolbarModes.DurationOnly : MainDrawerActivity.ToolbarModes.Compact;
+            }
+        }
+
         #endregion
 
         private class RecyclerViewScrollDetector : RecyclerView.OnScrollListener
@@ -323,6 +340,13 @@ namespace Toggl.Joey.UI.Fragments
                     OnScrollListener.OnScrolled (recyclerView, dx, dy);
                 }
 
+                int firstVisible = ((LinearLayoutManager) recyclerView.GetLayoutManager()).FindFirstVisibleItemPosition();
+                if (firstVisible == 0) {
+                    owner.EditFormVisible = true;
+                } else {
+                    owner.EditFormVisible = false;
+                }
+
                 var isSignificantDelta = Math.Abs (dy) > ScrollThreshold;
                 if (isSignificantDelta) {
                     OnScrollMoved();
@@ -342,6 +366,7 @@ namespace Toggl.Joey.UI.Fragments
                 if (owner.UndoBarVisible) {
                     owner.RemoveItemAndHideUndoBar ();
                 }
+
             }
         }
     }
