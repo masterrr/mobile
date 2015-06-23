@@ -89,6 +89,9 @@
     <Compile Include="Views\SummaryReportViewTest.cs" />
     <Compile Include="Analytics\TestTracker.cs" />
     <Compile Include="Analytics\BaseTrackerTest.cs" />
+    <Compile Include="Views\CollectionDataViewTest.cs" />
+    <Compile Include="Views\TimeEntriesCollectionTest.cs" />
+    <Compile Include="Views\LogTimeEntriesViewTest.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
