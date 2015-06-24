@@ -18,7 +18,6 @@ using Toggl.Phoebe.Data;
 using Toggl.Phoebe.Data.Utils;
 using Toggl.Phoebe.Data.Views;
 using XPlatUtils;
-using StickyHeader;
 using Activity = Android.Support.V7.App.AppCompatActivity;
 
 namespace Toggl.Joey.UI.Fragments

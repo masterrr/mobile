@@ -157,17 +157,6 @@
     <Compile Include="UI\Activities\SplashActivity.cs" />
     <Compile Include="UI\Utils\DimensionsExtensions.cs" />
     <Compile Include="UI\Utils\SwipeDismissCallback.cs" />
-    <Compile Include="UI\Views\StickyHeaderBuilder.cs" />
-    <Compile Include="UI\Views\StickyHeaderRecyclerView.cs" />
-    <Compile Include="UI\Views\StickyHeaderView.cs" />
-    <Compile Include="UI\Views\ViewTreeObserverExtensions.cs" />
-    <Compile Include="UI\Utils\AnimatorBuilder.cs" />
-    <Compile Include="UI\Utils\BaseStickyHeaderAnimator.cs" />
-    <Compile Include="UI\Utils\HeaderAnimator.cs" />
-    <Compile Include="UI\Utils\HeaderStickyAnimator.cs" />
-    <Compile Include="UI\Utils\SimpleHeaderStickyAnimator.cs" />
-    <Compile Include="UI\Views\StickyHeaderListView.cs" />
-    <Compile Include="UI\Views\StickyHeaderScrollView.cs" />
     <Compile Include="UI\Fragments\HomeScreenFragment.cs" />
     <Compile Include="UI\Fragments\BaseEditTimeEntryFragment.cs" />
     <Compile Include="UI\Fragments\ManualEditTimeEntryFragment.cs" />
