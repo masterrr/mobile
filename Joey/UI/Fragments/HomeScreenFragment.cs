@@ -29,6 +29,7 @@ namespace Toggl.Joey.UI.Fragments
         private static readonly int UndbarScrollThreshold = 100;
 
         private RecyclerView recyclerView;
+        private SnappyLayout snappyLayout;
         private View emptyMessageView;
         private Subscription<SettingChangedMessage> subscriptionSettingChanged;
         private LogTimeEntriesAdapter logAdapter;
@@ -58,9 +59,12 @@ namespace Toggl.Joey.UI.Fragments
             emptyMessageView.Visibility = ViewStates.Gone;
             recyclerView = view.FindViewById<RecyclerView> (Resource.Id.HomeRecyclerView);
             recyclerView.SetLayoutManager (new LinearLayoutManager (Activity));
+            
+            snappyLayout = view.FindViewById<SnappyLayout> (Resource.Id.HomeSnappyLayout);
             manualEntry = view.FindViewById<FrameLayout> (Resource.Id.ManualAddTimeEntry);
             manualEditFragment = (ManualEditTimeEntryFragment) ChildFragmentManager.FindFragmentById (Resource.Id.ManualEditTimeEntryFragment);
 
+            snappyLayout.ActiveChildChanged += OnSnappyActiveChildChanged;
             undoBar = view.FindViewById<FrameLayout> (Resource.Id.UndoBar);
             undoButton = view.FindViewById<Button> (Resource.Id.UndoButton);
             undoButton.Click += UndoBtnClicked;
@@ -91,12 +95,6 @@ namespace Toggl.Joey.UI.Fragments
                 EditFormVisible = true;
             }
 
-
-            StickyHeaderBuilder
-            .StickTo (recyclerView)
-            .SetHeader (manualEntry)
-            .Apply ();
-
             var bus = ServiceContainer.Resolve<MessageBus> ();
             subscriptionSettingChanged = bus.Subscribe<SettingChangedMessage> (OnSettingChanged);
         }
@@ -105,6 +103,13 @@ namespace Toggl.Joey.UI.Fragments
         {
             EnsureAdapter ();
             base.OnResume ();
+        }
+
+        public event EventHandler SnapPositionChanged;
+
+        private void OnSnappyActiveChildChanged (object sender, EventArgs e)
+        {
+            EditFormVisible = snappyLayout.ActiveChild == 0;
         }
 
         public override bool UserVisibleHint
@@ -305,6 +310,7 @@ namespace Toggl.Joey.UI.Fragments
                 animator.Start();
             }
         }
+        #endregion
 
         public bool EditFormVisible
         {
@@ -319,8 +325,6 @@ namespace Toggl.Joey.UI.Fragments
                 activity.ToolbarMode = isEditShowed ? MainDrawerActivity.ToolbarModes.DurationOnly : MainDrawerActivity.ToolbarModes.Compact;
             }
         }
-
-        #endregion
 
         private class RecyclerViewScrollDetector : RecyclerView.OnScrollListener
         {
@@ -341,14 +345,6 @@ namespace Toggl.Joey.UI.Fragments
                 if (OnScrollListener != null) {
                     OnScrollListener.OnScrolled (recyclerView, dx, dy);
                 }
-
-                int firstVisible = ((LinearLayoutManager) recyclerView.GetLayoutManager()).FindFirstVisibleItemPosition();
-                if (firstVisible == 0) {
-                    owner.EditFormVisible = true;
-                } else {
-                    owner.EditFormVisible = false;
-                }
-
                 var isSignificantDelta = Math.Abs (dy) > ScrollThreshold;
                 if (isSignificantDelta) {
                     OnScrollMoved();

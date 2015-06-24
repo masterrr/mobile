@@ -7,16 +7,21 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/HomeRecyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-        <FrameLayout
-            android:id="@+id/ManualAddTimeEntry"
-            android:layout_width="match_parent"
-            android:layout_height="280dp"
-            android:background="@drawable/BgArrowsPattern"
-            android:paddingTop="?android:attr/actionBarSize" />
+        <Toggl.Joey.UI.Views.SnappyLayout
+            android:id="@+id/HomeSnappyLayout"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+            <FrameLayout
+                android:id="@+id/ManualAddTimeEntry"
+                android:layout_width="match_parent"
+                android:layout_height="280dp"
+                android:background="@drawable/BgArrowsPattern"
+                android:paddingTop="?android:attr/actionBarSize" />
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/HomeRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </Toggl.Joey.UI.Views.SnappyLayout>
         <LinearLayout
             android:id="@+id/EmptyMessageView"
             android:layout_width="match_parent"
