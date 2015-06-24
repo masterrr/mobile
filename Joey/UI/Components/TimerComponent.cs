@@ -193,10 +193,9 @@ namespace Toggl.Joey.UI.Components
                 DescriptionTextView.Text = currentEntry.Description.Length == 0 ? "(no description)" : currentEntry.Description;
             }
 
+            var duration = currentEntry.GetDuration ();
+            DurationTextView.Text = TimeSpan.FromSeconds ((long)duration.TotalSeconds).ToString ();
             if (currentEntry.State == TimeEntryState.Running) {
-                var duration = currentEntry.GetDuration ();
-                DurationTextView.Text = TimeSpan.FromSeconds ((long)duration.TotalSeconds).ToString ();
-
                 // Schedule next rebind:
                 handler.RemoveCallbacks (Rebind);
                 handler.PostDelayed (Rebind, 1000 - duration.Milliseconds);
@@ -222,13 +221,5 @@ namespace Toggl.Joey.UI.Components
                 Rebind();
             }
         }
-
-        private void OpenTimeEntryEdit (ITimeEntryModel model)
-        {
-            var i = new Intent (activity, typeof (EditTimeEntryActivity));
-            i.PutStringArrayListExtra (EditTimeEntryActivity.ExtraGroupedTimeEntriesGuids, new List<string> {model.Id.ToString ()});
-            activity.StartActivity (i);
-        }
-
     }
 }
