@@ -96,8 +96,8 @@
     <string name="IdleNotificationText">What are you working on?</string>
     <string name="CurrentTimeEntryEditDescriptionHint">What are you working on?</string>
     <string name="CurrentTimeEntryEditDescriptionPastHint">What were you working on?</string>
-    <string name="CurrentTimeEntryEditProjectHint">Add project&#8230;</string>
-    <string name="CurrentTimeEntryEditTagsHint">Add tags&#8230;</string>
+    <string name="CurrentTimeEntryEditProjectHint">Add project</string>
+    <string name="CurrentTimeEntryEditTagsHint">Add tags</string>
     <string name="CurrentTimeEntryEditBillableChecked">Billable</string>
     <string name="CurrentTimeEntryEditBillableUnchecked">Non-billable</string>
     <string name="CurrentTimeEntryEditDeleteToast">Time entry has been discarded</string>

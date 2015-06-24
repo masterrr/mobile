@@ -266,12 +266,12 @@ namespace Toggl.Joey.UI.Fragments
 
             DescriptionBit = view.FindViewById<TogglField> (Resource.Id.Description)
                              .DestroyAssistView ().DestroyArrow ().ShowTitle (false)
-                             .SetName (Resource.String.BaseEditTimeEntryFragmentDescription);
+                             .SetName (Resource.String.CurrentTimeEntryEditDescriptionHint);
             DescriptionEditText = DescriptionBit.TextField;
 
             ProjectBit = view.FindViewById<TogglField> (Resource.Id.Project)
                          .ShowTitle (false).SimulateButton()
-                         .SetName (Resource.String.BaseEditTimeEntryFragmentProject);
+                         .SetName (Resource.String.CurrentTimeEntryEditProjectHint);
             ProjectEditText = ProjectBit.TextField;
 
             TagsBit = view.FindViewById<TogglTagsField> (Resource.Id.TagsBit).ShowTitle (false);
