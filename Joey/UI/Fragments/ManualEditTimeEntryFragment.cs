@@ -1,22 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using Android.Content;
 using Android.OS;
 using Android.Views;
 using Android.Widget;
+using Toggl.Joey.Data;
 using Toggl.Joey.UI.Activities;
 using Toggl.Joey.UI.Utils;
 using Toggl.Joey.UI.Views;
+using Toggl.Phoebe;
+using Toggl.Phoebe.Analytics;
 using Toggl.Phoebe.Data;
+using Toggl.Phoebe.Data.DataObjects;
 using Toggl.Phoebe.Data.Models;
+using Toggl.Phoebe.Data.Utils;
 using Toggl.Phoebe.Data.Views;
 using Toggl.Phoebe.Logging;
 using XPlatUtils;
 using Fragment = Android.Support.V4.App.Fragment;
-using Toggl.Phoebe;
-using Toggl.Phoebe.Data.DataObjects;
-using System.ComponentModel;
-using Toggl.Phoebe.Data.Utils;
 
 namespace Toggl.Joey.UI.Fragments
 {
@@ -32,6 +34,7 @@ namespace Toggl.Joey.UI.Fragments
         private bool canRebind;
         private bool descriptionChanging;
         private bool autoCommitScheduled;
+        private bool isProcessingAction;
 
         public ManualEditTimeEntryFragment ()
         {
@@ -250,6 +253,8 @@ namespace Toggl.Joey.UI.Fragments
 
         protected ImageButton DeleteImageButton { get; private set; }
 
+        protected Button DummyStartButton { get; private set; }
+
         protected TogglField ProjectBit { get; private set; }
 
         protected TogglField DescriptionBit { get; private set; }
@@ -278,6 +283,9 @@ namespace Toggl.Joey.UI.Fragments
 
             BillableCheckBox = view.FindViewById<CheckBox> (Resource.Id.BillableCheckBox).SetFont (Font.RobotoLight);
 
+
+            DummyStartButton = view.FindViewById<Button> (Resource.Id.DummyStartStopButton);
+            DummyStartButton.Click += OnStartButtonClicked;
             StartTimeEditText.Click += OnStartTimeEditTextClick;
             StopTimeEditText.Click += OnStopTimeEditTextClick;
             DescriptionEditText.TextChanged += OnDescriptionTextChanged;
@@ -289,6 +297,51 @@ namespace Toggl.Joey.UI.Fragments
             BillableCheckBox.CheckedChange += OnBillableCheckBoxCheckedChange;
 
             return view;
+        }
+
+        private async void  OnStartButtonClicked (object sender, EventArgs e)
+        {
+            // Protect from double clicks
+            if (isProcessingAction) {
+                return;
+            }
+
+            isProcessingAction = true;
+            try {
+                var entry = ActiveTimeEntry;
+                if (entry == null) {
+                    return;
+                }
+
+                // Make sure that we work on the copy of the entry to not affect the rest of the logic.
+                entry = (ITimeEntryModel)new TimeEntryModel (new TimeEntryData (entry.Data));
+
+                var showProjectSelection = false;
+
+                try {
+                    if (entry.State == TimeEntryState.New && entry.StopTime.HasValue) {
+                        await entry.StoreAsync ();
+
+                        // Ping analytics
+                        ServiceContainer.Resolve<ITracker> ().SendTimerStartEvent (TimerStartSource.AppManual);
+                    } else if (entry.State == TimeEntryState.Running) {
+                        await entry.StopAsync ();
+
+                        // Ping analytics
+                        ServiceContainer.Resolve<ITracker> ().SendTimerStopEvent (TimerStopSource.App);
+                    } else {
+                        await entry.StartAsync ();
+
+                        // Ping analytics
+                        ServiceContainer.Resolve<ITracker> ().SendTimerStartEvent (TimerStartSource.AppNew);
+                    }
+                } catch (Exception ex) { }
+
+                var bus = ServiceContainer.Resolve<MessageBus> ();
+                bus.Send (new UserTimeEntryStateChangeMessage (this, entry.Data));
+            } finally {
+                isProcessingAction = false;
+            }
         }
 
         public override bool OnOptionsItemSelected (IMenuItem item)
