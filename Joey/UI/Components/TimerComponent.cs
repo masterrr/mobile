@@ -1,25 +1,21 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using Android.Content;
 using Android.OS;
 using Android.Views;
 using Android.Widget;
-using Toggl.Joey.Data;
 using Toggl.Joey.UI.Activities;
 using Toggl.Joey.UI.Fragments;
 using Toggl.Joey.UI.Utils;
 using Toggl.Joey.UI.Views;
-using Toggl.Phoebe;
-using Toggl.Phoebe.Analytics;
 using Toggl.Phoebe.Data;
 using Toggl.Phoebe.Data.DataObjects;
 using Toggl.Phoebe.Data.Models;
 using Toggl.Phoebe.Data.Utils;
-using Toggl.Phoebe.Logging;
 using XPlatUtils;
 using Activity = Android.Support.V4.App.FragmentActivity;
 using Fragment = Android.Support.V4.App.Fragment;
-using System.Collections.Generic;
 
 namespace Toggl.Joey.UI.Components
 {
@@ -227,55 +223,6 @@ namespace Toggl.Joey.UI.Components
             }
         }
 
-        private async void OnActionButtonClicked (object sender, EventArgs e)
-        {
-            // Protect from double clicks
-            if (isProcessingAction) {
-                return;
-            }
-
-            isProcessingAction = true;
-            try {
-                var entry = ActiveTimeEntry;
-                if (entry == null) {
-                    return;
-                }
-
-                // Make sure that we work on the copy of the entry to not affect the rest of the logic.
-                entry = (ITimeEntryModel)new TimeEntryModel (new TimeEntryData (entry.Data));
-
-                var showProjectSelection = false;
-
-                try {
-                    if (entry.State == TimeEntryState.New && entry.StopTime.HasValue) {
-                        await entry.StoreAsync ();
-
-                        // Ping analytics
-                        ServiceContainer.Resolve<ITracker> ().SendTimerStartEvent (TimerStartSource.AppManual);
-                    } else if (entry.State == TimeEntryState.Running) {
-                        await entry.StopAsync ();
-
-                        // Ping analytics
-                        ServiceContainer.Resolve<ITracker> ().SendTimerStopEvent (TimerStopSource.App);
-                    } else {
-                        await entry.StartAsync ();
-
-                        // Ping analytics
-                        ServiceContainer.Resolve<ITracker> ().SendTimerStartEvent (TimerStartSource.AppNew);
-                        OpenTimeEntryEdit (entry);
-                    }
-                } catch (Exception ex) {
-                    var log = ServiceContainer.Resolve<ILogger> ();
-                    log.Warning (LogTag, ex, "Failed to change time entry state.");
-                }
-
-                var bus = ServiceContainer.Resolve<MessageBus> ();
-                bus.Send (new UserTimeEntryStateChangeMessage (this, entry.Data));
-            } finally {
-                isProcessingAction = false;
-            }
-        }
-
         private void OpenTimeEntryEdit (ITimeEntryModel model)
         {
             var i = new Intent (activity, typeof (EditTimeEntryActivity));
@@ -283,11 +230,5 @@ namespace Toggl.Joey.UI.Components
             activity.StartActivity (i);
         }
 
-        private bool ChooseProjectForNew
-        {
-            get {
-                return ServiceContainer.Resolve<SettingsStore> ().ChooseProjectForNew;
-            }
-        }
     }
 }
