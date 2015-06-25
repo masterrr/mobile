@@ -26,8 +26,6 @@ namespace Toggl.Joey.UI.Fragments
     {
         private readonly Handler handler = new Handler ();
         private TimeEntryTagsView tagsView;
-        private ITimeEntryModel model;
-        private EditTimeEntryView viewModel;
         private ActiveTimeEntryManager timeEntryManager;
         private ITimeEntryModel backingActiveTimeEntry;
         private PropertyChangeTracker propertyTracker;
@@ -55,17 +53,14 @@ namespace Toggl.Joey.UI.Fragments
                 timeEntryManager.PropertyChanged += OnActiveTimeEntryManagerPropertyChanged;
             }
 
-            TimeEntry = ActiveTimeEntry;
             canRebind = true;
         }
 
         private void OnActiveTimeEntryManagerPropertyChanged (object sender, PropertyChangedEventArgs args)
         {
-            TimeEntry = ActiveTimeEntry;
             if (args.PropertyName == ActiveTimeEntryManager.PropertyActive) {
-                if (SyncModel ()) {
-                    Rebind ();
-                }
+                SyncModel ();
+                Rebind ();
             }
         }
 
@@ -87,28 +82,28 @@ namespace Toggl.Joey.UI.Fragments
 
         private void HandleTimeEntryPropertyChanged (string prop)
         {
-            if (prop == TimeEntryModel.PropertyState
+            if (prop == TimeEntryModel.PropertyProject
+                    || prop == TimeEntryModel.PropertyState
                     || prop == TimeEntryModel.PropertyStartTime
-                    || prop == TimeEntryModel.PropertyStopTime) {
+                    || prop == TimeEntryModel.PropertyStopTime
+                    || prop == TimeEntryModel.PropertyDescription
+                    || prop == TimeEntryModel.PropertyIsBillable) {
                 Rebind ();
             }
         }
 
-        private bool SyncModel ()
+        private void SyncModel ()
         {
-            var shouldRebind = true;
-
             var data = ActiveTimeEntryData;
             if (data != null) {
                 if (backingActiveTimeEntry == null) {
                     backingActiveTimeEntry = new TimeEntryModel (data);
                 } else {
                     backingActiveTimeEntry.Data = data;
-                    shouldRebind = false;
                 }
             }
 
-            return shouldRebind;
+            return true;
         }
 
         private TimeEntryData ActiveTimeEntryData
@@ -133,61 +128,38 @@ namespace Toggl.Joey.UI.Fragments
 
         protected bool CanRebind
         {
-            get { return canRebind || TimeEntry == null; }
-        }
-
-        public ITimeEntryModel TimeEntry
-        {
-            get { return model; }
-            set {
-                DiscardDescriptionChanges ();
-
-                if (tagsView != null && (value == null || value.Id != tagsView.TimeEntryId)) {
-                    tagsView.Updated -= OnTimeEntryTagsUpdated;
-                    tagsView = null;
-                }
-
-                model = value;
-
-                if (model != null && tagsView == null) {
-                    tagsView = new TimeEntryTagsView (model.Id);
-                    tagsView.Updated += OnTimeEntryTagsUpdated;
-                }
-
-                Rebind ();
-                RebindTags ();
-            }
+            get { return canRebind || ActiveTimeEntry == null; }
         }
 
         protected virtual void Rebind ()
         {
             ResetTrackedObservables ();
-
-            if (TimeEntry == null || !canRebind) {
+            var currentEntry = ActiveTimeEntry;
+            if (currentEntry == null || !canRebind) {
                 return;
             }
 
             DateTime startTime;
-            var useTimer = TimeEntry.StartTime == DateTime.MinValue;
-            startTime = useTimer ? Time.Now : TimeEntry.StartTime.ToLocalTime ();
+            var useTimer = currentEntry.StartTime == DateTime.MinValue;
+            startTime = useTimer ? Time.Now : currentEntry.StartTime.ToLocalTime ();
 
             StartTimeEditText.Text = startTime.ToDeviceTimeString ();
 
             // Only update DescriptionEditText when content differs, else the user is unable to edit it
-            if (!descriptionChanging && DescriptionEditText.Text != TimeEntry.Description) {
-                DescriptionEditText.Text = TimeEntry.Description;
+            if (!descriptionChanging && DescriptionEditText.Text != currentEntry.Description) {
+                DescriptionEditText.Text = currentEntry.Description;
                 DescriptionEditText.SetSelection (DescriptionEditText.Text.Length);
             }
             DescriptionEditText.SetHint (useTimer
                                          ? Resource.String.CurrentTimeEntryEditDescriptionHint
                                          : Resource.String.CurrentTimeEntryEditDescriptionPastHint);
 
-            if (TimeEntry.StopTime.HasValue) {
-                StopTimeEditText.Text = TimeEntry.StopTime.Value.ToLocalTime ().ToDeviceTimeString ();
+            if (currentEntry.StopTime.HasValue) {
+                StopTimeEditText.Text = currentEntry.StopTime.Value.ToLocalTime ().ToDeviceTimeString ();
                 StopTimeEditText.Visibility = ViewStates.Visible;
             } else {
                 StopTimeEditText.Text = Time.Now.ToDeviceTimeString ();
-                if (TimeEntry.StartTime == DateTime.MinValue || TimeEntry.State == TimeEntryState.Running) {
+                if (currentEntry.StartTime == DateTime.MinValue || currentEntry.State == TimeEntryState.Running) {
                     StopTimeEditText.Visibility = ViewStates.Invisible;
                     StopTimeEditLabel.Visibility = ViewStates.Invisible;
                 } else {
@@ -196,10 +168,10 @@ namespace Toggl.Joey.UI.Fragments
                 }
             }
 
-            if (TimeEntry.Project != null) {
-                ProjectEditText.Text = TimeEntry.Project.Name;
-                if (TimeEntry.Project.Client != null) {
-                    ProjectBit.SetAssistViewTitle (TimeEntry.Project.Client.Name);
+            if (currentEntry.Project != null) {
+                ProjectEditText.Text = currentEntry.Project.Name;
+                if (currentEntry.Project.Client != null) {
+                    ProjectBit.SetAssistViewTitle (currentEntry.Project.Client.Name);
                 } else {
                     ProjectBit.DestroyAssistView ();
                 }
@@ -208,13 +180,13 @@ namespace Toggl.Joey.UI.Fragments
                 ProjectBit.DestroyAssistView ();
             }
 
-            BillableCheckBox.Checked = !TimeEntry.IsBillable;
-            if (TimeEntry.IsBillable) {
+            BillableCheckBox.Checked = !currentEntry.IsBillable;
+            if (currentEntry.IsBillable) {
                 BillableCheckBox.SetText (Resource.String.CurrentTimeEntryEditBillableChecked);
             } else {
                 BillableCheckBox.SetText (Resource.String.CurrentTimeEntryEditBillableUnchecked);
             }
-            if (TimeEntry.Workspace == null || !TimeEntry.Workspace.IsPremium) {
+            if (currentEntry.Workspace == null || !currentEntry.Workspace.IsPremium) {
                 BillableCheckBox.Visibility = ViewStates.Gone;
             } else {
                 BillableCheckBox.Visibility = ViewStates.Visible;
@@ -228,7 +200,8 @@ namespace Toggl.Joey.UI.Fragments
 
         private void RebindTags()
         {
-            if (TimeEntry == null || !canRebind) {
+            var currentEntry = ActiveTimeEntry;
+            if (currentEntry == null || !canRebind) {
                 return;
             }
 
@@ -341,6 +314,7 @@ namespace Toggl.Joey.UI.Fragments
                 bus.Send (new UserTimeEntryStateChangeMessage (this, entry.Data));
             } finally {
                 isProcessingAction = false;
+                Rebind();
             }
         }
 
@@ -351,28 +325,22 @@ namespace Toggl.Joey.UI.Fragments
             return base.OnOptionsItemSelected (item);
         }
 
-        private void OnDurationTextViewClick (object sender, EventArgs e)
-        {
-            if (TimeEntry == null) {
-                return;
-            }
-            new ChangeTimeEntryDurationDialogFragment (TimeEntry).Show (FragmentManager, "duration_dialog");
-        }
-
         private void OnStartTimeEditTextClick (object sender, EventArgs e)
         {
-            if (TimeEntry == null) {
+            var currentEntry = ActiveTimeEntry;
+            if (currentEntry == null) {
                 return;
             }
-            new ChangeTimeEntryStartTimeDialogFragment (TimeEntry).Show (FragmentManager, "time_dialog");
+            new ChangeTimeEntryStartTimeDialogFragment (currentEntry).Show (FragmentManager, "time_dialog");
         }
 
         private void OnStopTimeEditTextClick (object sender, EventArgs e)
         {
-            if (TimeEntry == null || TimeEntry.State == TimeEntryState.Running) {
+            var currentEntry = ActiveTimeEntry;
+            if (currentEntry == null || currentEntry.State == TimeEntryState.Running) {
                 return;
             }
-            new ChangeTimeEntryStopTimeDialogFragment (TimeEntry).Show (FragmentManager, "time_dialog");
+            new ChangeTimeEntryStopTimeDialogFragment (currentEntry).Show (FragmentManager, "time_dialog");
         }
 
         private void OnDescriptionTextChanged (object sender, Android.Text.TextChangedEventArgs e)
@@ -380,12 +348,13 @@ namespace Toggl.Joey.UI.Fragments
             // This can be called when the fragment is being restored, so the previous value will be
             // set miraculously. So we need to make sure that this is indeed the user who is changing the
             // value by only acting when the OnStart has been called.
+            var currentEntry = ActiveTimeEntry;
             if (!canRebind) {
                 return;
             }
 
             // Mark description as changed
-            descriptionChanging = TimeEntry != null && DescriptionEditText.Text != TimeEntry.Description;
+            descriptionChanging = currentEntry != null && DescriptionEditText.Text != currentEntry.Description;
 
             // Make sure that we're commiting 1 second after the user has stopped typing
             CancelDescriptionChangeAutoCommit ();
@@ -411,43 +380,48 @@ namespace Toggl.Joey.UI.Fragments
 
         private void OnProjectSelected (object sender, EventArgs e)
         {
-            if (TimeEntry == null) {
+            var currentEntry = ActiveTimeEntry;
+            if (currentEntry == null) {
                 return;
             }
 
             var intent = new Intent (Activity, typeof (ProjectListActivity));
-            intent.PutStringArrayListExtra (ProjectListActivity.ExtraTimeEntriesIds, new List<string> {TimeEntry.Id.ToString ()});
+            intent.PutStringArrayListExtra (ProjectListActivity.ExtraTimeEntriesIds, new List<string> {currentEntry.Id.ToString ()});
             StartActivity (intent);
         }
 
         private void OnTagSelected (object sender, EventArgs e)
         {
-            if (TimeEntry == null) {
+            var currentEntry = ActiveTimeEntry;
+            if (currentEntry == null) {
                 return;
             }
-            new ChooseTimeEntryTagsDialogFragment (TimeEntry.Workspace.Id, new List<TimeEntryData> {TimeEntry.Data}).Show (FragmentManager, "tags_dialog");
+            new ChooseTimeEntryTagsDialogFragment (currentEntry.Workspace.Id, new List<TimeEntryData> {currentEntry.Data}).Show (FragmentManager, "tags_dialog");
         }
 
         private void OnBillableCheckBoxCheckedChange (object sender, CompoundButton.CheckedChangeEventArgs e)
         {
-            if (TimeEntry == null) {
+            var currentEntry = ActiveTimeEntry;
+            if (currentEntry == null) {
                 return;
             }
 
             var isBillable = !BillableCheckBox.Checked;
-            if (TimeEntry.IsBillable != isBillable) {
-                TimeEntry.IsBillable = isBillable;
+            if (currentEntry.IsBillable != isBillable) {
+                currentEntry.IsBillable = isBillable;
                 SaveTimeEntry ();
             }
         }
 
         private async void OnDeleteImageButtonClick (object sender, EventArgs e)
         {
-            if (TimeEntry == null) {
+            var currentEntry = ActiveTimeEntry;
+
+            if (currentEntry == null) {
                 return;
             }
 
-            await TimeEntry.DeleteAsync ();
+            await currentEntry.DeleteAsync ();
             Toast.MakeText (Activity, Resource.String.CurrentTimeEntryEditDeleteToast, ToastLength.Short).Show ();
         }
 
@@ -482,12 +456,14 @@ namespace Toggl.Joey.UI.Fragments
 
         private void CommitDescriptionChanges ()
         {
-            if (TimeEntry != null && descriptionChanging) {
-                if (string.IsNullOrEmpty (TimeEntry.Description) && string.IsNullOrEmpty (DescriptionEditText.Text)) {
+            var currentEntry = ActiveTimeEntry;
+
+            if (currentEntry != null && descriptionChanging) {
+                if (string.IsNullOrEmpty (currentEntry.Description) && string.IsNullOrEmpty (DescriptionEditText.Text)) {
                     return;
                 }
-                if (TimeEntry.Description != DescriptionEditText.Text) {
-                    TimeEntry.Description = DescriptionEditText.Text;
+                if (currentEntry.Description != DescriptionEditText.Text) {
+                    currentEntry.Description = DescriptionEditText.Text;
                     SaveTimeEntry ();
                 }
             }
@@ -503,7 +479,7 @@ namespace Toggl.Joey.UI.Fragments
 
         private async void SaveTimeEntry ()
         {
-            var entry = TimeEntry;
+            var entry = ActiveTimeEntry;
             if (entry == null) {
                 return;
             }
