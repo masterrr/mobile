@@ -195,11 +195,9 @@ namespace Toggl.Joey.UI.Components
 
             var duration = currentEntry.GetDuration ();
             DurationTextView.Text = TimeSpan.FromSeconds ((long)duration.TotalSeconds).ToString ();
-            if (currentEntry.State == TimeEntryState.Running) {
-                // Schedule next rebind:
-                handler.RemoveCallbacks (Rebind);
-                handler.PostDelayed (Rebind, 1000 - duration.Milliseconds);
-            }
+            // Schedule next rebind:
+            handler.RemoveCallbacks (Rebind);
+            handler.PostDelayed (Rebind, 1000 - duration.Milliseconds);
         }
 
         public bool CompactView

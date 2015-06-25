@@ -77,6 +77,16 @@ namespace Toggl.Joey.UI.Fragments
                 propertyTracker.Add (model, HandleTimeEntryPropertyChanged);
             }
 
+            if (tagsView != null) {
+                tagsView.Updated -= OnTimeEntryTagsUpdated;
+                tagsView = null;
+            }
+
+            if (model != null && tagsView == null) {
+                tagsView = new TimeEntryTagsView (model.Id);
+                tagsView.Updated += OnTimeEntryTagsUpdated;
+            }
+
             propertyTracker.ClearStale ();
         }
 
@@ -102,8 +112,6 @@ namespace Toggl.Joey.UI.Fragments
                     backingActiveTimeEntry.Data = data;
                 }
             }
-
-            return true;
         }
 
         private TimeEntryData ActiveTimeEntryData
