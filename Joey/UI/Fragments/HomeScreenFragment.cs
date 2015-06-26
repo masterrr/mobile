@@ -38,6 +38,7 @@ namespace Toggl.Joey.UI.Fragments
         private Button undoButton;
         private bool isUndoShowed;
         private bool isEditShowed;
+        private int listScrollPosition;
         private ViewGroup cont;
         private ManualEditTimeEntryFragment manualEditFragment;
 
@@ -86,7 +87,7 @@ namespace Toggl.Joey.UI.Fragments
             recyclerView.AddOnItemTouchListener (itemTouchListener);
             recyclerView.AddOnScrollListener (new RecyclerViewScrollDetector (this));
             recyclerView.GetItemAnimator ().SupportsChangeAnimations = false;
-
+            recyclerView.Touch += OnListTouch;
             if (manualEditFragment == null) {
                 manualEditFragment = new ManualEditTimeEntryFragment();
                 FragmentTransaction transaction = ChildFragmentManager.BeginTransaction();
@@ -205,7 +206,41 @@ namespace Toggl.Joey.UI.Fragments
             }
         }
 
-        #region IDismissListener implementation
+        private float prevY;
+        private void OnListTouch (object sender, View.TouchEventArgs e)
+        {
+            bool scrollingDown = (prevY - e.Event.RawY) > 0;
+            if (snappyLayout.ActiveChild == 0) {
+                e.Handled = snappyLayout.OnTouchEvent (e.Event);
+                return;
+            }
+            switch (e.Event.Action) {
+            case MotionEventActions.Down:
+                // Disable SnappyList intercepting list view scroll events
+                recyclerView.Parent.RequestDisallowInterceptTouchEvent (true);
+                break;
+            case MotionEventActions.Move:
+                if (scrollingDown && listScrollPosition == 0) {
+                    e.Handled = snappyLayout.OnTouchEvent (e.Event);
+                    return;
+                } else {
+                    e.Handled = recyclerView.OnTouchEvent (e.Event);
+                }
+                break;
+            case MotionEventActions.Up:
+                prevY = 0;
+                break;
+            case MotionEventActions.Cancel:
+                recyclerView.Parent.RequestDisallowInterceptTouchEvent (false);
+                break;
+            }
+            prevY = e.Event.RawY;
+            // Run the usual touch logic for ListView
+
+            e.Handled = recyclerView.OnTouchEvent (e.Event);
+        }
+
+        #region IDismissCallbacks implementation
 
         public bool CanDismiss (RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder)
         {
@@ -328,6 +363,7 @@ namespace Toggl.Joey.UI.Fragments
         private class RecyclerViewScrollDetector : RecyclerView.OnScrollListener
         {
             private readonly HomeScreenFragment owner;
+            private int scrollPosition;
 
             public RecyclerViewScrollDetector (HomeScreenFragment owner)
             {
@@ -344,6 +380,9 @@ namespace Toggl.Joey.UI.Fragments
                 if (OnScrollListener != null) {
                     OnScrollListener.OnScrolled (recyclerView, dx, dy);
                 }
+                scrollPosition += dy;
+                owner.listScrollPosition = scrollPosition;
+
                 var isSignificantDelta = Math.Abs (dy) > ScrollThreshold;
                 if (isSignificantDelta) {
                     OnScrollMoved();
