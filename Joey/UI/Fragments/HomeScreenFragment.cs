@@ -358,6 +358,7 @@ namespace Toggl.Joey.UI.Fragments
                 isEditShowed = value;
                 var activity = (MainDrawerActivity)Activity ;
                 activity.ToolbarMode = isEditShowed ? MainDrawerActivity.ToolbarModes.DurationOnly : MainDrawerActivity.ToolbarModes.Compact;
+                snappyLayout.Top = isEditShowed ? 0 : activity.SupportActionBar.Height;
             }
         }
 
