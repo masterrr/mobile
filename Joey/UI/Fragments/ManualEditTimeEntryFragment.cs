@@ -75,6 +75,9 @@ namespace Toggl.Joey.UI.Fragments
             var model = ActiveTimeEntry;
             if (model != null) {
                 propertyTracker.Add (model, HandleTimeEntryPropertyChanged);
+                if (model.Workspace !=  null) {
+                    propertyTracker.Add (model.Workspace, HandleTimeEntryPropertyChanged);
+                }
             }
 
             if (tagsView != null) {
@@ -97,7 +100,8 @@ namespace Toggl.Joey.UI.Fragments
                     || prop == TimeEntryModel.PropertyStartTime
                     || prop == TimeEntryModel.PropertyStopTime
                     || prop == TimeEntryModel.PropertyDescription
-                    || prop == TimeEntryModel.PropertyIsBillable) {
+                    || prop == TimeEntryModel.PropertyIsBillable
+                    || prop == WorkspaceModel.PropertyIsPremium ) {
                 Rebind ();
             }
         }
