@@ -119,7 +119,6 @@
     <Compile Include="Net\NetworkPresence.cs" />
     <Compile Include="UI\Fragments\BaseDateTimeDialogFragment.cs" />
     <Compile Include="UI\Fragments\FeedbackFragment.cs" />
-    <Compile Include="UI\Views\LogTimeEntryItem.cs" />
     <Compile Include="UI\Views\FadeDrawable.cs" />
     <Compile Include="UI\Views\FadeLinearLayout.cs" />
     <Compile Include="UI\Views\PieChart.cs" />

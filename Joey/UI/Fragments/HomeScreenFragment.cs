@@ -22,7 +22,7 @@ using Activity = Android.Support.V7.App.AppCompatActivity;
 
 namespace Toggl.Joey.UI.Fragments
 {
-    public class HomeScreenFragment : Fragment, SwipeDismissTouchListener.IDismissCallbacks, ItemTouchListener.IItemTouchListener
+    public class HomeScreenFragment : Fragment, SwipeDismissCallback.IDismissListener, ItemTouchListener.IItemTouchListener
     {
         private static readonly int UndbarVisibleTime = 6000;
         private static readonly int UndbarScrollThreshold = 100;
@@ -59,10 +59,9 @@ namespace Toggl.Joey.UI.Fragments
             emptyMessageView.Visibility = ViewStates.Gone;
             recyclerView = view.FindViewById<RecyclerView> (Resource.Id.HomeRecyclerView);
             recyclerView.SetLayoutManager (new LinearLayoutManager (Activity));
-            
+
             snappyLayout = view.FindViewById<SnappyLayout> (Resource.Id.HomeSnappyLayout);
             manualEntry = view.FindViewById<FrameLayout> (Resource.Id.ManualAddTimeEntry);
-            manualEditFragment = (ManualEditTimeEntryFragment) ChildFragmentManager.FindFragmentById (Resource.Id.ManualEditTimeEntryFragment);
 
             snappyLayout.ActiveChildChanged += OnSnappyActiveChildChanged;
             undoBar = view.FindViewById<FrameLayout> (Resource.Id.UndoBar);
@@ -75,17 +74,9 @@ namespace Toggl.Joey.UI.Fragments
         {
             base.OnViewCreated (view, savedInstanceState);
 
-            var linearLayout = new LinearLayoutManager (Activity);
-            var swipeTouchListener = new SwipeDismissTouchListener (recyclerView, this);
-            var itemTouchListener = new ItemTouchListener (recyclerView, this);
+            var bus = ServiceContainer.Resolve<MessageBus> ();
+            subscriptionSettingChanged = bus.Subscribe<SettingChangedMessage> (OnSettingChanged);
 
-            recyclerView.SetLayoutManager (linearLayout);
-            recyclerView.AddItemDecoration (new DividerItemDecoration (Activity, DividerItemDecoration.VerticalList));
-            recyclerView.AddItemDecoration (new ShadowItemDecoration (Activity));
-            recyclerView.AddOnItemTouchListener (swipeTouchListener);
-            recyclerView.AddOnItemTouchListener (itemTouchListener);
-            recyclerView.AddOnScrollListener (new RecyclerViewScrollDetector (this));
-            recyclerView.GetItemAnimator ().SupportsChangeAnimations = false;
             recyclerView.Touch += OnListTouch;
             if (manualEditFragment == null) {
                 manualEditFragment = new ManualEditTimeEntryFragment();
@@ -93,9 +84,6 @@ namespace Toggl.Joey.UI.Fragments
                 transaction.Add (Resource.Id.ManualAddTimeEntry, manualEditFragment).Commit();
                 EditFormVisible = true;
             }
-
-            var bus = ServiceContainer.Resolve<MessageBus> ();
-            subscriptionSettingChanged = bus.Subscribe<SettingChangedMessage> (OnSettingChanged);
         }
 
         public override void OnResume ()
@@ -184,6 +172,7 @@ namespace Toggl.Joey.UI.Fragments
 
             recyclerView.GetAdapter ().Dispose ();
             recyclerView.Dispose ();
+            recyclerView.Touch -= OnListTouch;
             logAdapter = null;
 
             itemTouchListener.Dispose ();
