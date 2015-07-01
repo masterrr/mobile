@@ -38,10 +38,7 @@ namespace Toggl.Joey.UI.Fragments
         private Button undoButton;
         private bool isUndoShowed;
         private bool isEditShowed;
-        private int listScrollPosition;
-        private bool scrollingSnappy;
         private ManualEditTimeEntryFragment manualEditFragment;
-
 
         // Recycler setup
         private DividerItemDecoration dividerDecoration;
@@ -77,7 +74,6 @@ namespace Toggl.Joey.UI.Fragments
             var bus = ServiceContainer.Resolve<MessageBus> ();
             subscriptionSettingChanged = bus.Subscribe<SettingChangedMessage> (OnSettingChanged);
 
-            recyclerView.Touch += OnListTouch;
             if (manualEditFragment == null) {
                 manualEditFragment = new ManualEditTimeEntryFragment();
                 FragmentTransaction transaction = ChildFragmentManager.BeginTransaction();
@@ -96,6 +92,7 @@ namespace Toggl.Joey.UI.Fragments
         private void OnSnappyActiveChildChanged (object sender, EventArgs e)
         {
             EditFormVisible = snappyLayout.ActiveChild == 0;
+            snappyLayout.Activated = snappyLayout.ActiveChild == 0;
         }
 
         public override bool UserVisibleHint
@@ -145,7 +142,7 @@ namespace Toggl.Joey.UI.Fragments
         private void SetupRecyclerView ()
         {
             // Touch listeners.
-            itemTouchListener = new ItemTouchListener (recyclerView, this);
+            itemTouchListener = new ItemTouchListener (recyclerView, this, snappyLayout);
             recyclerView.AddOnItemTouchListener (itemTouchListener);
 
             var touchCallback = new SwipeDismissCallback (ItemTouchHelper.Up | ItemTouchHelper.Down, ItemTouchHelper.Left, this);
@@ -172,7 +169,6 @@ namespace Toggl.Joey.UI.Fragments
 
             recyclerView.GetAdapter ().Dispose ();
             recyclerView.Dispose ();
-            recyclerView.Touch -= OnListTouch;
             logAdapter = null;
 
             itemTouchListener.Dispose ();
@@ -193,38 +189,11 @@ namespace Toggl.Joey.UI.Fragments
             }
         }
 
-        private float prevY;
-        private void OnListTouch (object sender, View.TouchEventArgs e)
+        private bool ScrolledTop
         {
-            if (scrollingSnappy && e.Event.Action == MotionEventActions.Up) {
-                e.Handled = snappyLayout.OnTouchEvent (e.Event);
-                return;
+            set {
+                itemTouchListener.ScrolledTop = value;
             }
-
-            if (e.Event.Action == MotionEventActions.Down) {
-                scrollingSnappy = false;
-                recyclerView.Parent.RequestDisallowInterceptTouchEvent (true);
-            }
-
-            if (e.Event.Action == MotionEventActions.Up || e.Event.Action == MotionEventActions.Move) {
-                if (prevY == e.Event.RawY && e.Event.Action == MotionEventActions.Up) {
-                    e.Handled = recyclerView.OnTouchEvent (e.Event);
-                    return;
-                }
-                if (snappyLayout.ActiveChild == 0) {
-                    scrollingSnappy = true;
-                    e.Handled = snappyLayout.OnTouchEvent (e.Event);
-                } else {
-                    bool scrollingUp = prevY == 0 ? false : (prevY - e.Event.RawY) < 0;
-                    if (scrollingUp && listScrollPosition == 0) {
-                        scrollingSnappy = true;
-                        e.Handled = snappyLayout.OnTouchEvent (e.Event);
-                    } else {
-                        e.Handled = recyclerView.OnTouchEvent (e.Event);
-                    }
-                }
-            }
-            prevY = e.Event.Action == MotionEventActions.Up ? 0 : e.Event.RawY;
         }
 
         #region IDismissCallbacks implementation
@@ -248,9 +217,6 @@ namespace Toggl.Joey.UI.Fragments
 
         public void OnItemClick (RecyclerView parent, View clickedView, int position)
         {
-            if (scrollingSnappy) {
-                return;
-            }
             var intent = new Intent (Activity, typeof (EditTimeEntryActivity));
 
             IList<string> guids = ((TimeEntryHolder)logAdapter.GetEntry (position)).TimeEntryGuids;
@@ -354,7 +320,6 @@ namespace Toggl.Joey.UI.Fragments
         private class RecyclerViewScrollDetector : RecyclerView.OnScrollListener
         {
             private readonly HomeScreenFragment owner;
-            private int scrollPosition;
             private LinearLayoutManager layoutManager;
 
             public RecyclerViewScrollDetector (HomeScreenFragment owner)
@@ -372,10 +337,10 @@ namespace Toggl.Joey.UI.Fragments
                 if (OnScrollListener != null) {
                     OnScrollListener.OnScrolled (recyclerView, dx, dy);
                 }
+
                 layoutManager = (LinearLayoutManager)recyclerView.GetLayoutManager();
-                int firstVisiblePosition = layoutManager.FindFirstCompletelyVisibleItemPosition();
-                scrollPosition += dy;
-                owner.listScrollPosition = firstVisiblePosition == 0 ? 0 : scrollPosition;
+                int firstVisiblePosition = layoutManager.FindFirstVisibleItemPosition ();
+                owner.ScrolledTop = firstVisiblePosition == 0;
 
                 var isSignificantDelta = Math.Abs (dy) > ScrollThreshold;
                 if (isSignificantDelta) {

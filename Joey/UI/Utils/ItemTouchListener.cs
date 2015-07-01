@@ -2,6 +2,7 @@
 using Android.Support.V7.Widget;
 using Android.Views;
 using Java.Lang;
+using Toggl.Joey.UI.Views;
 
 namespace Toggl.Joey.UI.Utils
 {
@@ -18,10 +19,11 @@ namespace Toggl.Joey.UI.Utils
 
         private IItemTouchListener listener;
         private readonly RecyclerView recyclerView;
+        private readonly SnappyLayout snappyLayout;
         private GestureDetector gestureDetector;
         private bool IsScrolling;
 
-        public ItemTouchListener (RecyclerView recyclerView, IItemTouchListener listener)
+        public ItemTouchListener (RecyclerView recyclerView, IItemTouchListener listener, SnappyLayout snappy)
         {
 
             if (recyclerView == null || listener == null) {
@@ -31,6 +33,7 @@ namespace Toggl.Joey.UI.Utils
             IsScrolling = false;
             this.recyclerView = recyclerView;
             this.listener = listener;
+            this.snappyLayout = snappy;
             gestureDetector = new GestureDetector (recyclerView.Context, this);
             recyclerView.AddOnScrollListener (new RecyclerViewScrollDetector (this));
         }
@@ -46,8 +49,20 @@ namespace Toggl.Joey.UI.Utils
             }
         }
 
+        public bool ScrolledTop;
+
+        private float prevY;
         public bool OnInterceptTouchEvent (RecyclerView rv, MotionEvent e)
         {
+            if (snappyLayout.ActiveChild == 1) {
+                if (e.Action == MotionEventActions.Move && ScrolledTop && prevY < e.RawY) { // if scrolling up from top give stage to snappy.
+                    snappyLayout.Activated = true;
+                } else {
+                    snappyLayout.Activated = false;
+                }
+            }
+
+            prevY = e.Action == MotionEventActions.Up ? 0 : e.RawY;
             if (IsEnabled) {
                 gestureDetector.OnTouchEvent (e);
             }

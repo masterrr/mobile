@@ -17,6 +17,7 @@ namespace Toggl.Joey.UI.Views
         private float touchY;
         private float touchX;
         private bool isDragging;
+        private bool activated = true;
         private Animator scrollAnim;
 
         public SnappyLayout (Context ctx) : base (ctx)
@@ -90,6 +91,15 @@ namespace Toggl.Joey.UI.Views
             }
         }
 
+        public bool Activated
+        {
+            get {
+                return activated;
+            } set {
+                activated = value;
+            }
+        }
+
         private void SetActiveChild (int value)
         {
             if (value >= ChildCount) {
@@ -116,6 +126,9 @@ namespace Toggl.Joey.UI.Views
 
         public override bool OnInterceptTouchEvent (MotionEvent ev)
         {
+            if (!activated) {
+                return false;
+            }
             switch (ev.Action) {
             case MotionEventActions.Down:
                 touchX = ev.RawX;
