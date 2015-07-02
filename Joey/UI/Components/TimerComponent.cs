@@ -27,7 +27,6 @@ namespace Toggl.Joey.UI.Components
         private ActiveTimeEntryManager timeEntryManager;
         private ITimeEntryModel backingActiveTimeEntry;
         private bool canRebind;
-        private bool isProcessingAction;
         private bool compact;
         private bool hide = false;
 
@@ -41,6 +40,7 @@ namespace Toggl.Joey.UI.Components
 
         private Activity activity;
 
+        public event EventHandler ActiveEntryChanged;
 
         private void FindViews ()
         {
@@ -81,6 +81,10 @@ namespace Toggl.Joey.UI.Components
             canRebind = true;
             SyncModel ();
             Rebind ();
+
+            if (ActiveEntryChanged != null) {
+                ActiveEntryChanged.Invoke (this, EventArgs.Empty); // Initial rendering
+            }
         }
 
         public void OnStop ()
@@ -99,6 +103,9 @@ namespace Toggl.Joey.UI.Components
                 if (SyncModel ()) {
                     Rebind ();
                 }
+            }
+            if (ActiveEntryChanged != null) {
+                ActiveEntryChanged.Invoke (sender, args);
             }
         }
 
@@ -129,7 +136,7 @@ namespace Toggl.Joey.UI.Components
             }
         }
 
-        private ITimeEntryModel ActiveTimeEntry
+        public ITimeEntryModel ActiveTimeEntry
         {
             get {
                 if (ActiveTimeEntryData == null) {

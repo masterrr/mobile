@@ -75,7 +75,7 @@ namespace Toggl.Joey.UI.Fragments
             subscriptionSettingChanged = bus.Subscribe<SettingChangedMessage> (OnSettingChanged);
 
             if (manualEditFragment == null) {
-                manualEditFragment = new ManualEditTimeEntryFragment();
+                manualEditFragment = new ManualEditTimeEntryFragment ((MainDrawerActivity)Activity);
                 FragmentTransaction transaction = ChildFragmentManager.BeginTransaction();
                 transaction.Add (Resource.Id.ManualAddTimeEntry, manualEditFragment).Commit();
                 EditFormVisible = true;
@@ -87,7 +87,6 @@ namespace Toggl.Joey.UI.Fragments
             EnsureAdapter ();
             base.OnResume ();
         }
-
 
         private void OnSnappyActiveChildChanged (object sender, EventArgs e)
         {
@@ -311,7 +310,7 @@ namespace Toggl.Joey.UI.Fragments
                     return;
                 }
                 isEditShowed = value;
-                var activity = (MainDrawerActivity)Activity ;
+                var activity = (MainDrawerActivity)Activity;
                 activity.ToolbarMode = isEditShowed ? MainDrawerActivity.ToolbarModes.DurationOnly : MainDrawerActivity.ToolbarModes.Compact;
                 snappyLayout.Top = isEditShowed ? 0 : activity.SupportActionBar.Height;
             }

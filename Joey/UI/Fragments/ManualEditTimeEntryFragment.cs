@@ -7,6 +7,7 @@ using Android.Views;
 using Android.Widget;
 using Toggl.Joey.Data;
 using Toggl.Joey.UI.Activities;
+using Toggl.Joey.UI.Components;
 using Toggl.Joey.UI.Utils;
 using Toggl.Joey.UI.Views;
 using Toggl.Phoebe;
@@ -26,16 +27,16 @@ namespace Toggl.Joey.UI.Fragments
     {
         private readonly Handler handler = new Handler ();
         private TimeEntryTagsView tagsView;
-        private ActiveTimeEntryManager timeEntryManager;
-        private ITimeEntryModel backingActiveTimeEntry;
-        private PropertyChangeTracker propertyTracker;
         private bool canRebind;
         private bool descriptionChanging;
         private bool autoCommitScheduled;
         private bool isProcessingAction;
+        private MainDrawerActivity activity;
+        private TimerComponent timer;
 
-        public ManualEditTimeEntryFragment ()
+        public ManualEditTimeEntryFragment (MainDrawerActivity activity)
         {
+            this.activity = activity;
             Initialize();
         }
 
@@ -46,95 +47,38 @@ namespace Toggl.Joey.UI.Fragments
 
         private void Initialize()
         {
-            propertyTracker = new PropertyChangeTracker ();
-
-            if (timeEntryManager == null) {
-                timeEntryManager = ServiceContainer.Resolve<ActiveTimeEntryManager> ();
-                timeEntryManager.PropertyChanged += OnActiveTimeEntryManagerPropertyChanged;
+            timer = activity.Timer;
+            if (timer != null) {
+                timer.ActiveEntryChanged += OnTimeEntryUpdate;
             }
 
             canRebind = true;
         }
 
-        private void OnActiveTimeEntryManagerPropertyChanged (object sender, PropertyChangedEventArgs args)
+        private void OnTimeEntryUpdate (object sender, EventArgs e)
         {
-            if (args.PropertyName == ActiveTimeEntryManager.PropertyActive) {
-                SyncModel ();
-                Rebind ();
-            }
+            Rebind ();
         }
 
-        private void ResetTrackedObservables ()
+        private void ResetTagsView()
         {
-            if (propertyTracker == null) {
-                return;
-            }
-
-            propertyTracker.MarkAllStale ();
-
-            var model = ActiveTimeEntry;
-            if (model != null) {
-                propertyTracker.Add (model, HandleTimeEntryPropertyChanged);
-                if (model.Workspace !=  null) {
-                    propertyTracker.Add (model.Workspace, HandleTimeEntryPropertyChanged);
-                }
-            }
-
             if (tagsView != null) {
                 tagsView.Updated -= OnTimeEntryTagsUpdated;
                 tagsView = null;
             }
-
-            if (model != null && tagsView == null) {
-                tagsView = new TimeEntryTagsView (model.Id);
+            if (ActiveTimeEntry != null && tagsView == null) {
+                tagsView = new TimeEntryTagsView (ActiveTimeEntry.Id);
                 tagsView.Updated += OnTimeEntryTagsUpdated;
-            }
-
-            propertyTracker.ClearStale ();
-        }
-
-        private void HandleTimeEntryPropertyChanged (string prop)
-        {
-            if (prop == TimeEntryModel.PropertyProject
-                    || prop == TimeEntryModel.PropertyState
-                    || prop == TimeEntryModel.PropertyStartTime
-                    || prop == TimeEntryModel.PropertyStopTime
-                    || prop == TimeEntryModel.PropertyDescription
-                    || prop == TimeEntryModel.PropertyIsBillable
-                    || prop == WorkspaceModel.PropertyIsPremium ) {
-                Rebind ();
-            }
-        }
-
-        private void SyncModel ()
-        {
-            var data = ActiveTimeEntryData;
-            if (data != null) {
-                if (backingActiveTimeEntry == null) {
-                    backingActiveTimeEntry = new TimeEntryModel (data);
-                } else {
-                    backingActiveTimeEntry.Data = data;
-                }
-            }
-        }
-
-        private TimeEntryData ActiveTimeEntryData
-        {
-            get {
-                if (timeEntryManager == null) {
-                    return null;
-                }
-                return timeEntryManager.Active;
             }
         }
 
         private ITimeEntryModel ActiveTimeEntry
         {
             get {
-                if (ActiveTimeEntryData == null) {
+                if (timer == null) {
                     return null;
                 }
-                return backingActiveTimeEntry;
+                return timer.ActiveTimeEntry;
             }
         }
 
@@ -145,7 +89,7 @@ namespace Toggl.Joey.UI.Fragments
 
         protected virtual void Rebind ()
         {
-            ResetTrackedObservables ();
+            ResetTagsView ();
             var currentEntry = ActiveTimeEntry;
             if (currentEntry == null || !canRebind) {
                 return;
@@ -154,7 +98,6 @@ namespace Toggl.Joey.UI.Fragments
             DateTime startTime;
             var useTimer = currentEntry.StartTime == DateTime.MinValue;
             startTime = useTimer ? Time.Now : currentEntry.StartTime.ToLocalTime ();
-
             StartTimeEditText.Text = startTime.ToDeviceTimeString ();
 
             // Only update DescriptionEditText when content differs, else the user is unable to edit it
@@ -423,18 +366,6 @@ namespace Toggl.Joey.UI.Fragments
                 currentEntry.IsBillable = isBillable;
                 SaveTimeEntry ();
             }
-        }
-
-        private async void OnDeleteImageButtonClick (object sender, EventArgs e)
-        {
-            var currentEntry = ActiveTimeEntry;
-
-            if (currentEntry == null) {
-                return;
-            }
-
-            await currentEntry.DeleteAsync ();
-            Toast.MakeText (Activity, Resource.String.CurrentTimeEntryEditDeleteToast, ToastLength.Short).Show ();
         }
 
         private void AutoCommitDescriptionChanges ()
