@@ -18,7 +18,7 @@ namespace Toggl.Phoebe.Data.Views
     /// This view combines ICollectionDataView data and data from ITogglClient for time views. It tries to load data from
     /// web, but always falls back to data from the local store.
     /// </summary>
-    public class TimeEntriesCollectionView : ICollectionDataView<object>, IDisposable
+    public class TimeEntriesCollectionView : ICollectionGroupDataView<object, IDateGroup>, IDisposable
     {
         protected string Tag = "TimeEntriesCollectionView";
         protected TimeEntryHolder LastRemovedItem;
@@ -94,7 +94,7 @@ namespace Toggl.Phoebe.Data.Views
             if (isExcluded) {
                 await RemoveEntryAsync (entry);
             } else {
-                await AddOrUpdateEntryAsync (new TimeEntryData (entry));
+                 await AddOrUpdateEntryAsync (new TimeEntryData (entry));
             }
 
             if (updateMessageQueue.Count > 0) {
@@ -495,6 +495,11 @@ namespace Toggl.Phoebe.Data.Views
             }
         }
 
+        public IList <IDateGroup> Groups 
+        {
+            get { return DateGroups; }
+        }
+
         protected virtual IList<IDateGroup> DateGroups
         {
             get { return dateGroups; }
@@ -522,21 +527,21 @@ namespace Toggl.Phoebe.Data.Views
 
         #endregion
 
-        public interface IDateGroup : IDisposable
-        {
-            DateTime Date {  get; }
-
-            bool IsRunning { get; }
-
-            TimeSpan TotalDuration { get; }
-
-            IEnumerable<object> DataObjects { get; }
-        }
-
         private enum UpdateMode {
             Immediate,
             Batch,
         }
+    }
+
+    public interface IDateGroup : IDisposable
+    {
+        DateTime Date {  get; }
+
+        bool IsRunning { get; }
+
+        TimeSpan TotalDuration { get; }
+
+        IEnumerable<object> DataObjects { get; }
     }
 }
 
