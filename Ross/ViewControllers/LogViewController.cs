@@ -95,20 +95,20 @@ namespace Toggl.Ross.ViewControllers
             }
         }
 
-        class Source : GroupedDataViewSource<object, AllTimeEntriesView.DateGroup, TimeEntryData>, IDisposable
+        class Source : CollectionDataViewSource<object, IDateGroup>, IDisposable
         {
             readonly static NSString EntryCellId = new NSString ("EntryCellId");
             readonly static NSString SectionHeaderId = new NSString ("SectionHeaderId");
             readonly ContentController controller;
-            readonly AllTimeEntriesView dataView;
+            readonly GroupedTimeEntriesView dataView;
             private Subscription<SyncFinishedMessage> subscriptionSyncFinished;
             public UIRefreshControl HeaderView { get; set; }
 
-            public Source (ContentController controller) : this (controller, new AllTimeEntriesView ())
+            public Source (ContentController controller) : this (controller, new GroupedTimeEntriesView ())
             {
             }
 
-            private Source (ContentController controller, AllTimeEntriesView dataView) : base (controller.TableView, dataView)
+            private Source (ContentController controller, GroupedTimeEntriesView dataView) : base (controller.TableView, dataView)
             {
                 this.controller = controller;
                 this.dataView = dataView;
@@ -126,7 +126,7 @@ namespace Toggl.Ross.ViewControllers
 
                 if (HeaderView != null) {
                     HeaderView.ValueChanged += (sender, e) => ServiceContainer.Resolve<ISyncManager> ().Run();
-                    dataView.Updated += (sender, e) => HeaderView.EndRefreshing ();
+                    dataView.CollectionChanged += (sender, e) => HeaderView.EndRefreshing ();
                 }
             }
 
@@ -134,17 +134,7 @@ namespace Toggl.Ross.ViewControllers
             {
                 HeaderView.EndRefreshing ();
             }
-
-            protected override IEnumerable<AllTimeEntriesView.DateGroup> GetSections ()
-            {
-                return dataView.DateGroups;
-            }
-
-            protected override IEnumerable<TimeEntryData> GetRows (AllTimeEntriesView.DateGroup section)
-            {
-                return section.DataObjects;
-            }
-
+                
             public override nfloat EstimatedHeight (UITableView tableView, NSIndexPath indexPath)
             {
                 return 60f;
@@ -159,27 +149,33 @@ namespace Toggl.Ross.ViewControllers
             {
                 var cell = (TimeEntryCell)tableView.DequeueReusableCell (EntryCellId, indexPath);
                 cell.ContinueCallback = OnContinue;
-                cell.Bind ((TimeEntryModel)GetRow (indexPath));
+
+                var data = (TimeEntryGroup)GetRow (indexPath);
+
+                cell.Bind (data.Model);
+
                 return cell;
+            }
+                
+            protected object GetRow(NSIndexPath indexPath) {
+                return GetRows(GetSections().ElementAt(indexPath.Section)).ElementAt(indexPath.Row);
+            }
+
+            protected override IEnumerable<IDateGroup> GetSections ()
+            {
+                return dataView.Groups;
+            }
+
+            protected override IEnumerable<object> GetRows (IDateGroup section)
+            {
+                return section.DataObjects;
             }
 
             public override nfloat EstimatedHeightForHeader (UITableView tableView, nint section)
             {
                 return 42f;
             }
-
-            public override nfloat GetHeightForHeader (UITableView tableView, nint section)
-            {
-                return EstimatedHeightForHeader (tableView, section);
-            }
-
-            public override UIView GetViewForHeader (UITableView tableView, nint section)
-            {
-                var view = (SectionHeaderView)tableView.DequeueReusableHeaderFooterView (SectionHeaderId);
-                view.Bind (GetSection (section));
-                return view;
-            }
-
+                
             public override bool CanEditRow (UITableView tableView, NSIndexPath indexPath)
             {
                 return false;
@@ -187,13 +183,13 @@ namespace Toggl.Ross.ViewControllers
 
             public override void RowSelected (UITableView tableView, NSIndexPath indexPath)
             {
-                var data = GetRow (indexPath);
-                if (data != null) {
-                    controller.NavigationController.PushViewController (
-                        new EditTimeEntryViewController ((TimeEntryModel)data), true);
-                } else {
-                    tableView.DeselectRow (indexPath, true);
-                }
+//                var data = GetRow (indexPath);
+//                if (data != null) {
+//                    controller.NavigationController.PushViewController (
+//                        new EditTimeEntryViewController ((TimeEntryModel)data), true);
+//                } else {
+//                    tableView.DeselectRow (indexPath, true);
+//                }
             }
 
             private void OnContinue (TimeEntryModel model)
