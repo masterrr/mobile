@@ -158,7 +158,15 @@ namespace Toggl.Ross.ViewControllers
             }
                 
             protected object GetRow(NSIndexPath indexPath) {
-                return GetRows(GetSections().ElementAt(indexPath.Section)).ElementAt(indexPath.Row);
+                return GetRows(GetSection(indexPath)).ElementAt(indexPath.Row);
+            }
+
+            protected IDateGroup GetSection(nint section) {
+                return GetSections ().ElementAt ((int)section);
+            }
+
+            protected IDateGroup GetSection(NSIndexPath indexPath) {
+                return GetSections ().ElementAt (indexPath.Section);
             }
 
             protected override IEnumerable<IDateGroup> GetSections ()
@@ -174,6 +182,13 @@ namespace Toggl.Ross.ViewControllers
             public override nfloat EstimatedHeightForHeader (UITableView tableView, nint section)
             {
                 return 42f;
+            }
+
+            public override UIView GetViewForHeader (UITableView tableView, nint section)
+            {
+                var view = (SectionHeaderView)tableView.DequeueReusableHeaderFooterView (SectionHeaderId);
+                view.Bind (GetSection (section));
+                return view;
             }
                 
             public override bool CanEditRow (UITableView tableView, NSIndexPath indexPath)
@@ -619,6 +634,11 @@ namespace Toggl.Ross.ViewControllers
             private readonly UILabel dateLabel;
             private readonly UILabel totalDurationLabel;
             private AllTimeEntriesView.DateGroup data;
+
+
+            private IDateGroup data_;
+            private List<TimeEntryGroup> groups_;
+
             private List<TimeEntryModel> models;
             private PropertyChangeTracker propertyTracker = new PropertyChangeTracker ();
             private int rebindCounter;
@@ -673,6 +693,13 @@ namespace Toggl.Ross.ViewControllers
                 base.Dispose (disposing);
             }
 
+            public void Bind (IDateGroup data)
+            {
+                this.data_ = data;
+
+                Rebind ();
+            }
+
             public void Bind (AllTimeEntriesView.DateGroup data)
             {
                 if (this.data != null) {
@@ -694,12 +721,18 @@ namespace Toggl.Ross.ViewControllers
 
                 propertyTracker.MarkAllStale ();
 
-                foreach (var model in models) {
-                    propertyTracker.Add (model, HandleTimeEntryPropertyChanged);
+                if (data != null && models != null) {
+                    foreach (var model in models) {
+                        propertyTracker.Add (model, HandleTimeEntryPropertyChanged);
+                    }
+
                 }
 
+               
                 propertyTracker.ClearStale ();
             }
+
+
 
             private void HandleTimeEntryPropertyChanged (string prop)
             {
@@ -717,7 +750,9 @@ namespace Toggl.Ross.ViewControllers
 
             private void Rebind ()
             {
-                models = data.DataObjects.Select (d => new TimeEntryModel (d)).ToList ();
+                if (data != null) {
+                    models = data.DataObjects.Select (d => new TimeEntryModel (d)).ToList ();
+                }
 
                 ResetTrackedObservables ();
                 RebindDuration ();
@@ -727,21 +762,25 @@ namespace Toggl.Ross.ViewControllers
             {
                 rebindCounter++;
 
-                dateLabel.Text = data.Date.ToLocalizedDateString ();
+                if (data == null) {
+                    dateLabel.Text = data_.Date.ToLocalizedDateString ();
+                    totalDurationLabel.Text = FormatDuration (data_.TotalDuration);
+                } else {
+                    dateLabel.Text = data.Date.ToLocalizedDateString ();
+                    var duration = TimeSpan.FromSeconds (models.Sum (m => m.GetDuration ().TotalSeconds));
+                    totalDurationLabel.Text = FormatDuration (duration);
 
-                var duration = TimeSpan.FromSeconds (models.Sum (m => m.GetDuration ().TotalSeconds));
-                totalDurationLabel.Text = FormatDuration (duration);
-
-                if (models.Any (m => m.State == TimeEntryState.Running)) {
-                    // Schedule rebind
-                    var counter = rebindCounter;
-                    DispatchQueue.MainQueue.DispatchAfter (
-                        TimeSpan.FromMilliseconds (60000 - duration.Seconds * 1000 - duration.Milliseconds),
-                    delegate {
-                        if (counter == rebindCounter) {
-                            RebindDuration ();
-                        }
-                    });
+                    if (models.Any (m => m.State == TimeEntryState.Running)) {
+                        // Schedule rebind
+                        var counter = rebindCounter;
+                        DispatchQueue.MainQueue.DispatchAfter (
+                            TimeSpan.FromMilliseconds (60000 - duration.Seconds * 1000 - duration.Milliseconds),
+                            delegate {
+                                if (counter == rebindCounter) {
+                                    RebindDuration ();
+                                }
+                            });
+                    }
                 }
             }
 
