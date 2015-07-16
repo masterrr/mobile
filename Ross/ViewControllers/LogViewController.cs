@@ -59,10 +59,28 @@ namespace Toggl.Ross.ViewControllers
         private class ContentController : BaseTimerTableViewController
         {
             private UIView emptyView;
+            private TableViewRefreshView headerView; 
 
             public ContentController () : base (UITableViewStyle.Plain)
             {
             }
+
+            private void EnsureAdapter() 
+            {
+                if (TableView.Source == null) {
+                    var isGrouped = ServiceContainer.Resolve<ISettingsStore> ().GroupedTimeEntries;
+                    var collectionView = isGrouped ? (TimeEntriesCollectionView)new GroupedTimeEntriesView () : new LogTimeEntriesView ();
+                    var source = new Source (this, collectionView);
+                    if (emptyView != null) {
+                        source.EmptyView = emptyView;
+                    }
+                    if (headerView != null) {
+                        source.HeaderView = headerView;
+                    }
+                    source.Attach ();
+                }
+            }
+
 
             public override void ViewDidLoad ()
             {
@@ -75,13 +93,9 @@ namespace Toggl.Ross.ViewControllers
                     Message = "LogEmptyMessage".Tr (),
                 };
 
-                var headerView = new TableViewRefreshView ();
+                headerView = new TableViewRefreshView ();
 
-                var source = new Source (this) {
-                    EmptyView = emptyView,
-                    HeaderView = headerView
-                };
-                source.Attach ();
+                EnsureAdapter ();
 
                 RefreshControl = headerView;
                 headerView.AdaptToTableView (TableView);
@@ -100,15 +114,11 @@ namespace Toggl.Ross.ViewControllers
             readonly static NSString EntryCellId = new NSString ("EntryCellId");
             readonly static NSString SectionHeaderId = new NSString ("SectionHeaderId");
             readonly ContentController controller;
-            readonly GroupedTimeEntriesView dataView;
+            readonly TimeEntriesCollectionView dataView;
             private Subscription<SyncFinishedMessage> subscriptionSyncFinished;
             public UIRefreshControl HeaderView { get; set; }
 
-            public Source (ContentController controller) : this (controller, new GroupedTimeEntriesView ())
-            {
-            }
-
-            private Source (ContentController controller, GroupedTimeEntriesView dataView) : base (controller.TableView, dataView)
+            public Source (ContentController controller, TimeEntriesCollectionView dataView) : base (controller.TableView, dataView)
             {
                 this.controller = controller;
                 this.dataView = dataView;
@@ -150,9 +160,11 @@ namespace Toggl.Ross.ViewControllers
                 var cell = (TimeEntryCell)tableView.DequeueReusableCell (EntryCellId, indexPath);
                 cell.ContinueCallback = OnContinue;
 
-                var data = (TimeEntryGroup)GetRow (indexPath);
+                var row = GetRow (indexPath);
 
-                cell.Bind (data.Model);
+                var data = row as TimeEntryHolder;
+
+                cell.Bind ((TimeEntryModel)data.TimeEntryData);
 
                 return cell;
             }
@@ -171,12 +183,12 @@ namespace Toggl.Ross.ViewControllers
 
             protected override IEnumerable<IDateGroup> GetSections ()
             {
-                return dataView.Groups;
+                return dataView.Data.OfType<IDateGroup> ();
             }
 
             protected override IEnumerable<object> GetRows (IDateGroup section)
             {
-                return section.DataObjects;
+                return dataView.Data.SkipWhile(s => s != section).Skip(1).TakeWhile(r => r is TimeEntryHolder);
             }
 
             public override nfloat EstimatedHeightForHeader (UITableView tableView, nint section)
@@ -633,13 +645,13 @@ namespace Toggl.Ross.ViewControllers
             private const float HorizSpacing = 15f;
             private readonly UILabel dateLabel;
             private readonly UILabel totalDurationLabel;
-            private AllTimeEntriesView.DateGroup data;
 
-
-            private IDateGroup data_;
-            private List<TimeEntryGroup> groups_;
-
+            private AllTimeEntriesView.DateGroup plainData;
             private List<TimeEntryModel> models;
+
+            private IDateGroup groupedData;
+            private List<TimeEntryGroup> groups;
+
             private PropertyChangeTracker propertyTracker = new PropertyChangeTracker ();
             private int rebindCounter;
 
@@ -681,9 +693,9 @@ namespace Toggl.Ross.ViewControllers
                         propertyTracker.Dispose ();
                         propertyTracker = null;
                     }
-                    if (data != null) {
-                        data.Updated -= OnDateGroupUpdated;
-                        data = null;
+                    if (plainData != null) {
+                        plainData.Updated -= OnDateGroupUpdated;
+                        plainData = null;
                     }
                     if (models != null) {
                         models.Clear ();
@@ -695,20 +707,20 @@ namespace Toggl.Ross.ViewControllers
 
             public void Bind (IDateGroup data)
             {
-                this.data_ = data;
+                this.groupedData = data;
 
                 Rebind ();
             }
 
             public void Bind (AllTimeEntriesView.DateGroup data)
             {
-                if (this.data != null) {
-                    this.data.Updated -= OnDateGroupUpdated;
-                    this.data = null;
+                if (this.plainData != null) {
+                    this.plainData.Updated -= OnDateGroupUpdated;
+                    this.plainData = null;
                 }
 
-                this.data = data;
-                this.data.Updated += OnDateGroupUpdated;
+                this.plainData = data;
+                this.plainData.Updated += OnDateGroupUpdated;
 
                 Rebind ();
             }
@@ -721,19 +733,16 @@ namespace Toggl.Ross.ViewControllers
 
                 propertyTracker.MarkAllStale ();
 
-                if (data != null && models != null) {
+                if (plainData != null && models != null) {
                     foreach (var model in models) {
                         propertyTracker.Add (model, HandleTimeEntryPropertyChanged);
                     }
 
                 }
 
-               
                 propertyTracker.ClearStale ();
             }
-
-
-
+                
             private void HandleTimeEntryPropertyChanged (string prop)
             {
                 if (prop == TimeEntryModel.PropertyState
@@ -750,8 +759,8 @@ namespace Toggl.Ross.ViewControllers
 
             private void Rebind ()
             {
-                if (data != null) {
-                    models = data.DataObjects.Select (d => new TimeEntryModel (d)).ToList ();
+                if (plainData != null) {
+                    models = plainData.DataObjects.Select (d => new TimeEntryModel (d)).ToList ();
                 }
 
                 ResetTrackedObservables ();
@@ -762,11 +771,11 @@ namespace Toggl.Ross.ViewControllers
             {
                 rebindCounter++;
 
-                if (data == null) {
-                    dateLabel.Text = data_.Date.ToLocalizedDateString ();
-                    totalDurationLabel.Text = FormatDuration (data_.TotalDuration);
-                } else {
-                    dateLabel.Text = data.Date.ToLocalizedDateString ();
+                if (plainData == null) {
+                    dateLabel.Text = groupedData.Date.ToLocalizedDateString ();
+                    totalDurationLabel.Text = FormatDuration (groupedData.TotalDuration);
+                } else if (groupedData != null) {
+                    dateLabel.Text = plainData.Date.ToLocalizedDateString ();
                     var duration = TimeSpan.FromSeconds (models.Sum (m => m.GetDuration ().TotalSeconds));
                     totalDurationLabel.Text = FormatDuration (duration);
 
