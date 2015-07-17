@@ -646,13 +646,8 @@ namespace Toggl.Ross.ViewControllers
             private readonly UILabel dateLabel;
             private readonly UILabel totalDurationLabel;
 
-            private AllTimeEntriesView.DateGroup plainData;
-            private List<TimeEntryModel> models;
-
             private IDateGroup groupedData;
-            private List<TimeEntryGroup> groups;
 
-            private PropertyChangeTracker propertyTracker = new PropertyChangeTracker ();
             private int rebindCounter;
 
             public SectionHeaderView (IntPtr ptr) : base (ptr)
@@ -685,25 +680,7 @@ namespace Toggl.Ross.ViewControllers
                     height: contentFrame.Height
                 );
             }
-
-            protected override void Dispose (bool disposing)
-            {
-                if (disposing) {
-                    if (propertyTracker != null) {
-                        propertyTracker.Dispose ();
-                        propertyTracker = null;
-                    }
-                    if (plainData != null) {
-                        plainData.Updated -= OnDateGroupUpdated;
-                        plainData = null;
-                    }
-                    if (models != null) {
-                        models.Clear ();
-                        models = null;
-                    }
-                }
-                base.Dispose (disposing);
-            }
+                
 
             public void Bind (IDateGroup data)
             {
@@ -712,84 +689,28 @@ namespace Toggl.Ross.ViewControllers
                 Rebind ();
             }
 
-            public void Bind (AllTimeEntriesView.DateGroup data)
-            {
-                if (this.plainData != null) {
-                    this.plainData.Updated -= OnDateGroupUpdated;
-                    this.plainData = null;
-                }
-
-                this.plainData = data;
-                this.plainData.Updated += OnDateGroupUpdated;
-
-                Rebind ();
-            }
-
-            private void ResetTrackedObservables ()
-            {
-                if (propertyTracker == null) {
-                    return;
-                }
-
-                propertyTracker.MarkAllStale ();
-
-                if (plainData != null && models != null) {
-                    foreach (var model in models) {
-                        propertyTracker.Add (model, HandleTimeEntryPropertyChanged);
-                    }
-
-                }
-
-                propertyTracker.ClearStale ();
-            }
-                
-            private void HandleTimeEntryPropertyChanged (string prop)
-            {
-                if (prop == TimeEntryModel.PropertyState
-                        || prop == TimeEntryModel.PropertyStartTime
-                        || prop == TimeEntryModel.PropertyStopTime) {
-                    RebindDuration ();
-                }
-            }
-
-            private void OnDateGroupUpdated (object sender, EventArgs args)
-            {
-                Rebind ();
-            }
-
             private void Rebind ()
             {
-                if (plainData != null) {
-                    models = plainData.DataObjects.Select (d => new TimeEntryModel (d)).ToList ();
-                }
-
-                ResetTrackedObservables ();
                 RebindDuration ();
             }
 
             private void RebindDuration ()
             {
                 rebindCounter++;
+                var duration = groupedData.TotalDuration;
 
-                if (plainData == null) {
-                    dateLabel.Text = groupedData.Date.ToLocalizedDateString ();
-                    totalDurationLabel.Text = FormatDuration (groupedData.TotalDuration);
-                } else if (groupedData != null) {
-                    dateLabel.Text = plainData.Date.ToLocalizedDateString ();
-                    var duration = TimeSpan.FromSeconds (models.Sum (m => m.GetDuration ().TotalSeconds));
-                    totalDurationLabel.Text = FormatDuration (duration);
+                dateLabel.Text = groupedData.Date.ToLocalizedDateString ();
+                totalDurationLabel.Text = FormatDuration (duration);
 
-                    if (models.Any (m => m.State == TimeEntryState.Running)) {
-                        // Schedule rebind
-                        var counter = rebindCounter;
-                        DispatchQueue.MainQueue.DispatchAfter (
-                            TimeSpan.FromMilliseconds (60000 - duration.Seconds * 1000 - duration.Milliseconds),
-                            delegate {
-                                if (counter == rebindCounter) {
-                                    RebindDuration ();
-                                }
-                            });
-                    }
+                if (groupedData.IsRunning) {
+                    var counter = rebindCounter;
+
+                    DispatchQueue.MainQueue.DispatchAfter(TimeSpan.FromMilliseconds (60000 - duration.Seconds * 1000 - duration.Milliseconds), delegate {
+                        if (counter == rebindCounter) {
+                            RebindDuration ();
+                        }
+                    });
+
                 }
             }
 
