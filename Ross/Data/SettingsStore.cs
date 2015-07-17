@@ -164,12 +164,14 @@ namespace Toggl.Ross.Data
             }
         }
 
+        public static readonly string PropertyGroupedTimeEntries = GetPropertyName (s => s.GroupedTimeEntries);
+
         public bool GroupedTimeEntries
         {
             get { return (GetInt (PhoebeGroupedEntriesKey) ?? 1) == 1; }
             set {
                 SetInt (PhoebeGroupedEntriesKey, value ? 1 : 0);
-                OnSettingChanged (PhoebeGroupedEntriesKey);
+                OnSettingChanged (PropertyGroupedTimeEntries);
                 ServiceContainer.Resolve<ITracker> ().SendSettingsChangeEvent (SettingName.GroupedTimeEntries);
             }
         }

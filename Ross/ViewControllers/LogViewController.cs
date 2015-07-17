@@ -13,6 +13,7 @@ using Toggl.Phoebe.Data.Models;
 using Toggl.Phoebe.Data.Utils;
 using Toggl.Phoebe.Data.Views;
 using Toggl.Phoebe.Net;
+using Toggl.Ross.Data;
 using Toggl.Ross.DataSources;
 using Toggl.Ross.Theme;
 using Toggl.Ross.Views;
@@ -61,13 +62,16 @@ namespace Toggl.Ross.ViewControllers
             private UIView emptyView;
             private TableViewRefreshView headerView; 
 
+            private Subscription<SettingChangedMessage> subscriptionSettingChanged;
+
+
             public ContentController () : base (UITableViewStyle.Plain)
             {
             }
 
-            private void EnsureAdapter() 
+            private void EnsureAdapter(bool forceRebind = false) 
             {
-                if (TableView.Source == null) {
+                if (TableView.Source == null || forceRebind) {
                     var isGrouped = ServiceContainer.Resolve<ISettingsStore> ().GroupedTimeEntries;
                     var collectionView = isGrouped ? (TimeEntriesCollectionView)new GroupedTimeEntriesView () : new LogTimeEntriesView ();
                     var source = new Source (this, collectionView);
@@ -99,6 +103,21 @@ namespace Toggl.Ross.ViewControllers
 
                 RefreshControl = headerView;
                 headerView.AdaptToTableView (TableView);
+
+                var bus = ServiceContainer.Resolve<MessageBus> ();
+                subscriptionSettingChanged = bus.Subscribe<SettingChangedMessage> (OnSettingChanged);
+            }
+
+            private void OnSettingChanged (SettingChangedMessage msg)
+            {
+                // Protect against Java side being GCed
+                if (Handle == IntPtr.Zero) {
+                    return;
+                }
+
+                if (msg.Name == SettingsStore.PropertyGroupedTimeEntries) {
+                    EnsureAdapter(forceRebind: true);
+                }
             }
 
             public override void ViewDidLayoutSubviews ()
@@ -106,6 +125,18 @@ namespace Toggl.Ross.ViewControllers
                 base.ViewDidLayoutSubviews ();
 
                 emptyView.Frame = new CGRect (25f, (View.Frame.Size.Height - 200f) / 2, View.Frame.Size.Width - 50f, 200f);
+            }
+
+            protected override void Dispose (bool disposing)
+            {
+                base.Dispose (disposing);
+                if (disposing) {
+                    var bus = ServiceContainer.Resolve<MessageBus> ();
+                    if (subscriptionSettingChanged != null) {
+                        bus.Unsubscribe (subscriptionSettingChanged);
+                        subscriptionSettingChanged = null;
+                    }
+                }
             }
         }
 
