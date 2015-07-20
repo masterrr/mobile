@@ -109,18 +109,12 @@ namespace Toggl.Ross.DataSources
                 }
             }
         }
+            
 
-        private void OnCollectionChange (object sender, NotifyCollectionChangedEventArgs e)
-        {
-            if (Handle == IntPtr.Zero) {
-                return;
-            }
-
-            tableView.ReloadData ();
-        }
+        public abstract void OnCollectionChange (object sender, NotifyCollectionChangedEventArgs e);
 
         protected virtual void Update () {
-         //    tableView.ReloadData ();
+            tableView.ReloadData ();
         }
 
         public UITableView TableView

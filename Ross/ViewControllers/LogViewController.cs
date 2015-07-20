@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Specialized;
 using System.Collections.Generic;
 using System.Linq;
 using CoreAnimation;
@@ -154,6 +155,11 @@ namespace Toggl.Ross.ViewControllers
                 this.controller = controller;
                 this.dataView = dataView;
 
+                NSTimer.CreateRepeatingScheduledTimer(5.0f, delegate {
+                    var syncManager = ServiceContainer.Resolve<ISyncManager> ();
+                    syncManager.Run(SyncMode.Pull);
+                });
+
                 controller.TableView.RegisterClassForCellReuse (typeof (TimeEntryCell), EntryCellId);
                 controller.TableView.RegisterClassForHeaderFooterViewReuse (typeof (SectionHeaderView), SectionHeaderId);
             }
@@ -169,6 +175,101 @@ namespace Toggl.Ross.ViewControllers
                     HeaderView.ValueChanged += (sender, e) => ServiceContainer.Resolve<ISyncManager> ().Run();
                     dataView.CollectionChanged += (sender, e) => HeaderView.EndRefreshing ();
                 }
+            }
+
+
+
+            private NSIndexPath StartingIndexPath(int globalIndex) {
+                int r = -1, s = -1, g = -1;
+
+                foreach (var obj in dataView.Data) {
+                    if (g++ == globalIndex) {
+                        return NSIndexPath.FromRowSection (r, s);
+                    }
+                    if (obj is IDateGroup) {
+                        s++;
+                        r = -1;
+                    } else {
+                        r++;
+                    }
+                }
+                return null;
+            }
+
+            static bool initialLoad = true;
+
+            public override void OnCollectionChange (object sender, NotifyCollectionChangedEventArgs e)
+            {
+                TableView.BeginUpdates ();
+                if (e.Action == NotifyCollectionChangedAction.Add) {
+                    var d = dataView.Data.ToList ();
+                    var modified = d.Skip (e.NewStartingIndex).Take (e.NewItems.Count).ToList ();
+
+                    var sectionSlice = modified.OfType<IDateGroup> ().ToList ();
+                    if (sectionSlice.Count > 0) {
+                        var sectionIndx = d.OfType<IDateGroup> ().ToList ().IndexOf (sectionSlice.First ());
+                        var h = sectionIndx + sectionSlice.Count ();
+
+                        NSMutableIndexSet set = new NSMutableIndexSet ();
+
+                        for (int i = sectionIndx; i < h; i++) {
+                            set.Add ((nuint)i);
+                        }
+                        
+                        TableView.InsertSections (set, UITableViewRowAnimation.Top);
+                    } else if (modified.OfType<TimeEntryHolder> ().Count () == modified.Count) {
+                        var indexPath = StartingIndexPath (e.NewStartingIndex);
+                        var row = indexPath.Row;
+                        var section = indexPath.Section;
+
+                        var newItemsCount = e.NewItems.Count;
+
+                        var paths = new NSIndexPath[newItemsCount];
+
+                        for (int i = 0; i < newItemsCount; i++) {
+                            paths [i] = NSIndexPath.FromRowSection (row + i, section);
+                        }
+
+                        TableView.InsertRows (paths, UITableViewRowAnimation.Left);
+  
+                    } else {
+                        TableView.ReloadData ();
+                    }
+                
+                } else if (e.Action == NotifyCollectionChangedAction.Remove) {
+                    TableView.DeleteRows (new NSIndexPath[] { StartingIndexPath (e.OldStartingIndex) }, UITableViewRowAnimation.Automatic);
+                } else if (e.Action == NotifyCollectionChangedAction.Replace) {
+                    TableView.ReloadRows (new NSIndexPath[] { StartingIndexPath (e.OldStartingIndex) }, UITableViewRowAnimation.Automatic);
+
+                }
+
+//                    var index = e.NewStartingIndex;
+//
+//                    var actualIndexPath = StartingIndexPath (index);
+//                    var row = actualIndexPath.Row;
+//                    var section = actualIndexPath.Section;
+//
+//                    var newItemsCount = e.NewItems.Count;
+//                    int sectionDelta = 0;
+//
+//                    IDateGroup trackingGroup = null;
+//
+//                    List<NSIndexPath> paths = new List<NSIndexPath> ();
+//                    NSMutableIndexSet set = new NSMutableIndexSet ();
+//                    for (int i = 0; i < newItemsCount-1; i++) {
+//                        var data = dataView.Data.ElementAt (index + i);
+//                        if (data is IDateGroup) {
+//                            set.Add((nuint)(section+sectionDelta));
+//                            sectionDelta++;
+//                        }
+//                        paths.Add(NSIndexPath.FromRowSection(row+i, section+sectionDelta));
+//                    }
+//                    TableView.InsertSections (set, UITableViewRowAnimation.Left);
+//                    TableView.InsertRows (new NSIndexPath[] { StartingIndexPath (e.NewStartingIndex) }, UITableViewRowAnimation.Left);
+//                }
+
+                TableView.EndUpdates ();
+
             }
 
             private void OnSyncFinished (SyncFinishedMessage msg)
@@ -238,6 +339,7 @@ namespace Toggl.Ross.ViewControllers
             {
                 return false;
             }
+                
 
             public override void RowSelected (UITableView tableView, NSIndexPath indexPath)
             {
