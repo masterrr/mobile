@@ -193,7 +193,7 @@ namespace Toggl.Joey.UI.Components
 
             ProjectTextView.Visibility = CompactView ? ViewStates.Visible : ViewStates.Gone;
             DescriptionTextView.Visibility = CompactView ? ViewStates.Visible : ViewStates.Gone;;
-            DurationTextView.Gravity = CompactView ? (GravityFlags.Right | GravityFlags.CenterVertical) : GravityFlags.Center;
+            DurationTextView.Gravity = GravityFlags.Center;
 
             if (CompactView) {
                 ProjectTextView.Text = currentEntry.Project != null ? currentEntry.Project.Name : "(no project)";

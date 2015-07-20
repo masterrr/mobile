@@ -18,6 +18,7 @@ namespace Toggl.Joey.UI.Views
         private float touchX;
         private bool isDragging;
         private bool activated = true;
+        private bool lockFirstChild = false;
         private Animator scrollAnim;
 
         public SnappyLayout (Context ctx) : base (ctx)
@@ -71,8 +72,18 @@ namespace Toggl.Joey.UI.Views
             translateY = Math.Min (0, Math.Max (maxTranslateY, translateY));
 
             ForEachChild (child => {
-                child.TranslationY = translateY;
+
+                if (child.Top == 0 && lockFirstChild) {
+
+                } else {
+
+                    child.TranslationY = translateY;
+                }
             });
+
+            if (OnTranslateChanged != null) {
+                OnTranslateChanged (this, EventArgs.Empty);
+            }
         }
 
         public int ActiveChild
@@ -91,12 +102,25 @@ namespace Toggl.Joey.UI.Views
             }
         }
 
+        public float TranslateY
+        {
+            get { return translateY; }
+        }
+
         public bool Activated
         {
             get {
                 return activated;
             } set {
                 activated = value;
+            }
+        }
+
+        public bool LockFirst
+        {
+            get { return lockFirstChild; }
+            set {
+                lockFirstChild = value;
             }
         }
 
@@ -114,6 +138,8 @@ namespace Toggl.Joey.UI.Views
         }
 
         public event EventHandler ActiveChildChanged;
+
+        public event EventHandler OnTranslateChanged;
 
         private void CancelAnimations()
         {

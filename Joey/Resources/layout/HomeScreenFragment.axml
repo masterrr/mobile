@@ -11,25 +11,27 @@
             android:id="@+id/HomeSnappyLayout"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent">
+            <FrameLayout
+                android:id="@+id/ManualAddTimeEntry"
+                android:layout_width="match_parent"
+                android:layout_height="330dp"
+                android:background="@drawable/BgArrowsPattern"
+                android:paddingTop="?android:attr/actionBarSize" />
             <LinearLayout
+                android:id="@+id/HomeRecyclerViewContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@color/window_background"
                 android:orientation="vertical">
-                <FrameLayout
-                    android:id="@+id/ManualAddTimeEntry"
-                    android:layout_width="match_parent"
-                    android:layout_height="330dp"
-                    android:background="@drawable/BgArrowsPattern"
-                    android:paddingTop="?android:attr/actionBarSize" />
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/ToolbarDropShadowHeight"
                     android:background="@drawable/DropShadowVertical" />
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/HomeRecyclerView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
             </LinearLayout>
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/HomeRecyclerView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
         </Toggl.Joey.UI.Views.SnappyLayout>
         <LinearLayout
             android:id="@+id/EmptyMessageView"

@@ -35,6 +35,7 @@ namespace Toggl.Joey.UI.Fragments
         private readonly Handler handler = new Handler ();
         private FrameLayout undoBar;
         private FrameLayout manualEntry;
+        private LinearLayout recyclerContainer;
         private Button undoButton;
         private bool isUndoShowed;
         private bool isEditShowed;
@@ -56,11 +57,14 @@ namespace Toggl.Joey.UI.Fragments
             emptyMessageView.Visibility = ViewStates.Gone;
             recyclerView = view.FindViewById<RecyclerView> (Resource.Id.HomeRecyclerView);
             recyclerView.SetLayoutManager (new LinearLayoutManager (Activity));
-
+            recyclerContainer = view.FindViewById<LinearLayout> (Resource.Id.HomeRecyclerViewContainer);
             snappyLayout = view.FindViewById<SnappyLayout> (Resource.Id.HomeSnappyLayout);
+            snappyLayout.LockFirst = true;
             manualEntry = view.FindViewById<FrameLayout> (Resource.Id.ManualAddTimeEntry);
 
             snappyLayout.ActiveChildChanged += OnSnappyActiveChildChanged;
+            snappyLayout.OnTranslateChanged += OnTranslateYChanged;
+
             undoBar = view.FindViewById<FrameLayout> (Resource.Id.UndoBar);
             undoButton = view.FindViewById<Button> (Resource.Id.UndoButton);
             undoButton.Click += UndoBtnClicked;
@@ -92,6 +96,10 @@ namespace Toggl.Joey.UI.Fragments
         {
             EditFormVisible = snappyLayout.ActiveChild == 0;
             snappyLayout.Activated = snappyLayout.ActiveChild == 0;
+        }
+
+        private void OnTranslateYChanged (object sender, EventArgs e)
+        {
         }
 
         public override bool UserVisibleHint
@@ -312,7 +320,9 @@ namespace Toggl.Joey.UI.Fragments
                 isEditShowed = value;
                 var activity = (MainDrawerActivity)Activity;
                 activity.ToolbarMode = isEditShowed ? MainDrawerActivity.ToolbarModes.DurationOnly : MainDrawerActivity.ToolbarModes.Compact;
-                snappyLayout.Top = isEditShowed ? 0 : activity.SupportActionBar.Height;
+                var lp = (LinearLayout.MarginLayoutParams)recyclerContainer.LayoutParameters;
+                lp.TopMargin = isEditShowed ? 0 : activity.SupportActionBar.Height;
+                recyclerContainer.LayoutParameters = lp;
             }
         }
 
