@@ -100,9 +100,16 @@ namespace Toggl.Joey.UI.Fragments
 
         private void OnTranslateYChanged (object sender, EventArgs e)
         {
+            float translation = Math.Abs (snappyLayout.TranslateY);
+            int endPoint = snappyLayout.GetChildAt (0).Bottom;
+
             var activity = (MainDrawerActivity)Activity;
-            activity.Timer.AnimateState = Math.Abs (snappyLayout.TranslateY) /snappyLayout.GetChildAt (0).Bottom;
-            manualEditFragment.View.Alpha = 1f - 1f * (Math.Abs (snappyLayout.TranslateY) / snappyLayout.GetChildAt (0).Bottom);
+            activity.Timer.AnimateState = translation / endPoint;
+            manualEditFragment.View.Alpha = 1f - (translation / endPoint);
+
+            var lp = (LinearLayout.MarginLayoutParams)recyclerContainer.LayoutParameters;
+            lp.TopMargin = ((int)translation + activity.SupportActionBar.Height) >= endPoint ? activity.SupportActionBar.Height - (endPoint - (int)translation) : 0;
+            recyclerContainer.LayoutParameters = lp;
         }
 
         public override bool UserVisibleHint
@@ -323,9 +330,6 @@ namespace Toggl.Joey.UI.Fragments
                 isEditShowed = value;
                 var activity = (MainDrawerActivity)Activity;
                 activity.ToolbarMode = isEditShowed ? MainDrawerActivity.ToolbarModes.DurationOnly : MainDrawerActivity.ToolbarModes.Compact;
-                var lp = (LinearLayout.MarginLayoutParams)recyclerContainer.LayoutParameters;
-                lp.TopMargin = isEditShowed ? 0 : activity.SupportActionBar.Height;
-                recyclerContainer.LayoutParameters = lp;
             }
         }
 
