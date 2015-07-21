@@ -212,8 +212,8 @@ namespace Toggl.Joey.UI.Components
         {
             int rightRoom = Root.Width - DurationTextView.Width - DurationTextView.Left;
             DurationTextView.TranslationX = rightRoom * animateState;
-            DescriptionTextView.Alpha = 1f * animateState;
-            ProjectTextView.Alpha = 1f * animateState;
+            DescriptionTextView.Alpha = animateState * animateState;
+            ProjectTextView.Alpha = animateState * animateState;
         }
 
         public bool CompactView
