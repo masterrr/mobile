@@ -66,7 +66,6 @@
     <Compile Include="Analytics\**\*.cs" />
     <Compile Include="Logging\**\*.cs" />
     <Compile Include="Logging\ILoggerClient.cs" />
-    <Compile Include="Data\Views\ICollectionGroupDataView.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Contrib\" />
