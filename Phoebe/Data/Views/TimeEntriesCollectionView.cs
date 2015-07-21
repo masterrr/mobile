@@ -20,7 +20,7 @@ namespace Toggl.Phoebe.Data.Views
     /// This view combines ICollectionDataView data and data from ITogglClient for time views. It tries to load data from
     /// web, but always falls back to data from the local store.
     /// </summary>
-    public class TimeEntriesCollectionView : ICollectionGroupDataView<object, IDateGroup>, IDisposable
+    public class TimeEntriesCollectionView : ICollectionDataView<object>, IDisposable
     {
         public static int UndoSecondsInterval = 5;
 
@@ -120,7 +120,7 @@ namespace Toggl.Phoebe.Data.Views
             if (isExcluded) {
                 await RemoveEntryAsync (entry);
             } else {
-                 await AddOrUpdateEntryAsync (new TimeEntryData (entry));
+                await AddOrUpdateEntryAsync (new TimeEntryData (entry));
             }
         }
 
@@ -532,9 +532,16 @@ namespace Toggl.Phoebe.Data.Views
             }
         }
 
-        public IList <IDateGroup> Groups 
+        public IList <IDateGroup> Groups
         {
             get { return DateGroups; }
+        }
+
+        public int Count
+        {
+            get {
+                return ItemCollection.Count;
+            }
         }
 
         protected virtual IList<IDateGroup> DateGroups
