@@ -676,7 +676,6 @@
     <AndroidResource Include="Resources\drawable-hdpi\icTasks.png" />
     <AndroidResource Include="Resources\drawable-hdpi\icTasksSelected.png" />
     <AndroidResource Include="Resources\drawable\TasksButtonBackground.xml" />
-    <AndroidResource Include="Resources\layout\ManualEditForm.axml" />
     <AndroidResource Include="Resources\layout\HomeScreenFragment.axml" />
     <AndroidResource Include="Resources\layout\ManualEditTimeEntryFragment.axml" />
   </ItemGroup>
