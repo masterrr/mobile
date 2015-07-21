@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
 using CoreAnimation;
@@ -61,9 +60,7 @@ namespace Toggl.Ross.ViewControllers
         {
             private UIView emptyView;
             private TableViewRefreshView headerView;
-
             private Subscription<SettingChangedMessage> subscriptionSettingChanged;
-
 
             public ContentController () : base (UITableViewStyle.Plain)
             {
@@ -84,7 +81,6 @@ namespace Toggl.Ross.ViewControllers
                     source.Attach ();
                 }
             }
-
 
             public override void ViewDidLoad ()
             {
@@ -192,31 +188,31 @@ namespace Toggl.Ross.ViewControllers
 
                         if (elementToAdd is IDateGroup) {
                             var indexSet = GetSectionIndexFromItemIndex (index);
-                            TableView.InsertSections (indexSet, UITableViewRowAnimation.Top);
+                            TableView.InsertSections (indexSet, UITableViewRowAnimation.Automatic);
                         } else {
-                            var indexPath = GetRowPathFromItemIndex (e.NewStartingIndex);
-                            TableView.InsertRows (new [] {indexPath}, UITableViewRowAnimation.Top);
+                            var indexPath = GetRowPathFromItemIndex (index);
+                            TableView.InsertRows (new [] {indexPath}, UITableViewRowAnimation.Automatic);
                         }
                     }
                 }
 
                 if (e.Action == NotifyCollectionChangedAction.Remove) {
-                    if (dataView.Data.ElementAt (e.OldStartingIndex) is IDateGroup) {
+                    if (e.OldItems[0] is IDateGroup) {
                         var indexSet = GetSectionIndexFromItemIndex (e.OldStartingIndex);
-                        TableView.DeleteSections (indexSet, UITableViewRowAnimation.Top);
+                        TableView.DeleteSections (indexSet, UITableViewRowAnimation.Automatic);
                     } else {
-                        var indexPath = GetRowPathFromItemIndex (e.NewStartingIndex);
-                        TableView.DeleteRows (new [] {indexPath}, UITableViewRowAnimation.Top);
+                        var indexPath = GetRowPathFromItemIndex (e.OldStartingIndex);
+                        TableView.DeleteRows (new [] {indexPath}, UITableViewRowAnimation.Automatic);
                     }
                 }
 
                 if (e.Action == NotifyCollectionChangedAction.Replace) {
                     if (dataView.Data.ElementAt (e.NewStartingIndex) is IDateGroup) {
-                        //var indexSet = GetSectionIndexFromItemIndex (e.OldStartingIndex);
+                        var indexSet = GetSectionIndexFromItemIndex (e.OldStartingIndex);
                         //TableView.ReloadSections (indexSet, UITableViewRowAnimation.None);
                     } else {
                         var indexPath = GetRowPathFromItemIndex (e.NewStartingIndex);
-                        TableView.ReloadRows (new [] {indexPath}, UITableViewRowAnimation.Fade);
+                        TableView.ReloadRows (new [] {indexPath}, UITableViewRowAnimation.Automatic);
                     }
                 }
 

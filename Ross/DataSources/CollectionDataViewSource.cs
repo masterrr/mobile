@@ -83,13 +83,6 @@ namespace Toggl.Ross.DataSources
             }
 
             return rows.Cast <TRow> ();
-
-            /*
-            return dataView.Data.SkipWhile (s => s is TSection && CompareDataSections (s, section))
-                .Skip (1)
-                .TakeWhile (r => r is TRow)
-                .Cast <TRow> ();
-            */
         }
 
         protected NSIndexSet GetSectionIndexFromItemIndex (int itemIndex)
@@ -106,22 +99,23 @@ namespace Toggl.Ross.DataSources
 
         protected NSIndexPath GetRowPathFromItemIndex (int itemIndex)
         {
-            var rowIndex = -1;
+            var rowIndex = 0;
             var sectionIndex = -1;
-            nint count = -1;
+            int count = 0;
 
             foreach (var obj in dataView.Data) {
-                if (count ++ == itemIndex) {
-                    return NSIndexPath.FromRowSection (rowIndex, sectionIndex);
-                }
-
                 if (obj is TSection) {
                     sectionIndex ++;
-                    rowIndex = -1;
+                    rowIndex = 0;
                 } else {
+                    if (count == itemIndex) {
+                        return NSIndexPath.FromRowSection (rowIndex, sectionIndex);
+                    }
                     rowIndex ++;
                 }
+                count++;
             }
+
             return NSIndexPath.FromRowSection (0, 0);
         }
 
@@ -153,9 +147,7 @@ namespace Toggl.Ross.DataSources
             if (!Sections.Any ()) {
                 return 0;
             }
-
             var rowsInSection = GetRowsFromSection (Sections.ElementAt ((int)section));
-            Console.WriteLine (rowsInSection.Count ());
             return rowsInSection.Count ();
         }
 

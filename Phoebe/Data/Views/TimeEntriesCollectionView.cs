@@ -144,7 +144,11 @@ namespace Toggl.Phoebe.Data.Views
             if (isRange) {
                 args = CollectionEventBuilder.GetRangeEvent (action, newIndex, oldIndex);
             } else {
-                args = CollectionEventBuilder.GetEvent (action, newIndex, oldIndex);
+                // We need to generate the real args
+                // after data processing and
+                // include the target object in the args
+                // for testing purposes
+                args = CollectionEventBuilder.GetEvent (action, newIndex, oldIndex, data);
             }
 
             // Update collection.
