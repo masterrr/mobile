@@ -100,6 +100,8 @@ namespace Toggl.Joey.UI.Fragments
 
         private void OnTranslateYChanged (object sender, EventArgs e)
         {
+            var activity = (MainDrawerActivity)Activity;
+            activity.Timer.AnimateState = Math.Abs (snappyLayout.TranslateY) /snappyLayout.GetChildAt (0).Bottom;
         }
 
         public override bool UserVisibleHint

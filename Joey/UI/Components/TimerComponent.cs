@@ -26,6 +26,7 @@ namespace Toggl.Joey.UI.Components
         private PropertyChangeTracker propertyTracker;
         private ActiveTimeEntryManager timeEntryManager;
         private ITimeEntryModel backingActiveTimeEntry;
+        private float animateState;
         private bool canRebind;
         private bool compact;
         private bool hide = false;
@@ -191,8 +192,8 @@ namespace Toggl.Joey.UI.Components
                 return;
             }
 
-            ProjectTextView.Visibility = CompactView ? ViewStates.Visible : ViewStates.Gone;
-            DescriptionTextView.Visibility = CompactView ? ViewStates.Visible : ViewStates.Gone;;
+            ProjectTextView.Visibility = ViewStates.Visible;
+            DescriptionTextView.Visibility = ViewStates.Visible;
             DurationTextView.Gravity = GravityFlags.Center;
 
             if (CompactView) {
@@ -205,6 +206,14 @@ namespace Toggl.Joey.UI.Components
             // Schedule next rebind:
             handler.RemoveCallbacks (Rebind);
             handler.PostDelayed (Rebind, 1000 - duration.Milliseconds);
+        }
+
+        private void AnimateTo ()
+        {
+            int rightRoom = Root.Width - DurationTextView.Width - DurationTextView.Left;
+            DurationTextView.TranslationX = rightRoom * animateState;
+            DescriptionTextView.Alpha = 1f * animateState;
+            ProjectTextView.Alpha = 1f * animateState;
         }
 
         public bool CompactView
@@ -224,6 +233,15 @@ namespace Toggl.Joey.UI.Components
             set {
                 hide = value;
                 Rebind();
+            }
+        }
+
+        public float AnimateState
+        {
+            get { return animateState;}
+            set {
+                animateState = value;
+                AnimateTo ();
             }
         }
     }

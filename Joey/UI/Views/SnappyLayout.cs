@@ -72,11 +72,7 @@ namespace Toggl.Joey.UI.Views
             translateY = Math.Min (0, Math.Max (maxTranslateY, translateY));
 
             ForEachChild (child => {
-
-                if (child.Top == 0 && lockFirstChild) {
-
-                } else {
-
+                if (! (child.Top == 0 && lockFirstChild)) {
                     child.TranslationY = translateY;
                 }
             });
