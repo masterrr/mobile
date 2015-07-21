@@ -1,31 +1,40 @@
 ﻿using System;
-using System.Collections.Specialized;
 using System.Collections.Generic;
-using CoreGraphics;
+using System.Collections.Specialized;
 using System.Linq;
-using CoreFoundation;
+using CoreGraphics;
 using Foundation;
-using UIKit;
-using Toggl.Phoebe.Data;
-using Toggl.Phoebe.Data.DataObjects;
 using Toggl.Phoebe.Data.Views;
+using UIKit;
 
 namespace Toggl.Ross.DataSources
 {
-    public abstract class CollectionDataViewSource<TRow, TSection> : UITableViewSource
+    public abstract class CollectionDataViewSource<TData, TSection, TRow> : UITableViewSource
     {
-
         private readonly UITableView tableView;
-        private readonly ICollectionGroupDataView<TRow, TSection> dataView;
-        private DataCache cache;
+        private readonly ICollectionDataView<TData> dataView;
+        private IEnumerable<TSection> sections = new List<TSection> ();
 
-
-        public CollectionDataViewSource (UITableView tableView, ICollectionGroupDataView<TRow, TSection> dataView)
+        protected CollectionDataViewSource (UITableView tableView, ICollectionDataView<TData> dataView)
         {
             this.tableView = tableView;
             this.dataView = dataView;
             dataView.Reload ();
             dataView.CollectionChanged += OnCollectionChange;
+        }
+
+        protected override void Dispose (bool disposing)
+        {
+            if (disposing) {
+                dataView.CollectionChanged -= OnCollectionChange;
+            }
+            base.Dispose (disposing);
+        }
+
+        public virtual void OnCollectionChange (object sender, NotifyCollectionChangedEventArgs e)
+        {
+            // Cache sections
+            UpdateSectionList ();
         }
 
         public virtual void Attach ()
@@ -45,36 +54,117 @@ namespace Toggl.Ross.DataSources
         protected virtual bool HasData
         {
             get {
-                var sections = GetSections ();
-                var sections_ = sections as IList<TSection> ?? sections.ToList ();
-                if (sections_.Count == 1) {
-                    return GetRows (sections_ [0]).Any ();
-                }
-                return sections_.Count > 0;
+                return dataView.Data.Any ();
             }
+        }
+
+        protected IEnumerable<TSection> Sections
+        {
+            get {
+                return sections;
+            }
+        }
+
+        protected IEnumerable<TRow> GetRowsFromSection (TSection section)
+        {
+            var rows = new List<TData> ();
+            var startToCollect = false;
+
+            foreach (var item in dataView.Data) {
+                if (startToCollect && item is TSection) {
+                    startToCollect = false;
+                }
+
+                if (item is TSection && CompareDataSections (item, section)) {
+                    startToCollect = true;
+                } else if (startToCollect) {
+                    rows.Add (item);
+                }
+            }
+
+            return rows.Cast <TRow> ();
+
+            /*
+            return dataView.Data.SkipWhile (s => s is TSection && CompareDataSections (s, section))
+                .Skip (1)
+                .TakeWhile (r => r is TRow)
+                .Cast <TRow> ();
+            */
+        }
+
+        protected NSIndexSet GetSectionIndexFromItemIndex (int itemIndex)
+        {
+            nint sectionIndex = -1;
+            for (int i = 0; i <= itemIndex; i++) {
+                var obj = dataView.Data.ElementAt (i);
+                if (obj is TSection) {
+                    sectionIndex ++;
+                }
+            }
+            return NSIndexSet.FromIndex (sectionIndex);
+        }
+
+        protected NSIndexPath GetRowPathFromItemIndex (int itemIndex)
+        {
+            var rowIndex = -1;
+            var sectionIndex = -1;
+            nint count = -1;
+
+            foreach (var obj in dataView.Data) {
+                if (count ++ == itemIndex) {
+                    return NSIndexPath.FromRowSection (rowIndex, sectionIndex);
+                }
+
+                if (obj is TSection) {
+                    sectionIndex ++;
+                    rowIndex = -1;
+                } else {
+                    rowIndex ++;
+                }
+            }
+            return NSIndexPath.FromRowSection (0, 0);
+        }
+
+        protected int GetItemIndexFromRowPath (NSIndexPath indexPath)
+        {
+            var rowIndex = int.MinValue;
+            var sectionIndex = 0;
+            var count = 0;
+
+            foreach (var obj in dataView.Data) {
+                if (obj is TSection) {
+                    if (sectionIndex == indexPath.Section) {
+                        rowIndex = 0;
+                    }
+                    sectionIndex ++;
+                } else {
+                    if (rowIndex == indexPath.Row) {
+                        return count;
+                    }
+                    rowIndex ++;
+                }
+                count++;
+            }
+            return -1;
         }
 
         public override nint RowsInSection (UITableView tableview, nint section)
         {
-            var sectionsCount = GetSections ().Count();
-            if (sectionsCount == 0) {
+            if (!Sections.Any ()) {
                 return 0;
             }
-            return GetRows (GetSections ().ElementAt ((int)section)).Count();
+
+            var rowsInSection = GetRowsFromSection (Sections.ElementAt ((int)section));
+            Console.WriteLine (rowsInSection.Count ());
+            return rowsInSection.Count ();
         }
 
         public override nint NumberOfSections (UITableView tableView)
         {
-            var sectionsCount = GetSections ().Count();
-            return sectionsCount;
+            return Sections.Count ();
         }
 
-        protected abstract IEnumerable<TSection> GetSections ();
-
-        protected abstract IEnumerable<TRow> GetRows (TSection section);
-
         public UIView EmptyView { get; set; }
-
 
         protected virtual void UpdateFooter ()
         {
@@ -109,11 +199,15 @@ namespace Toggl.Ross.DataSources
                 }
             }
         }
-            
+        protected abstract bool CompareDataSections (TData data, TSection section);
 
-        public abstract void OnCollectionChange (object sender, NotifyCollectionChangedEventArgs e);
+        private void UpdateSectionList ()
+        {
+            sections = dataView.Data.OfType<TSection> ();
+        }
 
-        protected virtual void Update () {
+        protected virtual void Update ()
+        {
             tableView.ReloadData ();
         }
 
