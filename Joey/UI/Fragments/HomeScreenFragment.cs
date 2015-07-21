@@ -105,7 +105,7 @@ namespace Toggl.Joey.UI.Fragments
 
             var activity = (MainDrawerActivity)Activity;
             activity.Timer.AnimateState = translation / endPoint;
-            manualEditFragment.View.Alpha = 1f - (translation / endPoint);
+            manualEditFragment.View.Alpha = 0.8f - (translation / endPoint);
 
             var lp = (LinearLayout.MarginLayoutParams)recyclerContainer.LayoutParameters;
             lp.TopMargin = ((int)translation + activity.SupportActionBar.Height) >= endPoint ? activity.SupportActionBar.Height - (endPoint - (int)translation) : 0;
