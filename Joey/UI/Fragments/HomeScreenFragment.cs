@@ -102,6 +102,7 @@ namespace Toggl.Joey.UI.Fragments
         {
             var activity = (MainDrawerActivity)Activity;
             activity.Timer.AnimateState = Math.Abs (snappyLayout.TranslateY) /snappyLayout.GetChildAt (0).Bottom;
+            manualEditFragment.View.Alpha = 1f - 1f * (Math.Abs (snappyLayout.TranslateY) / snappyLayout.GetChildAt (0).Bottom);
         }
 
         public override bool UserVisibleHint

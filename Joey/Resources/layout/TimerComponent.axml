@@ -31,7 +31,7 @@
         android:textColor="@color/material_black"
         android:singleLine="true"
         android:textSize="32dp"
-        android:layout_marginLeft="-28dp"
+        android:layout_marginLeft="-20dp"
         android:textStyle="normal"
         android:fontFamily="sans-serif-light"
         android:layout_gravity="center" />

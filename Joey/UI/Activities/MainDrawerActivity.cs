@@ -165,8 +165,8 @@ namespace Toggl.Joey.UI.Activities
                 Timer.Hide = false;
                 Timer.CompactView = true;
                 SupportActionBar.SetDisplayShowTitleEnabled (false);
-                SupportActionBar.SetBackgroundDrawable (Resources.GetDrawable (Resource.Drawable.BgArrows));
-                MainToolbarShadow.Visibility = ViewStates.Visible;
+                SupportActionBar.SetBackgroundDrawable (null);
+                MainToolbarShadow.Visibility = ViewStates.Gone;
                 break;
             case MainDrawerActivity.ToolbarModes.Normal:
                 Timer.Hide = true;
