@@ -23,20 +23,17 @@ namespace Toggl.Joey.UI.Fragments
 {
     public class LogTimeEntriesListFragment : Fragment, SwipeDismissCallback.IDismissListener, ItemTouchListener.IItemTouchListener
     {
-        private static readonly int UndbarVisibleTime = 6000;
-        private static readonly int UndbarScrollThreshold = 100;
-
         private RecyclerView recyclerView;
         private View emptyMessageView;
         private Subscription<SettingChangedMessage> subscriptionSettingChanged;
         private LogTimeEntriesAdapter logAdapter;
         private bool isUndoShowed;
+        private StartStopFab startStopBtn;
 
         // Recycler setup
         private DividerItemDecoration dividerDecoration;
         private ShadowItemDecoration shadowDecoration;
         private ItemTouchListener itemTouchListener;
-        private RecyclerViewScrollDetector scrollListener;
 
         public override View OnCreateView (LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
@@ -48,6 +45,12 @@ namespace Toggl.Joey.UI.Fragments
             emptyMessageView.Visibility = ViewStates.Gone;
             recyclerView = view.FindViewById<RecyclerView> (Resource.Id.LogRecyclerView);
             recyclerView.SetLayoutManager (new LinearLayoutManager (Activity));
+            startStopBtn = view.FindViewById<StartStopFab> (Resource.Id.StartStopBtn);
+
+            startStopBtn.Click += (sender, e) => {
+                var r = new Random ();
+                startStopBtn.ButtonAction = r.Next (0,2);
+            };
 
             return view;
         }
@@ -123,14 +126,11 @@ namespace Toggl.Joey.UI.Fragments
             recyclerView.AddItemDecoration (dividerDecoration);
             recyclerView.AddItemDecoration (shadowDecoration);
 
-            scrollListener = new RecyclerViewScrollDetector (this);
-            recyclerView.AddOnScrollListener (scrollListener);
             recyclerView.GetItemAnimator ().SupportsChangeAnimations = false;
         }
 
         private void ReleaseRecyclerView ()
         {
-            recyclerView.RemoveOnScrollListener (scrollListener);
             recyclerView.RemoveItemDecoration (shadowDecoration);
             recyclerView.RemoveItemDecoration (dividerDecoration);
             recyclerView.RemoveOnItemTouchListener (itemTouchListener);
@@ -142,7 +142,6 @@ namespace Toggl.Joey.UI.Fragments
             itemTouchListener.Dispose ();
             dividerDecoration.Dispose ();
             shadowDecoration.Dispose ();
-            scrollListener.Dispose ();
         }
 
         private void OnSettingChanged (SettingChangedMessage msg)
@@ -253,46 +252,5 @@ namespace Toggl.Joey.UI.Fragments
 
         #endregion
 
-        private class RecyclerViewScrollDetector : RecyclerView.OnScrollListener
-        {
-            private readonly LogTimeEntriesListFragment owner;
-
-            public RecyclerViewScrollDetector (LogTimeEntriesListFragment owner)
-            {
-                this.owner = owner;
-                ScrollThreshold = UndbarScrollThreshold;
-            }
-
-            public int ScrollThreshold { get; set; }
-
-            public RecyclerView.OnScrollListener OnScrollListener { get; set; }
-
-            public override void OnScrolled (RecyclerView recyclerView, int dx, int dy)
-            {
-                if (OnScrollListener != null) {
-                    OnScrollListener.OnScrolled (recyclerView, dx, dy);
-                }
-
-                var isSignificantDelta = Math.Abs (dy) > ScrollThreshold;
-                if (isSignificantDelta) {
-                    OnScrollMoved();
-                }
-            }
-
-            public override void OnScrollStateChanged (RecyclerView recyclerView, int newState)
-            {
-                if (OnScrollListener != null) {
-                    OnScrollListener.OnScrollStateChanged (recyclerView, newState);
-                }
-                base.OnScrollStateChanged (recyclerView, newState);
-            }
-
-            private void OnScrollMoved()
-            {
-                if (owner.UndoBarVisible) {
-                    owner.RemoveItemAndHideUndoBar ();
-                }
-            }
-        }
     }
 }
