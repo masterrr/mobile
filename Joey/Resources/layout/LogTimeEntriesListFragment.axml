@@ -29,11 +29,13 @@
             android:text="@string/NoItemsText"
             android:gravity="center" />
     </LinearLayout>
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
+    <Toggl.Joey.UI.Views.StartStopFab
+        android:id="@+id/StartStopBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:clickable="true"
+        android:backgroundTint="@color/bright_green"
+        android:src="@drawable/IcPlayArrowWhite"
         app:layout_anchor="@+id/LogRecyclerView"
         app:layout_anchorGravity="bottom|right|end"
         android:layout_margin="@dimen/fab_margin" />

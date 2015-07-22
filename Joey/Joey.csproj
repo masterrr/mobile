@@ -161,6 +161,7 @@
     <Compile Include="UI\Activities\SplashActivity.cs" />
     <Compile Include="UI\Utils\DimensionsExtensions.cs" />
     <Compile Include="UI\Utils\SwipeDismissCallback.cs" />
+    <Compile Include="UI\Views\StartStopFab.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />
