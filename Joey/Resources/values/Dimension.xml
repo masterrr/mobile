@@ -5,5 +5,6 @@
     <dimen name="normalTextSize" >14sp</dimen>
     <dimen name="largTextSize" >16sp</dimen>
     <dimen name="ToolbarDropShadowHeight">4dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
 </resources>
 
