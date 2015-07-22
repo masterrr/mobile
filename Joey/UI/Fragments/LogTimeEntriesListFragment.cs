@@ -30,9 +30,6 @@ namespace Toggl.Joey.UI.Fragments
         private View emptyMessageView;
         private Subscription<SettingChangedMessage> subscriptionSettingChanged;
         private LogTimeEntriesAdapter logAdapter;
-        private readonly Handler handler = new Handler ();
-        private FrameLayout undoBar;
-        private Button undoButton;
         private bool isUndoShowed;
 
         // Recycler setup
@@ -51,10 +48,6 @@ namespace Toggl.Joey.UI.Fragments
             emptyMessageView.Visibility = ViewStates.Gone;
             recyclerView = view.FindViewById<RecyclerView> (Resource.Id.LogRecyclerView);
             recyclerView.SetLayoutManager (new LinearLayoutManager (Activity));
-
-            undoBar = view.FindViewById<FrameLayout> (Resource.Id.UndoBar);
-            undoButton = view.FindViewById<Button> (Resource.Id.UndoButton);
-            undoButton.Click += UndoBtnClicked;
 
             return view;
         }
@@ -108,9 +101,6 @@ namespace Toggl.Joey.UI.Fragments
                 bus.Unsubscribe (subscriptionSettingChanged);
                 subscriptionSettingChanged = null;
             }
-
-            // Remove calls to hide Undo bar.
-            handler.RemoveCallbacks (RemoveItemAndHideUndoBar);
 
             ReleaseRecyclerView ();
 
@@ -222,8 +212,6 @@ namespace Toggl.Joey.UI.Fragments
             if (!UndoBarVisible) {
                 UndoBarVisible = true;
             }
-            handler.RemoveCallbacks (RemoveItemAndHideUndoBar);
-            handler.PostDelayed (RemoveItemAndHideUndoBar, UndbarVisibleTime);
         }
 
         public void RemoveItemAndHideUndoBar ()
@@ -248,7 +236,6 @@ namespace Toggl.Joey.UI.Fragments
             var undoAdapter = recyclerView.GetAdapter () as IUndoCapabilities;
             undoAdapter.RestoreItemFromUndo ();
 
-            handler.RemoveCallbacks (ShowUndoBar);
             UndoBarVisible = false;
         }
 
@@ -261,14 +248,6 @@ namespace Toggl.Joey.UI.Fragments
                     return;
                 }
                 isUndoShowed = value;
-
-                var targetTranY = isUndoShowed ? 0.0f : 160.0f;
-                ValueAnimator animator = ValueAnimator.OfFloat (undoBar.TranslationY, targetTranY);
-                animator.SetDuration (500);
-                animator.Update += (sender, e) => {
-                    undoBar.TranslationY = (float)animator.AnimatedValue;
-                };
-                animator.Start();
             }
         }
 
