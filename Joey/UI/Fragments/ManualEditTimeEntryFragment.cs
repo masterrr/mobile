@@ -31,6 +31,7 @@ namespace Toggl.Joey.UI.Fragments
         private bool descriptionChanging;
         private bool autoCommitScheduled;
         private bool isProcessingAction;
+        private PropertyChangeTracker propertyTracker;
         private MainDrawerActivity activity;
         private TimerComponent timer;
 
@@ -51,6 +52,7 @@ namespace Toggl.Joey.UI.Fragments
             if (timer != null) {
                 timer.ActiveEntryChanged += OnTimeEntryUpdate;
             }
+            propertyTracker = new PropertyChangeTracker ();
 
             canRebind = true;
         }
@@ -58,6 +60,60 @@ namespace Toggl.Joey.UI.Fragments
         private void OnTimeEntryUpdate (object sender, EventArgs e)
         {
             Rebind ();
+        }
+
+
+        private void ResetTrackedObservables ()
+        {
+            if (propertyTracker == null) {
+                return;
+            }
+            propertyTracker.MarkAllStale ();
+
+            var entry = ActiveTimeEntry;
+            if (entry != null) {
+                propertyTracker.Add (entry, HandleTimeEntryPropertyChanged);
+
+                if (entry.Project != null) {
+
+                    propertyTracker.Add (entry.Project, HandleProjectPropertyChanged);
+
+                    if (entry.Project.Client != null) {
+                        propertyTracker.Add (entry.Project.Client, HandleClientPropertyChanged);
+                    }
+                }
+            }
+
+            propertyTracker.ClearStale ();
+        }
+
+
+        private void HandleTimeEntryPropertyChanged (string prop)
+        {
+            if (prop == TimeEntryModel.PropertyProject
+                    || prop == TimeEntryModel.PropertyState
+                    || prop == TimeEntryModel.PropertyStartTime
+                    || prop == TimeEntryModel.PropertyStopTime
+                    || prop == TimeEntryModel.PropertyDescription
+                    || prop == TimeEntryModel.PropertyIsBillable) {
+                Rebind ();
+            }
+        }
+
+        private void HandleProjectPropertyChanged (string prop)
+        {
+            if (prop == ProjectModel.PropertyClient
+                    || prop == ProjectModel.PropertyName
+                    || prop == ProjectModel.PropertyColor) {
+                Rebind ();
+            }
+        }
+
+        private void HandleClientPropertyChanged (string prop)
+        {
+            if (prop == ClientModel.PropertyName) {
+                Rebind ();
+            }
         }
 
         private void ResetTagsView()
@@ -89,6 +145,7 @@ namespace Toggl.Joey.UI.Fragments
 
         protected virtual void Rebind ()
         {
+            ResetTrackedObservables();
             ResetTagsView ();
             var currentEntry = ActiveTimeEntry;
             if (currentEntry == null || !canRebind) {
@@ -219,6 +276,8 @@ namespace Toggl.Joey.UI.Fragments
             ProjectEditText.Click += OnProjectSelected;
             TagsBit.FullClick += OnTagSelected;
             BillableCheckBox.CheckedChange += OnBillableCheckBoxCheckedChange;
+
+            Rebind ();
 
             return view;
         }

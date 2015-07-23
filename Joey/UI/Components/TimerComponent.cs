@@ -100,13 +100,14 @@ namespace Toggl.Joey.UI.Components
 
         private void OnActiveTimeEntryManagerPropertyChanged (object sender, PropertyChangedEventArgs args)
         {
-            if (args.PropertyName == ActiveTimeEntryManager.PropertyActive) {
+            if (args.PropertyName == ActiveTimeEntryManager.PropertyActive || args.PropertyName == ActiveTimeEntryManager.PropertyRunning) {
+
                 if (SyncModel ()) {
                     Rebind ();
                 }
-            }
-            if (ActiveEntryChanged != null) {
-                ActiveEntryChanged.Invoke (sender, args);
+                if (ActiveEntryChanged != null) {
+                    ActiveEntryChanged.Invoke (sender, args);
+                }
             }
         }
 
