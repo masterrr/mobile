@@ -39,6 +39,7 @@ namespace Toggl.Joey.UI.Fragments
         private Button undoButton;
         private bool isUndoShowed;
         private bool isEditShowed;
+        private bool snappyConfigured;
         private ManualEditTimeEntryFragment manualEditFragment;
 
         // Recycler setup
@@ -101,15 +102,19 @@ namespace Toggl.Joey.UI.Fragments
         private void OnTranslateYChanged (object sender, EventArgs e)
         {
             float translation = Math.Abs (snappyLayout.TranslateY);
-            int endPoint = snappyLayout.GetChildAt (0).Bottom;
 
             var activity = (MainDrawerActivity)Activity;
+            int endPoint = snappyLayout.GetChildAt (0).Bottom - activity.SupportActionBar.Height;
             activity.Timer.AnimateState = translation / endPoint;
             manualEditFragment.View.Alpha = 1f - 1.5f* (translation / endPoint);
 
-            var lp = (LinearLayout.MarginLayoutParams)recyclerContainer.LayoutParameters;
-            lp.TopMargin = ((int)translation + activity.SupportActionBar.Height) >= endPoint ? activity.SupportActionBar.Height - (endPoint - (int)translation) : 0;
-            recyclerContainer.LayoutParameters = lp;
+            if (!snappyConfigured) {
+                snappyLayout.SetChildOffset (1, activity.SupportActionBar.Height);
+                var lp = (LinearLayout.MarginLayoutParams)recyclerContainer.LayoutParameters;
+                lp.TopMargin = -activity.SupportActionBar.Height;
+                recyclerContainer.LayoutParameters = lp;
+                snappyConfigured = true;
+            }
         }
 
         public override bool UserVisibleHint

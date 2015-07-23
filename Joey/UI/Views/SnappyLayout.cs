@@ -19,6 +19,7 @@ namespace Toggl.Joey.UI.Views
         private bool isDragging;
         private bool activated = true;
         private bool lockFirstChild = false;
+        private int[] offsets = new int[10];
         private Animator scrollAnim;
 
         public SnappyLayout (Context ctx) : base (ctx)
@@ -51,6 +52,11 @@ namespace Toggl.Joey.UI.Views
             touchSlop = conf.ScaledTouchSlop;
         }
 
+        public void SetChildOffset (int childNumber, int offset)
+        {
+            offsets[childNumber] = offset;
+        }
+
         private void ForEachChild (Action<View> act)
         {
             var count = ChildCount;
@@ -70,11 +76,12 @@ namespace Toggl.Joey.UI.Views
         private void UpdateChildrenTranslationY ()
         {
             translateY = Math.Min (0, Math.Max (maxTranslateY, translateY));
-
+            int childNumber = 0;
             ForEachChild (child => {
                 if (! (child.Top == 0 && lockFirstChild)) {
-                    child.TranslationY = translateY;
+                    child.TranslationY = translateY + offsets[childNumber];
                 }
+                childNumber++;
             });
 
             if (OnTranslateChanged != null) {
