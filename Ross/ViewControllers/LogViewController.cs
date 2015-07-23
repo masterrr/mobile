@@ -253,6 +253,11 @@ namespace Toggl.Ross.ViewControllers
                 return view;
             }
 
+            public override nfloat GetHeightForHeader (UITableView tableView, nint section)
+            {
+                return EstimatedHeightForHeader (tableView, section);
+            }
+
             public override nfloat EstimatedHeightForHeader (UITableView tableView, nint section)
             {
                 return 42f;
