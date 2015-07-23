@@ -420,11 +420,6 @@ namespace Toggl.Ross.ViewControllers
                 RebindTags ();
             }
 
-            protected override void ResetTrackedObservables ()
-            {
-                
-            }
-
             protected override void OnContinue ()
             {
                 if (DataSource == null) {
@@ -568,8 +563,6 @@ namespace Toggl.Ross.ViewControllers
 
             protected override void Rebind ()
             {
-                ResetTrackedObservables ();
-
                 if (DataSource == null) {
                     return;
                 }
@@ -581,7 +574,7 @@ namespace Toggl.Ross.ViewControllers
                 var projectColor = Color.Gray;
                 var clientName = String.Empty;
 
-                if (model.ProjectData != null) {
+                if (model.ProjectName != null) {
                     projectName = model.ProjectName;
                 }
 
@@ -589,9 +582,8 @@ namespace Toggl.Ross.ViewControllers
                 if (colorId > -1) {
                     projectColor = UIColor.Clear.FromHex(ProjectModel.HexColors [colorId]);
                 }
-                projectColor = UIColor.Black;
 
-                if (model.ClientData != null) {
+                if (model.ClientName != null) {
                     clientName = model.ClientName;
                 }
 

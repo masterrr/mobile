@@ -6,7 +6,7 @@ using Toggl.Phoebe.Data.Utils;
 
 namespace Toggl.Ross.Views
 {
-    public abstract class SwipableTimeEntryTableViewCell : ModelTableViewCell<TimeEntryHolder>
+    public abstract class SwipableTimeEntryTableViewCell : BindableTableViewCell<TimeEntryHolder>
     {
         private const float ContinueSwipeWidth = 90f;
         private const float DeleteSwipeWidth = 100f;
