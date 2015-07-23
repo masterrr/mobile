@@ -130,12 +130,12 @@ namespace Toggl.Phoebe.Data.Views
         }
 
         #region Undo
-        protected async override void AddTimeEntryHolder (TimeEntryHolder holder)
+        protected async override Task AddTimeEntryHolderAsync (TimeEntryHolder holder)
         {
             await AddOrUpdateEntryAsync (holder.TimeEntryData);
         }
 
-        protected async override void RemoveTimeEntryHolder (TimeEntryHolder holder)
+        protected async override Task RemoveTimeEntryHolderAsync (TimeEntryHolder holder)
         {
             await RemoveEntryAsync (holder.TimeEntryData);
         }

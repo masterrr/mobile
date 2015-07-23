@@ -237,7 +237,7 @@ namespace Toggl.Phoebe.Data.Views
         }
 
         #region Undo
-        protected async override void AddTimeEntryHolder (TimeEntryHolder holder)
+        protected async override Task AddTimeEntryHolderAsync (TimeEntryHolder holder)
         {
             var entryGroup = new TimeEntryGroup (holder.TimeEntryDataList);
 
@@ -256,7 +256,7 @@ namespace Toggl.Phoebe.Data.Views
             await UpdateCollectionAsync (entryGroup, NotifyCollectionChangedAction.Add, newIndex);
         }
 
-        protected async override void RemoveTimeEntryHolder (TimeEntryHolder holder)
+        protected async override Task RemoveTimeEntryHolderAsync (TimeEntryHolder holder)
         {
             DateGroup dateGroup;
             TimeEntryGroup timeEntryGroup;
