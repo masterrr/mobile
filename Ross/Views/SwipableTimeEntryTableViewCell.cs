@@ -1,12 +1,12 @@
 using System;
 using CoreGraphics;
 using UIKit;
-using Toggl.Phoebe.Data.Models;
 using Toggl.Ross.Theme;
+using Toggl.Phoebe.Data.Utils;
 
 namespace Toggl.Ross.Views
 {
-    public abstract class SwipableTimeEntryTableViewCell : ModelTableViewCell<TimeEntryModel>
+    public abstract class SwipableTimeEntryTableViewCell : ModelTableViewCell<TimeEntryHolder>
     {
         private const float ContinueSwipeWidth = 90f;
         private const float DeleteSwipeWidth = 100f;

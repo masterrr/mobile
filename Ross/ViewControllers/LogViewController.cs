@@ -237,11 +237,12 @@ namespace Toggl.Ross.ViewControllers
             public override UITableViewCell GetCell (UITableView tableView, NSIndexPath indexPath)
             {
                 var cell = (TimeEntryCell)tableView.DequeueReusableCell (EntryCellId, indexPath);
-                cell.ContinueCallback = OnContinue;
-
                 var index = GetItemIndexFromRowPath (indexPath);
+                cell.ContinueCallback = obj => OnContinue (obj, index);
+                cell.DeleteCallback = obj => OnDelete (obj, index);
+
                 var data = (TimeEntryHolder)dataView.Data.ElementAt (index);
-                cell.Bind ((TimeEntryModel)data.TimeEntryData);
+                cell.Bind (data);
 
                 return cell;
             }
@@ -280,10 +281,17 @@ namespace Toggl.Ross.ViewControllers
 //                }
             }
 
-            private void OnContinue (TimeEntryModel model)
+            private void OnContinue (TimeEntryHolder holder, int index)
             {
                 DurationOnlyNoticeAlertView.TryShow ();
+                dataView.ContinueTimeEntry (index);
                 controller.TableView.ScrollRectToVisible (new CGRect (0, 0, 1, 1), true);
+            }
+
+            private void OnDelete (TimeEntryHolder holder, int index)
+            {
+                DurationOnlyNoticeAlertView.TryShow ();
+                dataView.RemoveItemWithUndo (index);
             }
 
             protected override void Update ()
@@ -405,26 +413,34 @@ namespace Toggl.Ross.ViewControllers
                 RebindTags ();
             }
 
-            protected override async void OnContinue ()
+            protected override void ResetTrackedObservables ()
+            {
+                
+            }
+
+            protected override void OnContinue ()
             {
                 if (DataSource == null) {
                     return;
                 }
-                await DataSource.ContinueAsync ();
+
                 if (ContinueCallback != null) {
                     ContinueCallback (DataSource);
                 }
-
+             
                 // Ping analytics
                 ServiceContainer.Resolve<ITracker>().SendTimerStartEvent (TimerStartSource.AppContinue);
             }
 
-            protected override async void OnDelete ()
+            protected override void OnDelete ()
             {
                 if (DataSource == null) {
                     return;
                 }
-                await DataSource.DeleteAsync ();
+
+                if (DeleteCallback != null) {
+                    DeleteCallback (DataSource);
+                }
             }
 
             public override void LayoutSubviews ()
@@ -558,13 +574,12 @@ namespace Toggl.Ross.ViewControllers
                 var projectColor = Color.Gray;
                 var clientName = String.Empty;
 
-                if (model.Project != null) {
-                    projectName = model.Project.Name;
-                    projectColor = UIColor.Clear.FromHex (model.Project.GetHexColor ());
+                projectName = model.ProjectName;
+                //TODO: projectColor = UIColor.Clear.FromHex (model.Color);
+                projectColor = UIColor.Blue;
 
-                    if (model.Project.Client != null) {
-                        clientName = model.Project.Client.Name;
-                    }
+                if (model.ClientData != null) {
+                    clientName = model.ClientName;
                 }
 
                 projectLabel.TextColor = projectColor;
@@ -577,8 +592,7 @@ namespace Toggl.Ross.ViewControllers
                     SetNeedsLayout ();
                 }
 
-                var taskName = model.Task != null ? model.Task.Name : String.Empty;
-                var taskHidden = String.IsNullOrWhiteSpace (taskName);
+                var taskHidden = String.IsNullOrWhiteSpace (model.TaskName);
                 var description = model.Description;
                 var descHidden = String.IsNullOrWhiteSpace (description);
 
@@ -588,9 +602,9 @@ namespace Toggl.Ross.ViewControllers
                 }
                 var taskDeskSepHidden = taskHidden || descHidden;
 
-                if (taskLabel.Hidden != taskHidden || taskLabel.Text != taskName) {
+                if (taskLabel.Hidden != taskHidden || taskLabel.Text != model.TaskName) {
                     taskLabel.Hidden = taskHidden;
-                    taskLabel.Text = taskName;
+                    taskLabel.Text = model.TaskName;
                     SetNeedsLayout ();
                 }
                 if (descriptionLabel.Hidden != descHidden || descriptionLabel.Text != description) {
@@ -605,8 +619,8 @@ namespace Toggl.Ross.ViewControllers
 
                 RebindTags ();
 
-                var duration = model.GetDuration ();
-                durationLabel.Text = TimeEntryModel.GetFormattedDuration (model.Data);
+                var duration = model.TotalDuration;
+                durationLabel.Text = TimeEntryModel.GetFormattedDuration (model.TimeEntryData);
 
                 runningImageView.Hidden = model.State != TimeEntryState.Running;
 
@@ -645,66 +659,9 @@ namespace Toggl.Ross.ViewControllers
                 }
             }
 
-            protected override void ResetTrackedObservables ()
-            {
-                Tracker.MarkAllStale ();
+            public Action<TimeEntryHolder> ContinueCallback { get; set; }
+            public Action<TimeEntryHolder> DeleteCallback { get; set; }
 
-                if (DataSource != null) {
-                    Tracker.Add (DataSource, HandleTimeEntryPropertyChanged);
-
-                    if (DataSource.Project != null) {
-                        Tracker.Add (DataSource.Project, HandleProjectPropertyChanged);
-
-                        if (DataSource.Project.Client != null) {
-                            Tracker.Add (DataSource.Project.Client, HandleClientPropertyChanged);
-                        }
-                    }
-
-                    if (DataSource.Task != null) {
-                        Tracker.Add (DataSource.Task, HandleTaskPropertyChanged);
-                    }
-                }
-
-                Tracker.ClearStale ();
-            }
-
-            private void HandleTimeEntryPropertyChanged (string prop)
-            {
-                if (prop == TimeEntryModel.PropertyProject
-                        || prop == TimeEntryModel.PropertyTask
-                        || prop == TimeEntryModel.PropertyStartTime
-                        || prop == TimeEntryModel.PropertyStopTime
-                        || prop == TimeEntryModel.PropertyState
-                        || prop == TimeEntryModel.PropertyIsBillable
-                        || prop == TimeEntryModel.PropertyDescription) {
-                    Rebind ();
-                }
-            }
-
-            private void HandleProjectPropertyChanged (string prop)
-            {
-                if (prop == ProjectModel.PropertyClient
-                        || prop == ProjectModel.PropertyName
-                        || prop == ProjectModel.PropertyColor) {
-                    Rebind ();
-                }
-            }
-
-            private void HandleClientPropertyChanged (string prop)
-            {
-                if (prop == ClientModel.PropertyName) {
-                    Rebind ();
-                }
-            }
-
-            private void HandleTaskPropertyChanged (string prop)
-            {
-                if (prop == TaskModel.PropertyName) {
-                    Rebind ();
-                }
-            }
-
-            public Action<TimeEntryModel> ContinueCallback { get; set; }
         }
 
         class SectionHeaderView : UITableViewHeaderFooterView
