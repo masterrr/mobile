@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using Android.Animation;
 using Android.Content;
 using Android.OS;
+using Android.Support.Design.Widget;
 using Android.Support.V4.App;
 using Android.Support.V7.Widget;
 using Android.Support.V7.Widget.Helper;
@@ -23,12 +23,16 @@ namespace Toggl.Joey.UI.Fragments
 {
     public class LogTimeEntriesListFragment : Fragment, SwipeDismissCallback.IDismissListener, ItemTouchListener.IItemTouchListener
     {
+        private readonly int UndoBarDuration = 5;
+
         private RecyclerView recyclerView;
         private View emptyMessageView;
         private Subscription<SettingChangedMessage> subscriptionSettingChanged;
         private LogTimeEntriesAdapter logAdapter;
-        private bool isUndoShowed;
         private StartStopFab startStopBtn;
+        private CoordinatorLayout coordinatorLayout;
+
+        private TimeEntriesCollectionView collectionView;
 
         // Recycler setup
         private DividerItemDecoration dividerDecoration;
@@ -46,6 +50,7 @@ namespace Toggl.Joey.UI.Fragments
             recyclerView = view.FindViewById<RecyclerView> (Resource.Id.LogRecyclerView);
             recyclerView.SetLayoutManager (new LinearLayoutManager (Activity));
             startStopBtn = view.FindViewById<StartStopFab> (Resource.Id.StartStopBtn);
+            coordinatorLayout = view.FindViewById<CoordinatorLayout> (Resource.Id.logCoordinatorLayout);
 
             startStopBtn.Click += (sender, e) => {
                 var r = new Random ();
@@ -82,11 +87,8 @@ namespace Toggl.Joey.UI.Fragments
         {
             if (recyclerView.GetAdapter() == null) {
                 var isGrouped = ServiceContainer.Resolve<SettingsStore> ().GroupedTimeEntries;
-                if (isGrouped) {
-                    logAdapter = new LogTimeEntriesAdapter (recyclerView, new GroupedTimeEntriesView());
-                } else {
-                    logAdapter = new LogTimeEntriesAdapter (recyclerView, new LogTimeEntriesView());
-                }
+                collectionView = isGrouped ? (TimeEntriesCollectionView)new GroupedTimeEntriesView () : new LogTimeEntriesView ();
+                logAdapter = new LogTimeEntriesAdapter (recyclerView, collectionView);
                 recyclerView.SetAdapter (logAdapter);
                 SetupRecyclerView ();
             }
@@ -164,11 +166,13 @@ namespace Toggl.Joey.UI.Fragments
             return adapter.GetItemViewType (viewHolder.LayoutPosition) == LogTimeEntriesAdapter.ViewTypeContent;
         }
 
-        public void OnDismiss (RecyclerView.ViewHolder viewHolder, int position)
+        public async void OnDismiss (RecyclerView.ViewHolder viewHolder)
         {
-            var undoAdapter = recyclerView.GetAdapter () as IUndoCapabilities;
-            undoAdapter.RemoveItemWithUndo (viewHolder);
-            ShowUndoBar ();
+            await collectionView.RemoveItemWithUndoAsync (viewHolder.AdapterPosition);
+            Snackbar
+            .Make (coordinatorLayout, Resources.GetString (Resource.String.UndoBarDeletedText), UndoBarDuration)
+            .SetAction (Resources.GetString (Resource.String.UndoBarButtonText), async v => await collectionView.RestoreItemFromUndoAsync ())
+            .Show ();
         }
 
         #endregion
@@ -198,59 +202,5 @@ namespace Toggl.Joey.UI.Fragments
         }
 
         #endregion
-
-        #region Undo bar
-
-        private void ShowUndoBar ()
-        {
-            // Protect against Java side being GCed
-            if (Handle == IntPtr.Zero) {
-                return;
-            }
-
-            if (!UndoBarVisible) {
-                UndoBarVisible = true;
-            }
-        }
-
-        public void RemoveItemAndHideUndoBar ()
-        {
-            UndoBarVisible = false;
-
-            // Remove item permanently
-            var undoAdapter = recyclerView.GetAdapter () as IUndoCapabilities;
-            if (undoAdapter != null) {
-                undoAdapter.ConfirmItemRemove ();
-            }
-        }
-
-        private void UndoBtnClicked (object sender, EventArgs e)
-        {
-            // Protect against Java side being GCed
-            if (Handle == IntPtr.Zero) {
-                return;
-            }
-
-            // Undo remove item.
-            var undoAdapter = recyclerView.GetAdapter () as IUndoCapabilities;
-            undoAdapter.RestoreItemFromUndo ();
-
-            UndoBarVisible = false;
-        }
-
-        public bool UndoBarVisible
-        {
-            get {
-                return isUndoShowed;
-            } set {
-                if (isUndoShowed == value) {
-                    return;
-                }
-                isUndoShowed = value;
-            }
-        }
-
-        #endregion
-
     }
 }

@@ -15,7 +15,7 @@ namespace Toggl.Joey.UI.Utils
         {
             bool CanDismiss (RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder);
 
-            void OnDismiss (RecyclerView.ViewHolder viewHolder, int position);
+            void OnDismiss (RecyclerView.ViewHolder viewHolder);
         }
 
         private const float minThreshold = 20;
@@ -96,9 +96,9 @@ namespace Toggl.Joey.UI.Utils
             return 0;
         }
 
-        public override void OnSwiped (RecyclerView.ViewHolder viewHolder, int position)
+        public override void OnSwiped (RecyclerView.ViewHolder viewHolder, int direction)
         {
-            listener.OnDismiss (viewHolder, position);
+            listener.OnDismiss (viewHolder);
         }
 
         public override float GetSwipeThreshold (RecyclerView.ViewHolder p0)
