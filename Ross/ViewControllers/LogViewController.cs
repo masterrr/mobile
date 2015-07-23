@@ -69,6 +69,10 @@ namespace Toggl.Ross.ViewControllers
             private void EnsureAdapter (bool forceRebind = false)
             {
                 if (TableView.Source == null || forceRebind) {
+                    TableView.Hidden = true;
+                    if (TableView.Source != null) {
+                        (TableView.Source as Source).Dispose ();
+                    }
                     var isGrouped = ServiceContainer.Resolve<ISettingsStore> ().GroupedTimeEntries;
                     var collectionView = isGrouped ? (TimeEntriesCollectionView)new GroupedTimeEntriesView () : new LogTimeEntriesView ();
                     var source = new Source (this, collectionView);
@@ -79,6 +83,8 @@ namespace Toggl.Ross.ViewControllers
                         source.HeaderView = headerView;
                     }
                     source.Attach ();
+                    TableView.ReloadData ();
+                    TableView.Hidden = false;
                 }
             }
 
@@ -312,6 +318,7 @@ namespace Toggl.Ross.ViewControllers
                         bus.Unsubscribe (subscriptionSyncFinished);
                         subscriptionSyncFinished = null;
                     }
+                    TableView.Source = null;
                 }
                 base.Dispose (disposing);
             }
@@ -574,9 +581,15 @@ namespace Toggl.Ross.ViewControllers
                 var projectColor = Color.Gray;
                 var clientName = String.Empty;
 
-                projectName = model.ProjectName;
-                //TODO: projectColor = UIColor.Clear.FromHex (model.Color);
-                projectColor = UIColor.Blue;
+                if (model.ProjectData != null) {
+                    projectName = model.ProjectName;
+                }
+
+                var colorId = DataSource.Color % ProjectModel.HexColors.Length;
+                if (colorId > -1) {
+                    projectColor = UIColor.Clear.FromHex(ProjectModel.HexColors [colorId]);
+                }
+                projectColor = UIColor.Black;
 
                 if (model.ClientData != null) {
                     clientName = model.ClientName;
@@ -620,7 +633,7 @@ namespace Toggl.Ross.ViewControllers
                 RebindTags ();
 
                 var duration = model.TotalDuration;
-                durationLabel.Text = TimeEntryModel.GetFormattedDuration (model.TimeEntryData);
+                durationLabel.Text = TimeEntryModel.GetFormattedDuration (duration);
 
                 runningImageView.Hidden = model.State != TimeEntryState.Running;
 
