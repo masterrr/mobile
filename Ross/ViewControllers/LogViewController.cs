@@ -286,18 +286,23 @@ namespace Toggl.Ross.ViewControllers
 //                    tableView.DeselectRow (indexPath, true);
 //                }
             }
+
+            private int GetHolderIndex(TimeEntryHolder holder)
+            {
+                return dataView.Data.TakeWhile ((x) => x != holder).Count ();
+            }
                 
             private void OnContinue (TimeEntryHolder holder)
             {
                 DurationOnlyNoticeAlertView.TryShow ();
-                dataView.ContinueTimeEntry (holder);
+                dataView.ContinueTimeEntry (GetHolderIndex(holder));
                 controller.TableView.ScrollRectToVisible (new CGRect (0, 0, 1, 1), true);
             }
 
             private void OnDelete (TimeEntryHolder holder)
             {
                 DurationOnlyNoticeAlertView.TryShow ();
-                dataView.RemoveItem (holder);
+                dataView.RemoveItem (GetHolderIndex(holder));
             }
 
             protected override void Update ()
