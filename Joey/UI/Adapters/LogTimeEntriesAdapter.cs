@@ -18,7 +18,7 @@ using XPlatUtils;
 
 namespace Toggl.Joey.UI.Adapters
 {
-    public class LogTimeEntriesAdapter : RecycledDataViewAdapter<object>, IUndoCapabilities
+    public class LogTimeEntriesAdapter : RecycledDataViewAdapter<object>
     {
         public static readonly int ViewTypeLoaderPlaceholder = 0;
         public static readonly int ViewTypeContent = 1;
@@ -99,21 +99,6 @@ namespace Toggl.Joey.UI.Adapters
             lastTimeEntryContinuedTime = Time.UtcNow;
 
             modelView.ContinueTimeEntry (viewHolder.AdapterPosition);
-        }
-
-        public void RemoveItemWithUndo (RecyclerView.ViewHolder viewHolder)
-        {
-            modelView.RemoveItemWithUndo (viewHolder.AdapterPosition);
-        }
-
-        public void RestoreItemFromUndo ()
-        {
-            modelView.RestoreItemFromUndo ();
-        }
-
-        public void ConfirmItemRemove ()
-        {
-            modelView.ConfirmItemRemove ();
         }
 
         protected override RecyclerView.ViewHolder GetViewHolder (ViewGroup parent, int viewType)
