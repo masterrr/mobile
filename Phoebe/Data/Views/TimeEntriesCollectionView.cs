@@ -113,12 +113,12 @@ namespace Toggl.Phoebe.Data.Views
 
         protected virtual Task AddOrUpdateEntryAsync (TimeEntryData entry)
         {
-            return null;
+            throw new NotImplementedException ("You can't call this method in base class " + GetType ().Name);
         }
 
         protected virtual Task RemoveEntryAsync (TimeEntryData entry)
         {
-            return null;
+            throw new NotImplementedException ("You can't call this method in base class " + GetType ().Name);
         }
 
         protected virtual async Task UpdateCollectionAsync (object data, NotifyCollectionChangedAction action, int newIndex, int oldIndex = -1, bool isRange = false)
@@ -237,15 +237,7 @@ namespace Toggl.Phoebe.Data.Views
         #endregion
 
         #region Undo
-        public void RestoreItemFromUndo ()
-        {
-            if (LastRemovedItem != null) {
-                AddTimeEntryHolder (LastRemovedItem);
-                LastRemovedItem = null;
-            }
-        }
-
-        public async void RemoveItemWithUndo (int index)
+        public async Task RemoveItemWithUndoAsync (int index)
         {
             // Get data holder
             var timeEntryHolder = GetHolderFromIndex (index);
@@ -254,20 +246,40 @@ namespace Toggl.Phoebe.Data.Views
             }
 
             // Remove previous if exists
-            RemoveItemPermanently (LastRemovedItem);
+            await RemoveItemPermanentlyAsync (LastRemovedItem);
             if (timeEntryHolder.State == TimeEntryState.Running) {
                 await TimeEntryModel.StopAsync (timeEntryHolder.TimeEntryData);
             }
             LastRemovedItem = timeEntryHolder;
-            RemoveTimeEntryHolder (timeEntryHolder);
+
+            // Remove item only from list
+            await RemoveTimeEntryHolderAsync (timeEntryHolder);
         }
 
-        public void ConfirmItemRemove ()
+        public async Task RestoreItemFromUndoAsync ()
         {
-            RemoveItemPermanently (LastRemovedItem);
+            if (LastRemovedItem != null) {
+                await AddTimeEntryHolderAsync (LastRemovedItem);
+                LastRemovedItem = null;
+            }
         }
 
-        private async void RemoveItemPermanently (TimeEntryHolder holder)
+        public async Task ConfirmItemRemoveAsync ()
+        {
+            await RemoveItemPermanentlyAsync (LastRemovedItem);
+        }
+
+        protected virtual Task AddTimeEntryHolderAsync (TimeEntryHolder holder)
+        {
+            throw new NotImplementedException ("You can't call this method in base class " + GetType ().Name);
+        }
+
+        protected virtual Task RemoveTimeEntryHolderAsync (TimeEntryHolder holder)
+        {
+            throw new NotImplementedException ("You can't call this method in base class " + GetType ().Name);
+        }
+
+        private async Task RemoveItemPermanentlyAsync (TimeEntryHolder holder)
         {
             if (holder == null) {
                 return;
@@ -289,14 +301,6 @@ namespace Toggl.Phoebe.Data.Views
 
             var holder = ItemCollection [index] as TimeEntryHolder;
             return holder;
-        }
-
-        protected virtual void AddTimeEntryHolder (TimeEntryHolder holder)
-        {
-        }
-
-        protected virtual void RemoveTimeEntryHolder (TimeEntryHolder holder)
-        {
         }
         #endregion
 
