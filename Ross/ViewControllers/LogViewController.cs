@@ -244,8 +244,8 @@ namespace Toggl.Ross.ViewControllers
             {
                 var cell = (TimeEntryCell)tableView.DequeueReusableCell (EntryCellId, indexPath);
                 var index = GetItemIndexFromRowPath (indexPath);
-                cell.ContinueCallback = obj => OnContinue (obj, index);
-                cell.DeleteCallback = obj => OnDelete (obj, index);
+                cell.ContinueCallback = OnContinue;
+                cell.DeleteCallback = OnDelete;
 
                 var data = (TimeEntryHolder)dataView.Data.ElementAt (index);
                 cell.Bind (data);
@@ -286,18 +286,18 @@ namespace Toggl.Ross.ViewControllers
 //                    tableView.DeselectRow (indexPath, true);
 //                }
             }
-
-            private void OnContinue (TimeEntryHolder holder, int index)
+                
+            private void OnContinue (TimeEntryHolder holder)
             {
                 DurationOnlyNoticeAlertView.TryShow ();
-                dataView.ContinueTimeEntry (index);
+                dataView.ContinueTimeEntry (holder);
                 controller.TableView.ScrollRectToVisible (new CGRect (0, 0, 1, 1), true);
             }
 
-            private void OnDelete (TimeEntryHolder holder, int index)
+            private void OnDelete (TimeEntryHolder holder)
             {
                 DurationOnlyNoticeAlertView.TryShow ();
-                dataView.RemoveItemWithUndo (index);
+                dataView.RemoveItem (holder);
             }
 
             protected override void Update ()
