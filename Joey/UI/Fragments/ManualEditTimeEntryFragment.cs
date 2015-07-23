@@ -185,8 +185,6 @@ namespace Toggl.Joey.UI.Fragments
 
         protected TogglField ProjectBit { get; private set; }
 
-        protected TogglField DescriptionBit { get; private set; }
-
         protected TogglTagsField TagsBit { get; private set; }
 
         public override View OnCreateView (LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -197,14 +195,12 @@ namespace Toggl.Joey.UI.Fragments
             StopTimeEditText = view.FindViewById<EditText> (Resource.Id.StopTimeEditText).SetFont (Font.Roboto);
             StopTimeEditLabel = view.FindViewById<TextView> (Resource.Id.StopTimeEditLabel);
 
-            DescriptionBit = view.FindViewById<TogglField> (Resource.Id.Description)
-                             .DestroyAssistView ().DestroyArrow ().ShowTitle (false)
-                             .SetName (Resource.String.CurrentTimeEntryEditDescriptionHint);
-            DescriptionEditText = DescriptionBit.TextField;
+            DescriptionEditText = view.FindViewById<EditText> (Resource.Id.Description);
 
             ProjectBit = view.FindViewById<TogglField> (Resource.Id.Project)
                          .ShowTitle (false).SimulateButton()
                          .SetName (Resource.String.CurrentTimeEntryEditProjectHint);
+
             ProjectEditText = ProjectBit.TextField;
 
             TagsBit = view.FindViewById<TogglTagsField> (Resource.Id.TagsBit).ShowTitle (false);
@@ -303,13 +299,12 @@ namespace Toggl.Joey.UI.Fragments
             // This can be called when the fragment is being restored, so the previous value will be
             // set miraculously. So we need to make sure that this is indeed the user who is changing the
             // value by only acting when the OnStart has been called.
-            var currentEntry = ActiveTimeEntry;
             if (!canRebind) {
                 return;
             }
 
             // Mark description as changed
-            descriptionChanging = currentEntry != null && DescriptionEditText.Text != currentEntry.Description;
+            descriptionChanging =  ActiveTimeEntry != null && DescriptionEditText.Text != ActiveTimeEntry.Description;
 
             // Make sure that we're commiting 1 second after the user has stopped typing
             CancelDescriptionChangeAutoCommit ();
@@ -399,14 +394,12 @@ namespace Toggl.Joey.UI.Fragments
 
         private void CommitDescriptionChanges ()
         {
-            var currentEntry = ActiveTimeEntry;
-
-            if (currentEntry != null && descriptionChanging) {
-                if (string.IsNullOrEmpty (currentEntry.Description) && string.IsNullOrEmpty (DescriptionEditText.Text)) {
+            if (ActiveTimeEntry != null && descriptionChanging) {
+                if (string.IsNullOrEmpty (ActiveTimeEntry.Description) && string.IsNullOrEmpty (DescriptionEditText.Text)) {
                     return;
                 }
-                if (currentEntry.Description != DescriptionEditText.Text) {
-                    currentEntry.Description = DescriptionEditText.Text;
+                if (ActiveTimeEntry.Description != DescriptionEditText.Text) {
+                    ActiveTimeEntry.Description = DescriptionEditText.Text;
                     SaveTimeEntry ();
                 }
             }

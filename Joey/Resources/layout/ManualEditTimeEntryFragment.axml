@@ -94,11 +94,19 @@
                 android:focusableInTouchMode="true"
                 android:layout_width="0px"
                 android:layout_height="0px" />
-            <Toggl.Joey.UI.Views.TogglField
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+            <EditText
                 android:id="@+id/Description"
-                android:layout_marginTop="20dp" />
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:lines="1"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:background="@drawable/BackgroundLine"
+                android:textColor="@color/material_black"
+                android:textSize="18dp"
+                android:layout_marginTop="20dp"
+                android:paddingBottom="10dp"
+                android:textCursorDrawable="@drawable/RedCursor" />
             <Toggl.Joey.UI.Views.TogglField
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
