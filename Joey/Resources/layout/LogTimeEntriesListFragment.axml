@@ -15,7 +15,9 @@
             android:id="@+id/EditFormView"
             android:layout_width="match_parent"
             android:layout_height="350dp"
+            android:paddingTop="?attr/actionBarSize"
             android:background="@drawable/BgArrowsPattern"
+            android:minHeight="?android:attr/actionBarSize"
             app:layout_scrollFlags="scroll|enterAlways|exitUntilCollapsed">
             <include
                 layout="@layout/HomeScreenEditFragment" />

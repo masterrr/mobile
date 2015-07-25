@@ -1,25 +1,21 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using Android.Content;
 using Android.OS;
 using Android.Views;
 using Android.Widget;
-using Toggl.Joey.Data;
 using Toggl.Joey.UI.Activities;
 using Toggl.Joey.UI.Fragments;
 using Toggl.Joey.UI.Utils;
 using Toggl.Joey.UI.Views;
-using Toggl.Phoebe;
-using Toggl.Phoebe.Analytics;
 using Toggl.Phoebe.Data;
 using Toggl.Phoebe.Data.DataObjects;
 using Toggl.Phoebe.Data.Models;
 using Toggl.Phoebe.Data.Utils;
-using Toggl.Phoebe.Logging;
 using XPlatUtils;
 using Activity = Android.Support.V4.App.FragmentActivity;
 using Fragment = Android.Support.V4.App.Fragment;
-using System.Collections.Generic;
 
 namespace Toggl.Joey.UI.Components
 {
@@ -30,25 +26,29 @@ namespace Toggl.Joey.UI.Components
         private PropertyChangeTracker propertyTracker;
         private ActiveTimeEntryManager timeEntryManager;
         private ITimeEntryModel backingActiveTimeEntry;
+        private float animateState;
         private bool canRebind;
-        private bool isProcessingAction;
-        private bool hideDuration;
-        private bool hideAction;
+        private bool compact;
+        private bool hide = false;
 
         protected TextView DurationTextView { get; private set; }
 
-        protected Button ActionButton { get; private set; }
+        protected TextView ProjectTextView { get; private set; }
+
+        protected TextView DescriptionTextView { get; private set; }
 
         public View Root { get; private set; }
 
         private Activity activity;
 
+        public event EventHandler ActiveEntryChanged;
+
         private void FindViews ()
         {
-            ActionButton = Root.FindViewById<Button> (Resource.Id.ActionButton).SetFont (Font.Roboto);
             DurationTextView = Root.FindViewById<TextView> (Resource.Id.DurationTextView).SetFont (Font.RobotoLight);
+            ProjectTextView = Root.FindViewById<TextView> (Resource.Id.ProjectTextView);
+            DescriptionTextView = Root.FindViewById<TextView> (Resource.Id.DescriptionTextView).SetFont (Font.RobotoLight);
 
-            ActionButton.Click += OnActionButtonClicked;
             DurationTextView.Click += OnDurationTextClicked;
         }
 
@@ -82,6 +82,10 @@ namespace Toggl.Joey.UI.Components
             canRebind = true;
             SyncModel ();
             Rebind ();
+
+            if (ActiveEntryChanged != null) {
+                ActiveEntryChanged.Invoke (this, EventArgs.Empty); // Initial rendering
+            }
         }
 
         public void OnStop ()
@@ -96,9 +100,13 @@ namespace Toggl.Joey.UI.Components
 
         private void OnActiveTimeEntryManagerPropertyChanged (object sender, PropertyChangedEventArgs args)
         {
-            if (args.PropertyName == ActiveTimeEntryManager.PropertyActive) {
+            if (args.PropertyName == ActiveTimeEntryManager.PropertyActive || args.PropertyName == ActiveTimeEntryManager.PropertyRunning) {
+
                 if (SyncModel ()) {
                     Rebind ();
+                }
+                if (ActiveEntryChanged != null) {
+                    ActiveEntryChanged.Invoke (sender, args);
                 }
             }
         }
@@ -130,7 +138,7 @@ namespace Toggl.Joey.UI.Components
             }
         }
 
-        private ITimeEntryModel ActiveTimeEntry
+        public ITimeEntryModel ActiveTimeEntry
         {
             get {
                 if (ActiveTimeEntryData == null) {
@@ -178,123 +186,63 @@ namespace Toggl.Joey.UI.Components
         {
             ResetTrackedObservables ();
 
+            Root.Visibility = Hide ? ViewStates.Gone : ViewStates.Visible;
+
             var currentEntry = ActiveTimeEntry;
-            if (!canRebind || currentEntry == null) {
+            if (!canRebind || currentEntry == null || Hide) {
                 return;
             }
 
-            var res = activity.Resources;
-            if (currentEntry.State == TimeEntryState.New && currentEntry.StopTime.HasValue) {
-                // Save button
-                ActionButton.Text = res.GetString (Resource.String.TimerSaveButtonText);
-                ActionButton.SetBackgroundColor (res.GetColor (Resource.Color.gray));
-            } else if (currentEntry.State == TimeEntryState.Running) {
-                // Stop button
-                ActionButton.Text = res.GetString (Resource.String.TimerStopButtonText);
-                ActionButton.SetBackgroundColor (res.GetColor (Resource.Color.bright_red));
-            } else {
-                // Start button
-                ActionButton.Text = res.GetString (Resource.String.TimerStartButtonText);
-                ActionButton.SetBackgroundColor (res.GetColor (Resource.Color.bright_green));
+            ProjectTextView.Visibility = ViewStates.Visible;
+            DescriptionTextView.Visibility = ViewStates.Visible;
+            DurationTextView.Gravity = GravityFlags.Center;
+
+            if (CompactView) {
+                ProjectTextView.Text = currentEntry.Project != null ? currentEntry.Project.Name : "(no project)";
+                DescriptionTextView.Text = currentEntry.Description.Length == 0 ? "(no description)" : currentEntry.Description;
             }
 
-            ActionButton.Visibility = HideAction ? ViewStates.Gone : ViewStates.Visible;
-
-            if (currentEntry.State == TimeEntryState.Running && !HideDuration) {
-                var duration = currentEntry.GetDuration ();
-                DurationTextView.Text = TimeSpan.FromSeconds ((long)duration.TotalSeconds).ToString ();
-                DurationTextView.Visibility = ViewStates.Visible;
-
-                // Schedule next rebind:
-                handler.RemoveCallbacks (Rebind);
-                handler.PostDelayed (Rebind, 1000 - duration.Milliseconds);
-            } else {
-                DurationTextView.Visibility = ViewStates.Gone;
-            }
+            var duration = currentEntry.GetDuration ();
+            DurationTextView.Text = TimeSpan.FromSeconds ((long)duration.TotalSeconds).ToString ();
+            // Schedule next rebind:
+            handler.RemoveCallbacks (Rebind);
+            handler.PostDelayed (Rebind, 1000 - duration.Milliseconds);
         }
 
-        public bool HideDuration
+        private void AnimateTo ()
         {
-            get { return hideDuration; }
+            int rightRoom = Root.Width - DurationTextView.Width - DurationTextView.Left;
+            DurationTextView.TranslationX = rightRoom * animateState;
+            DescriptionTextView.Alpha = animateState * animateState;
+            ProjectTextView.Alpha = animateState * animateState;
+        }
+
+        public bool CompactView
+        {
+            get { return compact; }
             set {
-                if (hideDuration != value) {
-                    hideDuration = value;
+                if (compact != value) {
+                    compact = value;
                     Rebind ();
                 }
             }
         }
 
-        public bool HideAction
+        public bool Hide
         {
-            get { return hideAction; }
+            get { return hide; }
             set {
-                if (hideAction != value) {
-                    hideAction = value;
-                    Rebind ();
-                }
+                hide = value;
+                Rebind();
             }
         }
 
-        private async void OnActionButtonClicked (object sender, EventArgs e)
+        public float AnimateState
         {
-            // Protect from double clicks
-            if (isProcessingAction) {
-                return;
-            }
-
-            isProcessingAction = true;
-            try {
-                var entry = ActiveTimeEntry;
-                if (entry == null) {
-                    return;
-                }
-
-                // Make sure that we work on the copy of the entry to not affect the rest of the logic.
-                entry = (ITimeEntryModel)new TimeEntryModel (new TimeEntryData (entry.Data));
-
-                var showProjectSelection = false;
-
-                try {
-                    if (entry.State == TimeEntryState.New && entry.StopTime.HasValue) {
-                        await entry.StoreAsync ();
-
-                        // Ping analytics
-                        ServiceContainer.Resolve<ITracker> ().SendTimerStartEvent (TimerStartSource.AppManual);
-                    } else if (entry.State == TimeEntryState.Running) {
-                        await entry.StopAsync ();
-
-                        // Ping analytics
-                        ServiceContainer.Resolve<ITracker> ().SendTimerStopEvent (TimerStopSource.App);
-                    } else {
-                        await entry.StartAsync ();
-
-                        // Ping analytics
-                        ServiceContainer.Resolve<ITracker> ().SendTimerStartEvent (TimerStartSource.AppNew);
-                        OpenTimeEntryEdit (entry);
-                    }
-                } catch (Exception ex) {
-                    var log = ServiceContainer.Resolve<ILogger> ();
-                    log.Warning (LogTag, ex, "Failed to change time entry state.");
-                }
-
-                var bus = ServiceContainer.Resolve<MessageBus> ();
-                bus.Send (new UserTimeEntryStateChangeMessage (this, entry.Data));
-            } finally {
-                isProcessingAction = false;
-            }
-        }
-
-        private void OpenTimeEntryEdit (ITimeEntryModel model)
-        {
-            var i = new Intent (activity, typeof (EditTimeEntryActivity));
-            i.PutStringArrayListExtra (EditTimeEntryActivity.ExtraGroupedTimeEntriesGuids, new List<string> {model.Id.ToString ()});
-            activity.StartActivity (i);
-        }
-
-        private bool ChooseProjectForNew
-        {
-            get {
-                return ServiceContainer.Resolve<SettingsStore> ().ChooseProjectForNew;
+            get { return animateState;}
+            set {
+                animateState = value;
+                AnimateTo ();
             }
         }
     }
