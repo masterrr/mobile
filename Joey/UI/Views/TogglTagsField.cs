@@ -57,6 +57,11 @@ namespace Toggl.Joey.UI.Views
             EditText.Click += OnClick;
         }
 
+        public TogglTagsField ShowTitle (bool show)
+        {
+            TextView.Visibility = show ? ViewStates.Visible : ViewStates.Gone;
+            return this;
+        }
 
         public virtual void RebindTags (TimeEntryTagsView tagsView)
         {
