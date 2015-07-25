@@ -1,59 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{735F910D-2550-48D1-B577-735721EFE6DF}</ProjectGuid>
-    <ProjectTypeGuids>{EFBA0AD7-5A72-4C68-AF49-83D382785DCF};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <OutputType>Library</OutputType>
-    <RootNamespace>Toggl.Joey</RootNamespace>
-    <AndroidApplication>True</AndroidApplication>
-    <AndroidResgenFile>Resources\Resource.designer.cs</AndroidResgenFile>
-    <AndroidResgenClass>Resource</AndroidResgenClass>
-    <MonoAndroidResourcePrefix>Resources</MonoAndroidResourcePrefix>
-    <MonoAndroidAssetsPrefix>Assets</MonoAndroidAssetsPrefix>
-    <AndroidUseLatestPlatformSdk>False</AndroidUseLatestPlatformSdk>
-    <AssemblyName>Joey</AssemblyName>
-    <AndroidManifest>Properties\AndroidManifest.xml</AndroidManifest>
-    <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
-    <JavaMaximumHeapSize>1G</JavaMaximumHeapSize>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug</OutputPath>
-    <DefineConstants>DEBUG;__MOBILE__;__ANDROID__;</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <AndroidLinkMode>None</AndroidLinkMode>
-    <ConsolePause>false</ConsolePause>
-    <EmbedAssembliesIntoApk>False</EmbedAssembliesIntoApk>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release</OutputPath>
-    <DefineConstants>__MOBILE__;__ANDROID__;</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <ConsolePause>false</ConsolePause>
-    <AndroidLinkMode>Full</AndroidLinkMode>
-    <AndroidLinkSkip>Bugsnag;Bugsnag.Android;Phoebe;Joey</AndroidLinkSkip>
-    <AndroidUseSharedRuntime>false</AndroidUseSharedRuntime>
-    <DebugType>full</DebugType>
-  </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Core" />
-    <Reference Include="Mono.Android" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="GooglePlayServicesLib">
-      <HintPath>..\packages\Xamarin.GooglePlayServices.22.0.0.2\lib\MonoAndroid41\GooglePlayServicesLib.dll</HintPath>
-    </Reference>
-    <Reference Include="Xamarin.Insights">
-      <HintPath>..\packages\Xamarin.Insights.1.10.4.112\lib\MonoAndroid10\Xamarin.Insights.dll</HintPath>
-    </Reference>
+<PropertyGroup>
+  <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+  <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+  <ProjectGuid>{735F910D-2550-48D1-B577-735721EFE6DF}</ProjectGuid>
+  <ProjectTypeGuids>{EFBA0AD7-5A72-4C68-AF49-83D382785DCF};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+  <OutputType>Library</OutputType>
+  <RootNamespace>Toggl.Joey</RootNamespace>
+  <AndroidApplication>True</AndroidApplication>
+  <AndroidResgenFile>Resources\Resource.designer.cs</AndroidResgenFile>
+  <AndroidResgenClass>Resource</AndroidResgenClass>
+  <MonoAndroidResourcePrefix>Resources</MonoAndroidResourcePrefix>
+  <MonoAndroidAssetsPrefix>Assets</MonoAndroidAssetsPrefix>
+  <AndroidUseLatestPlatformSdk>False</AndroidUseLatestPlatformSdk>
+  <AssemblyName>Joey</AssemblyName>
+  <AndroidManifest>Properties\AndroidManifest.xml</AndroidManifest>
+  <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
+  <JavaMaximumHeapSize>1G</JavaMaximumHeapSize>
+</PropertyGroup>
+<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+  <DebugSymbols>true</DebugSymbols>
+  <DebugType>full</DebugType>
+  <Optimize>false</Optimize>
+  <OutputPath>bin\Debug</OutputPath>
+  <DefineConstants>DEBUG;__MOBILE__;__ANDROID__;</DefineConstants>
+  <ErrorReport>prompt</ErrorReport>
+  <WarningLevel>4</WarningLevel>
+  <AndroidLinkMode>None</AndroidLinkMode>
+  <ConsolePause>false</ConsolePause>
+  <EmbedAssembliesIntoApk>False</EmbedAssembliesIntoApk>
+</PropertyGroup>
+<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+  <Optimize>true</Optimize>
+  <OutputPath>bin\Release</OutputPath>
+  <DefineConstants>__MOBILE__;__ANDROID__;</DefineConstants>
+  <ErrorReport>prompt</ErrorReport>
+  <WarningLevel>4</WarningLevel>
+  <ConsolePause>false</ConsolePause>
+  <AndroidLinkMode>Full</AndroidLinkMode>
+  <AndroidLinkSkip>Bugsnag;Bugsnag.Android;Phoebe;Joey</AndroidLinkSkip>
+  <AndroidUseSharedRuntime>false</AndroidUseSharedRuntime>
+  <DebugType>full</DebugType>
+</PropertyGroup>
+<ItemGroup>
+  <Reference Include="System" />
+  <Reference Include="System.Xml" />
+  <Reference Include="System.Core" />
+  <Reference Include="Mono.Android" />
+  <Reference Include="System.Net.Http" />
+  <Reference Include="GooglePlayServicesLib">
+    <HintPath>..\packages\Xamarin.GooglePlayServices.22.0.0.2\lib\MonoAndroid41\GooglePlayServicesLib.dll</HintPath>
+  </Reference>
+  <Reference Include="Xamarin.Insights">
+    <HintPath>..\packages\Xamarin.Insights.1.10.4.112\lib\MonoAndroid10\Xamarin.Insights.dll</HintPath>
+  </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\portable-net40+sl5+wp80+win8+wpa81\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -156,6 +156,7 @@
     <Compile Include="UI\Utils\DimensionsExtensions.cs" />
     <Compile Include="UI\Utils\SwipeDismissCallback.cs" />
     <Compile Include="UI\Views\StartStopFab.cs" />
+    <Compile Include="UI\Fragments\HomeScreenEditFragment.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />
@@ -674,6 +675,7 @@
     <AndroidResource Include="Resources\drawable-hdpi\icTasks.png" />
     <AndroidResource Include="Resources\drawable-hdpi\icTasksSelected.png" />
     <AndroidResource Include="Resources\drawable\TasksButtonBackground.xml" />
+    <AndroidResource Include="Resources\layout\HomeScreenEditFragment.axml" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Novell\Novell.MonoDroid.CSharp.targets" />
   <ItemGroup>
