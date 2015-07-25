@@ -103,6 +103,7 @@
                 android:singleLine="true"
                 android:background="@drawable/BackgroundLine"
                 android:textColor="@color/material_black"
+                android:textColorHint="@color/material_black"
                 android:textSize="18dp"
                 android:layout_marginTop="20dp"
                 android:paddingBottom="10dp"
