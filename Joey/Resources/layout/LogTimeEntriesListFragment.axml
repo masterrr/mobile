@@ -18,10 +18,7 @@
             android:paddingTop="?attr/actionBarSize"
             android:background="@drawable/BgArrowsPattern"
             android:minHeight="?android:attr/actionBarSize"
-            app:layout_scrollFlags="scroll|enterAlways|exitUntilCollapsed">
-            <include
-                layout="@layout/HomeScreenEditFragment" />
-        </FrameLayout>
+            app:layout_scrollFlags="scroll|enterAlways|exitUntilCollapsed" />
     </android.support.design.widget.AppBarLayout>
     <android.support.v7.widget.RecyclerView
         android:id="@+id/LogRecyclerView"
