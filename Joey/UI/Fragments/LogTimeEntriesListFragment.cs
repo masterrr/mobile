@@ -32,6 +32,10 @@ namespace Toggl.Joey.UI.Fragments
 
         private TimeEntriesCollectionView collectionView;
 
+        private FrameLayout manualEntry;
+        private bool isEditShowed;
+        private HomeScreenEditFragment manualEditFragment;
+
         // Recycler setup
         private DividerItemDecoration dividerDecoration;
         private ShadowItemDecoration shadowDecoration;
@@ -57,6 +61,27 @@ namespace Toggl.Joey.UI.Fragments
 
             var bus = ServiceContainer.Resolve<MessageBus> ();
             subscriptionSettingChanged = bus.Subscribe<SettingChangedMessage> (OnSettingChanged);
+            if (manualEditFragment == null) {
+                manualEditFragment = new HomeScreenEditFragment ((MainDrawerActivity)Activity);
+                FragmentTransaction transaction = ChildFragmentManager.BeginTransaction();
+                transaction.Add (Resource.Id.EditFormView, manualEditFragment).Commit();
+                EditFormVisible = true;
+            }
+        }
+
+
+        public bool EditFormVisible
+        {
+            get {
+                return isEditShowed;
+            } set {
+                if (isEditShowed == value) {
+                    return;
+                }
+                isEditShowed = value;
+                var activity = (MainDrawerActivity)Activity;
+                activity.ToolbarMode = isEditShowed ? MainDrawerActivity.ToolbarModes.DurationOnly : MainDrawerActivity.ToolbarModes.Compact;
+            }
         }
 
         public override void OnResume ()
