@@ -112,11 +112,6 @@ namespace Toggl.Ross.ViewControllers
 
             private void OnSettingChanged (SettingChangedMessage msg)
             {
-                // Protect against Java side being GCed
-                if (Handle == IntPtr.Zero) {
-                    return;
-                }
-
                 if (msg.Name == SettingsStore.PropertyGroupedTimeEntries) {
                     EnsureAdapter (true);
                 }
@@ -223,6 +218,10 @@ namespace Toggl.Ross.ViewControllers
                 }
 
                 TableView.EndUpdates ();
+
+                if (e.Action == NotifyCollectionChangedAction.Reset) {
+                    TableView.ReloadData ();
+                }
             }
 
             private void OnSyncFinished (SyncFinishedMessage msg)
