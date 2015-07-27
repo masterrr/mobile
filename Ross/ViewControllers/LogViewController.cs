@@ -217,6 +217,31 @@ namespace Toggl.Ross.ViewControllers
                     }
                 }
 
+                if (e.Action == NotifyCollectionChangedAction.Move) {
+                    var oldSectionSet = GetSectionIndexFromItemIndex (e.OldStartingIndex);
+                    var newSectionSet = GetSectionIndexFromItemIndex (e.NewStartingIndex);
+                    var oldSectionIndx = oldSectionSet.FirstIndex;
+                    var newSectionIndx = newSectionSet.FirstIndex;
+
+                    if (oldSectionIndx == newSectionIndx) {
+                        TableView.ReloadSections (oldSectionSet, UITableViewRowAnimation.Automatic);
+                    } else {
+                        var oldSection = dataView.Data.ElementAt ((int)oldSectionIndx) as IDateGroup;
+                        if (oldSection != null && oldSection.DataObjects.Any ()) {
+                            TableView.ReloadSections (oldSectionSet, UITableViewRowAnimation.Automatic);
+                        } else {
+                            TableView.DeleteSections (oldSectionSet, UITableViewRowAnimation.Automatic);
+                        }
+
+                        var newSection = dataView.Data.ElementAt ((int)newSectionIndx) as IDateGroup;
+                        if (newSection != null && newSection.DataObjects.Any ()) {
+                            TableView.ReloadSections (newSectionSet, UITableViewRowAnimation.Automatic);
+                        } else {
+                            TableView.InsertSections (newSectionSet, UITableViewRowAnimation.Automatic);
+                        }
+                    }
+                }
+
                 TableView.EndUpdates ();
 
                 if (e.Action == NotifyCollectionChangedAction.Reset) {
