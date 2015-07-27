@@ -5,21 +5,38 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true">
-    <android.support.design.widget.AppBarLayout
+    <Toggl.Joey.UI.Views.TogglAppBar
         android:id="@+id/HomeAppBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         android:fitsSystemWindows="true">
-        <FrameLayout
-            android:id="@+id/EditFormView"
+        <android.support.design.widget.CollapsingToolbarLayout
+            android:id="@+id/collapsing_toolbar"
             android:layout_width="match_parent"
-            android:layout_height="350dp"
-            android:paddingTop="?attr/actionBarSize"
-            android:background="@drawable/BgArrowsPattern"
-            android:minHeight="?android:attr/actionBarSize"
-            app:layout_scrollFlags="scroll|enterAlways|exitUntilCollapsed" />
-    </android.support.design.widget.AppBarLayout>
+            android:layout_height="match_parent"
+            android:fitsSystemWindows="true"
+            app:contentScrim="?attr/colorPrimary"
+            android:minHeight="?attr/actionBarSize"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed">
+            <FrameLayout
+                android:id="@+id/EditFormView"
+                android:layout_width="match_parent"
+                android:layout_height="350dp"
+                android:paddingTop="?attr/actionBarSize"
+                android:background="@drawable/BgArrowsPattern"
+                app:layout_collapseMode="pin"
+                app:layout_scrollFlags="scroll|enterAlways" />
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/HomeToolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:minHeight="?attr/actionBarSize"
+                android:paddingLeft="-17dp"
+                android:background="@android:color/holo_blue_bright"
+                app:layout_collapseMode="pin" />
+        </android.support.design.widget.CollapsingToolbarLayout>
+    </Toggl.Joey.UI.Views.TogglAppBar>
     <android.support.v7.widget.RecyclerView
         android:id="@+id/LogRecyclerView"
         android:layout_width="match_parent"
