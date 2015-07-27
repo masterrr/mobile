@@ -215,7 +215,7 @@ namespace Toggl.Ross.ViewControllers
                 if (e.Action == NotifyCollectionChangedAction.Replace) {
                     if (dataView.Data.ElementAt (e.NewStartingIndex) is IDateGroup) {
                         var indexSet = GetSectionIndexFromItemIndex (e.OldStartingIndex);
-                        //TableView.ReloadSections (indexSet, UITableViewRowAnimation.None);
+                        TableView.ReloadSections (indexSet, UITableViewRowAnimation.Automatic);
                     } else {
                         var indexPath = GetRowPathFromItemIndex (e.NewStartingIndex);
                         TableView.ReloadRows (new [] {indexPath}, UITableViewRowAnimation.Automatic);

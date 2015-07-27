@@ -31,10 +31,17 @@ namespace Toggl.Ross.DataSources
             base.Dispose (disposing);
         }
 
+        bool enoughRowsCheck = false;
+
         public virtual void OnCollectionChange (object sender, NotifyCollectionChangedEventArgs e)
         {
             // Cache sections
             UpdateSectionList ();
+
+            if (!enoughRowsCheck && dataView.Data.OfType<TRow> ().Count() < 10) {
+                TryLoadMore ();
+                enoughRowsCheck = true;
+            }
         }
 
         public virtual void Attach ()
