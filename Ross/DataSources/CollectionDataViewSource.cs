@@ -31,7 +31,7 @@ namespace Toggl.Ross.DataSources
             base.Dispose (disposing);
         }
 
-        bool enoughRowsCheck = false;
+        private bool enoughRowsCheck = false;
 
         public virtual void OnCollectionChange (object sender, NotifyCollectionChangedEventArgs e)
         {
@@ -78,12 +78,8 @@ namespace Toggl.Ross.DataSources
             var startToCollect = false;
 
             foreach (var item in dataView.Data) {
-                if (startToCollect && item is TSection) {
-                    startToCollect = false;
-                }
-
-                if (item is TSection && CompareDataSections (item, section)) {
-                    startToCollect = true;
+                if (item is TSection) {
+                    startToCollect = CompareDataSections (item, section);
                 } else if (startToCollect) {
                     rows.Add (item);
                 }
