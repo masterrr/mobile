@@ -19,6 +19,7 @@ using Toggl.Phoebe.Data.Utils;
 using Toggl.Phoebe.Data.Views;
 using XPlatUtils;
 using Android.Graphics;
+using Toolbar = Android.Support.V7.Widget.Toolbar;
 
 namespace Toggl.Joey.UI.Fragments
 {
@@ -36,6 +37,9 @@ namespace Toggl.Joey.UI.Fragments
         private bool isEditShowed;
         private HomeScreenEditFragment manualEditFragment;
 
+        private TogglAppBar HomeAppBar;
+        private Toolbar HomeToolbar;
+
         // Recycler setup
         private DividerItemDecoration dividerDecoration;
         private ShadowItemDecoration shadowDecoration;
@@ -52,6 +56,9 @@ namespace Toggl.Joey.UI.Fragments
             recyclerView = view.FindViewById<RecyclerView> (Resource.Id.LogRecyclerView);
             recyclerView.SetLayoutManager (new LinearLayoutManager (Activity));
             coordinatorLayout = view.FindViewById<CoordinatorLayout> (Resource.Id.logCoordinatorLayout);
+            manualEntry = view.FindViewById<FrameLayout> (Resource.Id.EditFormView);
+            HomeAppBar = view.FindViewById<TogglAppBar> (Resource.Id.HomeAppBar);
+            HomeToolbar = view.FindViewById<Toolbar> (Resource.Id.HomeToolbar);
             return view;
         }
 

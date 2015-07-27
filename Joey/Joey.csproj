@@ -157,6 +157,7 @@
     <Compile Include="UI\Utils\SwipeDismissCallback.cs" />
     <Compile Include="UI\Views\StartStopFab.cs" />
     <Compile Include="UI\Fragments\HomeScreenEditFragment.cs" />
+    <Compile Include="UI\Views\TogglAppBar.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />
