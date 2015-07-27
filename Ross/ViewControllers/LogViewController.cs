@@ -288,22 +288,22 @@ namespace Toggl.Ross.ViewControllers
                 }
             }
 
-            private int GetHolderIndex(TimeEntryHolder holder)
+            private int GetHolderIndex (TimeEntryHolder holder)
             {
                 return dataView.Data.TakeWhile ((x) => x != holder).Count ();
             }
-                
+
             private void OnContinue (TimeEntryHolder holder)
             {
                 DurationOnlyNoticeAlertView.TryShow ();
-                dataView.ContinueTimeEntry (GetHolderIndex(holder));
+                dataView.ContinueTimeEntry (GetHolderIndex (holder));
                 controller.TableView.ScrollRectToVisible (new CGRect (0, 0, 1, 1), true);
             }
 
             private void OnDelete (TimeEntryHolder holder)
             {
                 DurationOnlyNoticeAlertView.TryShow ();
-                dataView.RemoveItem (GetHolderIndex(holder));
+                dataView.RemoveItem (GetHolderIndex (holder));
             }
 
             protected override void Update ()
@@ -435,7 +435,7 @@ namespace Toggl.Ross.ViewControllers
                 if (ContinueCallback != null) {
                     ContinueCallback (DataSource);
                 }
-             
+
                 // Ping analytics
                 ServiceContainer.Resolve<ITracker>().SendTimerStartEvent (TimerStartSource.AppContinue);
             }
@@ -586,7 +586,7 @@ namespace Toggl.Ross.ViewControllers
 
                 var colorId = DataSource.Color % ProjectModel.HexColors.Length;
                 if (colorId > -1) {
-                    projectColor = UIColor.Clear.FromHex(ProjectModel.HexColors [colorId]);
+                    projectColor = UIColor.Clear.FromHex (ProjectModel.HexColors [colorId]);
                 }
 
                 if (model.ClientName != null) {
