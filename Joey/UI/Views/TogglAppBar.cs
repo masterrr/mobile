@@ -30,9 +30,9 @@ namespace Toggl.Joey.UI.Views
         {
             base.OnMeasure (widthMeasureSpec, heightMeasureSpec);
 
-            var par = new CoordinatorLayout.LayoutParams (xParent.LayoutParameters);
-            mBehavior = (AppBarLayout.Behavior) par.Behavior ?? new AppBarLayout.Behavior();
-            LayoutParameters = par;
+            var lp = new CoordinatorLayout.LayoutParams (xParent.LayoutParameters);
+            mBehavior = new AppBarLayout.Behavior ();
+//            LayoutParameters = lp;
         }
 
         protected override void OnLayout (bool changed, int l, int t, int r, int b)
@@ -96,28 +96,28 @@ namespace Toggl.Joey.UI.Views
             RequestLayout();
         }
 
-        private void PerformCollapsingWithoutAnimation()
+        public void PerformCollapsingWithoutAnimation()
         {
             if (xParent != null ) {
                 mBehavior.OnNestedPreScroll ((CoordinatorLayout)xParent, this, null, 0, Height, new int[] {0, 0});
             }
         }
 
-        private void PerformCollapsingWithAnimation()
+        public void PerformCollapsingWithAnimation()
         {
             if (xParent != null ) {
                 mBehavior.OnNestedFling ((CoordinatorLayout)xParent, this, null, 0, Height, true);
             }
         }
 
-        private void PerformExpandingWithoutAnimation()
+        public void PerformExpandingWithoutAnimation()
         {
             if (xParent != null ) {
                 mBehavior.SetTopAndBottomOffset (0);
             }
         }
 
-        private void PerformExpandingWithAnimation()
+        public void PerformExpandingWithAnimation()
         {
             if (xParent != null ) {
                 mBehavior.OnNestedFling ((CoordinatorLayout)xParent, this, null, 0, -Height * 5, false);
@@ -132,4 +132,5 @@ namespace Toggl.Joey.UI.Views
             None
         }
     }
+
 }

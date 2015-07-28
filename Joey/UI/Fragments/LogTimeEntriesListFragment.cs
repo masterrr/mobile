@@ -57,7 +57,9 @@ namespace Toggl.Joey.UI.Fragments
             recyclerView.SetLayoutManager (new LinearLayoutManager (Activity));
             coordinatorLayout = view.FindViewById<CoordinatorLayout> (Resource.Id.logCoordinatorLayout);
             manualEntry = view.FindViewById<FrameLayout> (Resource.Id.EditFormView);
+
             HomeAppBar = view.FindViewById<TogglAppBar> (Resource.Id.HomeAppBar);
+            HomeAppBar.OffsetChanged +=  OnChange;
             HomeToolbar = view.FindViewById<Toolbar> (Resource.Id.HomeToolbar);
             return view;
         }
