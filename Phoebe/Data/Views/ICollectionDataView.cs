@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Threading.Tasks;
 
 namespace Toggl.Phoebe.Data.Views
 {
@@ -12,9 +13,9 @@ namespace Toggl.Phoebe.Data.Views
 
         bool HasMore { get; }
 
-        void Reload ();
+        Task ReloadAsync ();
 
-        void LoadMore ();
+        Task LoadMoreAsync ();
 
         bool IsLoading { get; }
 

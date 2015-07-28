@@ -50,7 +50,6 @@ namespace Toggl.Phoebe.Data.Views
             var bus = ServiceContainer.Resolve<MessageBus> ();
             subscriptionDataChange = bus.Subscribe<DataChangeMessage> (OnDataChange);
             HasMore = true;
-            Reload ();
         }
 
         public void Dispose ()
@@ -332,12 +331,12 @@ namespace Toggl.Phoebe.Data.Views
         #endregion
 
         #region Load
-        private void OnSyncFinished (SyncFinishedMessage msg)
+        private async void OnSyncFinished (SyncFinishedMessage msg)
         {
             if (reloadScheduled) {
                 reloadScheduled = false;
                 IsLoading = false;
-                Load (true);
+                await LoadAsync (true);
             }
 
             if (subscriptionSyncFinished != null) {
@@ -356,7 +355,7 @@ namespace Toggl.Phoebe.Data.Views
             updateMode = UpdateMode.Batch;
         }
 
-        private async void EndUpdate ()
+        private async Task EndUpdateAsync ()
         {
             updateMode = UpdateMode.Immediate;
             if (UpdatedCount > lastNumberOfItems) {
@@ -364,7 +363,7 @@ namespace Toggl.Phoebe.Data.Views
             }
         }
 
-        public void Reload ()
+        public async Task ReloadAsync ()
         {
             if (IsLoading) {
                 return;
@@ -385,16 +384,16 @@ namespace Toggl.Phoebe.Data.Views
                     subscriptionSyncFinished = bus.Subscribe<SyncFinishedMessage> (OnSyncFinished);
                 }
             } else {
-                Load (true);
+                await LoadAsync (true);
             }
         }
 
-        public void LoadMore ()
+        public async Task LoadMoreAsync ()
         {
-            Load (false);
+            await LoadAsync (false);
         }
 
-        private async void Load (bool initialLoad)
+        private async Task LoadAsync (bool initialLoad)
         {
             if (IsLoading || !HasMore) {
                 return;
@@ -479,7 +478,7 @@ namespace Toggl.Phoebe.Data.Views
                 log.Error (Tag, exc, "Failed to fetch time entries");
             } finally {
                 IsLoading = false;
-                EndUpdate ();
+                await EndUpdateAsync ();
             }
         }
 
