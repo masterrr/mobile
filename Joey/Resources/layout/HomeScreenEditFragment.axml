@@ -126,7 +126,8 @@
                 android:layout_height="wrap_content"
                 android:text="StartStop"
                 android:layout_gravity="right"
-                android:layout_marginTop="-30dp" />
+                android:layout_marginTop="-30dp"
+                android:visibility="invisible" />
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>
