@@ -23,13 +23,10 @@ namespace Toggl.Joey.UI.Fragments
 {
     public class LogTimeEntriesListFragment : Fragment, SwipeDismissCallback.IDismissListener, ItemTouchListener.IItemTouchListener
     {
-        private readonly int UndoBarDuration = 5;
-
         private RecyclerView recyclerView;
         private View emptyMessageView;
         private Subscription<SettingChangedMessage> subscriptionSettingChanged;
         private LogTimeEntriesAdapter logAdapter;
-        private StartStopFab startStopBtn;
         private CoordinatorLayout coordinatorLayout;
 
         private TimeEntriesCollectionView collectionView;
@@ -49,14 +46,7 @@ namespace Toggl.Joey.UI.Fragments
             emptyMessageView.Visibility = ViewStates.Gone;
             recyclerView = view.FindViewById<RecyclerView> (Resource.Id.LogRecyclerView);
             recyclerView.SetLayoutManager (new LinearLayoutManager (Activity));
-            startStopBtn = view.FindViewById<StartStopFab> (Resource.Id.StartStopBtn);
             coordinatorLayout = view.FindViewById<CoordinatorLayout> (Resource.Id.logCoordinatorLayout);
-
-            startStopBtn.Click += (sender, e) => {
-                var r = new Random ();
-                startStopBtn.ButtonAction = r.Next (0,2);
-            };
-
             return view;
         }
 
@@ -168,10 +158,13 @@ namespace Toggl.Joey.UI.Fragments
 
         public async void OnDismiss (RecyclerView.ViewHolder viewHolder)
         {
+            var duration = TimeEntriesCollectionView.UndoSecondsInterval * 1000;
+
             await collectionView.RemoveItemWithUndoAsync (viewHolder.AdapterPosition);
             Snackbar
-            .Make (coordinatorLayout, Resources.GetString (Resource.String.UndoBarDeletedText), UndoBarDuration)
+            .Make (coordinatorLayout, Resources.GetString (Resource.String.UndoBarDeletedText), duration)
             .SetAction (Resources.GetString (Resource.String.UndoBarButtonText), async v => await collectionView.RestoreItemFromUndoAsync ())
+            .SetDuration (duration)
             .Show ();
         }
 
