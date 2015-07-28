@@ -88,6 +88,18 @@ namespace Toggl.Ross.DataSources
             return rows.Cast <TRow> ();
         }
 
+        protected int GetPlainSectionIndexOfItemIndex (int itemIndex)
+        {
+            int sectionIndex = -1;
+            for (int i = 0; i <= itemIndex; i++) {
+                var obj = dataView.Data.ElementAt (i);
+                if (obj is TSection) {
+                    sectionIndex = i;
+                }
+            }
+            return sectionIndex;
+        }
+
         protected NSIndexSet GetSectionIndexFromItemIndex (int itemIndex)
         {
             nint sectionIndex = -1;
