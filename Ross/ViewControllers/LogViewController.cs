@@ -180,6 +180,11 @@ namespace Toggl.Ross.ViewControllers
                 // the collection is updated.
                 base.OnCollectionChange (sender, e);
 
+                if (e.Action == NotifyCollectionChangedAction.Reset) {
+                    TableView.ReloadData ();
+                    return;
+                }
+
                 TableView.BeginUpdates ();
 
                 if (e.Action == NotifyCollectionChangedAction.Add) {
@@ -220,20 +225,21 @@ namespace Toggl.Ross.ViewControllers
                 if (e.Action == NotifyCollectionChangedAction.Move) {
                     var oldSectionSet = GetSectionIndexFromItemIndex (e.OldStartingIndex);
                     var newSectionSet = GetSectionIndexFromItemIndex (e.NewStartingIndex);
-                    var oldSectionIndx = oldSectionSet.FirstIndex;
-                    var newSectionIndx = newSectionSet.FirstIndex;
 
-                    if (oldSectionIndx == newSectionIndx) {
+                    var plainOldSectionIndx = GetPlainSectionIndexOfItemIndex (e.OldStartingIndex);
+                    var plainNewSectionIndx = GetPlainSectionIndexOfItemIndex (e.NewStartingIndex);
+
+                    if (oldSectionSet.FirstIndex == newSectionSet.FirstIndex) {
                         TableView.ReloadSections (oldSectionSet, UITableViewRowAnimation.Automatic);
                     } else {
-                        var oldSection = dataView.Data.ElementAt ((int)oldSectionIndx) as IDateGroup;
+                        var oldSection = dataView.Data.ElementAt (plainOldSectionIndx) as IDateGroup;
                         if (oldSection != null && oldSection.DataObjects.Any ()) {
                             TableView.ReloadSections (oldSectionSet, UITableViewRowAnimation.Automatic);
                         } else {
                             TableView.DeleteSections (oldSectionSet, UITableViewRowAnimation.Automatic);
                         }
 
-                        var newSection = dataView.Data.ElementAt ((int)newSectionIndx) as IDateGroup;
+                        var newSection = dataView.Data.ElementAt (plainNewSectionIndx) as IDateGroup;
                         if (newSection != null && newSection.DataObjects.Any ()) {
                             TableView.ReloadSections (newSectionSet, UITableViewRowAnimation.Automatic);
                         } else {
@@ -244,9 +250,7 @@ namespace Toggl.Ross.ViewControllers
 
                 TableView.EndUpdates ();
 
-                if (e.Action == NotifyCollectionChangedAction.Reset) {
-                    TableView.ReloadData ();
-                }
+
             }
 
             private void OnSyncFinished (SyncFinishedMessage msg)
