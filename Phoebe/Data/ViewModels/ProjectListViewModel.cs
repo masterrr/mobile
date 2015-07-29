@@ -28,6 +28,9 @@ namespace Toggl.Phoebe.Data.ViewModels
         {
             IsLoading = true;
 
+            // create list
+            projectList = await WorkspaceProjectsView.CreateAsync ();
+
             // Create model.
             if (timeEntryList.Count > 1) {
                 model = new TimeEntryGroup (timeEntryList);
@@ -53,9 +56,6 @@ namespace Toggl.Phoebe.Data.ViewModels
         public WorkspaceProjectsView ProjectList
         {
             get {
-                if (projectList == null) {
-                    projectList = new WorkspaceProjectsView ();
-                }
                 return projectList;
             }
         }

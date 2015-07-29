@@ -18,10 +18,31 @@ namespace Toggl.Phoebe.Data.Views
         private Subscription<DataChangeMessage> subscriptionDataChange;
         private bool isLoading;
         private bool hasMore;
-
+        private Project displayingTaskForProject;
         private int displayTaskForProjectPosition;
 
-        private Project displayingTaskForProject;
+        protected WorkspaceProjectsView (bool sortByClients = false)
+        {
+            SortByClients = sortByClients;
+            var bus = ServiceContainer.Resolve<MessageBus> ();
+            subscriptionDataChange = bus.Subscribe<DataChangeMessage> (OnDataChange);
+        }
+
+        protected async Task<WorkspaceProjectsView> InitializeAsync()
+        {
+            await ReloadAsync ();
+            return this;
+        }
+
+        // Factory method to call constructor
+        // and to init the list async
+        // (async is not permitted in constructors)
+        public static Task<WorkspaceProjectsView> CreateAsync (bool sortByClients = false)
+        {
+            var ret = new WorkspaceProjectsView (sortByClients);
+            return ret.InitializeAsync();
+        }
+
         public Project DisplayingTaskForProject
         {
             get {
@@ -29,16 +50,9 @@ namespace Toggl.Phoebe.Data.Views
             }
         }
 
-        public bool SortByClients { private set; get; }
-
-        public WorkspaceProjectsView (bool sortByClients = false)
-        {
-            SortByClients = sortByClients;
-
-            var bus = ServiceContainer.Resolve<MessageBus> ();
-            subscriptionDataChange = bus.Subscribe<DataChangeMessage> (OnDataChange);
-
-            Reload ();
+        public bool SortByClients {
+            private set;
+            get;
         }
 
         public void ShowTaskForProject (Project project, int position, out int collapsingCount)
@@ -320,7 +334,7 @@ namespace Toggl.Phoebe.Data.Views
             }
         }
 
-        public async void Reload ()
+        public async Task ReloadAsync ()
         {
             if (IsLoading) {
                 return;
@@ -453,9 +467,9 @@ namespace Toggl.Phoebe.Data.Views
                        ));
         }
 
-        public void LoadMore ()
+        public Task LoadMoreAsync ()
         {
-
+            throw new NotImplementedException ("Not implemented");
         }
 
         public IEnumerable<object> Data
