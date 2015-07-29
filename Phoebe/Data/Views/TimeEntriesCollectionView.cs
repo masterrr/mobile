@@ -45,7 +45,7 @@ namespace Toggl.Phoebe.Data.Views
         // deal with the fast producer, slow consumer effect.
         private BufferBlock<DataChangeMessage> bufferBlock = new BufferBlock<DataChangeMessage> ();
 
-        public TimeEntriesCollectionView ()
+        protected TimeEntriesCollectionView ()
         {
             var bus = ServiceContainer.Resolve<MessageBus> ();
             subscriptionDataChange = bus.Subscribe<DataChangeMessage> (OnDataChange);
