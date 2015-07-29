@@ -74,10 +74,6 @@ namespace Toggl.Joey.UI.Fragments
                 viewModel = new ProjectListViewModel (timeEntryList);
             }
 
-            var adapter = new ProjectListAdapter (recyclerView, viewModel.ProjectList);
-            adapter.HandleProjectSelection = OnItemSelected;
-            recyclerView.SetAdapter (adapter);
-
             viewModel.OnIsLoadingChanged += OnModelLoaded;
             await viewModel.Init ();
         }
@@ -87,6 +83,10 @@ namespace Toggl.Joey.UI.Fragments
             if (!viewModel.IsLoading) {
                 if (viewModel.Model == null) {
                     Activity.Finish ();
+                } else {
+                    var adapter = new ProjectListAdapter (recyclerView, viewModel.ProjectList);
+                    adapter.HandleProjectSelection = OnItemSelected;
+                    recyclerView.SetAdapter (adapter);
                 }
             }
         }
