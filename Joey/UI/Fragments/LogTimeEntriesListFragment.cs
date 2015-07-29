@@ -18,6 +18,7 @@ using Toggl.Phoebe.Data;
 using Toggl.Phoebe.Data.Utils;
 using Toggl.Phoebe.Data.Views;
 using XPlatUtils;
+using System.Threading.Tasks;
 
 namespace Toggl.Joey.UI.Fragments
 {
@@ -58,26 +59,22 @@ namespace Toggl.Joey.UI.Fragments
             subscriptionSettingChanged = bus.Subscribe<SettingChangedMessage> (OnSettingChanged);
         }
 
-        public override void OnResume ()
+        public async override void OnResume ()
         {
-            EnsureAdapter ();
             base.OnResume ();
+            await EnsureAdapter ();
         }
 
-        public override bool UserVisibleHint
-        {
-            get { return base.UserVisibleHint; }
-            set {
-                base.UserVisibleHint = value;
-                EnsureAdapter ();
-            }
-        }
-
-        private void EnsureAdapter ()
+        private async Task EnsureAdapter ()
         {
             if (recyclerView.GetAdapter() == null) {
                 var isGrouped = ServiceContainer.Resolve<SettingsStore> ().GroupedTimeEntries;
-                collectionView = isGrouped ? (TimeEntriesCollectionView)new GroupedTimeEntriesView () : new LogTimeEntriesView ();
+                if (isGrouped) {
+                    collectionView = await GroupedTimeEntriesView.CreateAsync ();
+                } else {
+                    collectionView = await LogTimeEntriesView.CreateAsync ();
+                }
+
                 logAdapter = new LogTimeEntriesAdapter (recyclerView, collectionView);
                 recyclerView.SetAdapter (logAdapter);
                 SetupRecyclerView ();
@@ -98,6 +95,7 @@ namespace Toggl.Joey.UI.Fragments
             }
 
             ReleaseRecyclerView ();
+            //collectionView.Dispose ();
 
             base.OnDestroyView ();
         }
@@ -136,7 +134,7 @@ namespace Toggl.Joey.UI.Fragments
             shadowDecoration.Dispose ();
         }
 
-        private void OnSettingChanged (SettingChangedMessage msg)
+        private async void OnSettingChanged (SettingChangedMessage msg)
         {
             // Protect against Java side being GCed
             if (Handle == IntPtr.Zero) {
@@ -144,7 +142,7 @@ namespace Toggl.Joey.UI.Fragments
             }
 
             if (msg.Name == SettingsStore.PropertyGroupedTimeEntries) {
-                EnsureAdapter();
+                await EnsureAdapter();
             }
         }
 
@@ -163,8 +161,8 @@ namespace Toggl.Joey.UI.Fragments
             await collectionView.RemoveItemWithUndoAsync (viewHolder.AdapterPosition);
             Snackbar
             .Make (coordinatorLayout, Resources.GetString (Resource.String.UndoBarDeletedText), duration)
-            .SetAction (Resources.GetString (Resource.String.UndoBarButtonText), async v => await collectionView.RestoreItemFromUndoAsync ())
-            .SetDuration (duration)
+            .SetAction (Resources.GetString (Resource.String.UndoBarButtonText),
+                        async v => await collectionView.RestoreItemFromUndoAsync ())
             .Show ();
         }
 

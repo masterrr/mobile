@@ -61,7 +61,7 @@ namespace Toggl.Joey.UI.Adapters
             base.Dispose (disposing);
         }
 
-        private void OnLoading (object sender, EventArgs e)
+        private async void OnLoading (object sender, EventArgs e)
         {
             // Need to access the Handle property, else mono optimises/loses the context and we get a weird
             // low-level exception about "'jobject' must not be IntPtr.Zero".
@@ -71,7 +71,7 @@ namespace Toggl.Joey.UI.Adapters
 
             // Sometimes a new call to LoadMore is needed.
             if (lastLoadingPosition + LoadMoreOffset > ItemCount && dataView.HasMore && !dataView.IsLoading) {
-                dataView.LoadMore ();
+                await dataView.LoadMoreAsync ();
             }
         }
 
@@ -121,11 +121,11 @@ namespace Toggl.Joey.UI.Adapters
             return viewType == ViewTypeLoaderPlaceholder ? new SpinnerHolder (GetLoadIndicatorView (parent)) : GetViewHolder (parent, viewType);
         }
 
-        public override void OnBindViewHolder (RecyclerView.ViewHolder holder, int position)
+        public async override void OnBindViewHolder (RecyclerView.ViewHolder holder, int position)
         {
             if (position + LoadMoreOffset > ItemCount && dataView.HasMore && !dataView.IsLoading) {
                 lastLoadingPosition = position;
-                dataView.LoadMore ();
+                await dataView.LoadMoreAsync ();
             }
 
             if (GetItemViewType (position) == ViewTypeLoaderPlaceholder) {
