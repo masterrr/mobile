@@ -14,9 +14,21 @@ namespace Toggl.Phoebe.Data.Views
     {
         private readonly List<DateGroup> dateGroups = new List<DateGroup> ();
 
-        public GroupedTimeEntriesView ()
+        protected GroupedTimeEntriesView ()
         {
             Tag = "GroupedTimeEntriesView";
+        }
+
+        protected async Task<GroupedTimeEntriesView> InitializeAsync()
+        {
+            await ReloadAsync ();
+            return this;
+        }
+
+        public static Task<GroupedTimeEntriesView> CreateAsync()
+        {
+            var ret = new GroupedTimeEntriesView();
+            return ret.InitializeAsync();
         }
 
         protected async override Task AddOrUpdateEntryAsync (TimeEntryData entry)

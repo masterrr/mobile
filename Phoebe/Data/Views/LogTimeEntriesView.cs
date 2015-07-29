@@ -14,9 +14,21 @@ namespace Toggl.Phoebe.Data.Views
     {
         private readonly List<DateGroup> dateGroups = new List<DateGroup> ();
 
-        public LogTimeEntriesView ()
+        protected LogTimeEntriesView ()
         {
             Tag = "LogTimeEntriesView";
+        }
+
+        protected async Task<LogTimeEntriesView> InitializeAsync()
+        {
+            await ReloadAsync ();
+            return this;
+        }
+
+        public static Task<LogTimeEntriesView> CreateAsync()
+        {
+            var ret = new LogTimeEntriesView();
+            return ret.InitializeAsync();
         }
 
         protected async override Task AddOrUpdateEntryAsync (TimeEntryData entry)
