@@ -255,6 +255,7 @@ namespace Toggl.Joey.UI.Fragments
             float progress = (float)Math.Abs (verticalOffset) / (float) appBar.TotalScrollRange;
             activity.Timer.AnimateState = progress;
             manualEntry.Alpha = 1 - progress;
+            manualEntry.TranslationY = -verticalOffset;
         }
     }
 }
