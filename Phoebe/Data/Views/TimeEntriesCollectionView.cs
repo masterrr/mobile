@@ -133,79 +133,99 @@ namespace Toggl.Phoebe.Data.Views
             throw new NotImplementedException ("You can't call this method in base class " + GetType ().Name);
         }
 
-        protected virtual async Task UpdateCollectionAsync (object data, NotifyCollectionChangedAction action, int newIndex, int oldIndex = -1, bool isRange = false)
+        protected async Task UpdateCollectionAsync (List<object> newItems, NotifyCollectionChangedAction action, int newStartingIndex)
         {
             if (updateMode != UpdateMode.Immediate) {
                 return;
             }
 
-            NotifyCollectionChangedEventArgs args;
-            if (isRange) {
-                args = CollectionEventBuilder.GetRangeEvent (action, newIndex, oldIndex);
-            } else {
-                args = CollectionEventBuilder.GetEvent (action, newIndex, oldIndex);
+            var holderTaskList = new List<Task> ();
+            var items = new List<object> ();
+
+            // Clean collection if we add
+            // a range from the begining
+            if (newStartingIndex == 0) {
+                ItemCollection.Clear ();
             }
+
+            for (int i = 0; i < newItems.Count; i++) {
+                var item = newItems [i];
+                if (item is IDateGroup) {
+                    ItemCollection.Insert (newStartingIndex + i, item);
+                    items.Add (item);
+                } else {
+                    var timeEntryList = GetListOfTimeEntries (item);
+                    var timeEntryHolder = new TimeEntryHolder (timeEntryList);
+                    ItemCollection.Insert (newStartingIndex + i, timeEntryHolder);
+                    holderTaskList.Add (timeEntryHolder.LoadAsync ());
+                    items.Add (timeEntryHolder);
+                }
+            }
+
+            // Load holders
+            await Task.WhenAll (holderTaskList);
+
+            var args = new NotifyCollectionChangedEventArgs (action, items, newStartingIndex);
+            DispatchEventCollection (args);
+        }
+
+        protected async Task UpdateCollectionAsync (object data, NotifyCollectionChangedAction action, int newStartingIndex, int oldStartingIndex = -1)
+        {
+            if (updateMode != UpdateMode.Immediate) {
+                return;
+            }
+
+            NotifyCollectionChangedEventArgs args = null;
 
             // Update collection.
-            if (args.Action == NotifyCollectionChangedAction.Add) {
-                if (args.NewItems.Count == 1 && data != null) {
-                    if (data is IDateGroup) {
-                        ItemCollection.Insert (args.NewStartingIndex, data);
-                    } else {
-                        var timeEntryList = GetListOfTimeEntries (data);
-                        var newHolder = new TimeEntryHolder (timeEntryList);
-                        await newHolder.LoadAsync ();
-                        ItemCollection.Insert (args.NewStartingIndex, newHolder);
-                    }
-                } else {
-                    var holderTaskList = new List<Task> ();
-                    var currentItems = new List<object> (UpdatedList);
-
-                    if (args.NewStartingIndex == 0) {
-                        ItemCollection.Clear ();
-                    }
-
-                    for (int i = args.NewStartingIndex; i < args.NewStartingIndex + args.NewItems.Count; i++) {
-                        var item = currentItems [i];
-                        if (item is IDateGroup) {
-                            ItemCollection.Insert (i, item);
-                        } else {
-                            var timeEntryList = GetListOfTimeEntries (item);
-                            var timeEntryHolder = new TimeEntryHolder (timeEntryList);
-                            ItemCollection.Insert (i, timeEntryHolder);
-                            holderTaskList.Add (timeEntryHolder.LoadAsync ());
-                        }
-                    }
-                    await Task.WhenAll (holderTaskList);
-                }
-            }
-
-            if (args.Action == NotifyCollectionChangedAction.Move) {
-                var savedItem = ItemCollection [args.OldStartingIndex];
-                ItemCollection.RemoveAt (args.OldStartingIndex);
-                ItemCollection.Insert (args.NewStartingIndex, savedItem);
-            }
-
-            if (args.Action == NotifyCollectionChangedAction.Remove) {
-                ItemCollection.RemoveAt (args.OldStartingIndex);
-            }
-
-            if (args.Action == NotifyCollectionChangedAction.Replace) {
+            if (action == NotifyCollectionChangedAction.Add) {
+                object newObject;
                 if (data is IDateGroup) {
-                    ItemCollection [args.NewStartingIndex] = data;
+                    ItemCollection.Insert (newStartingIndex, data);
+                    newObject = data;
                 } else {
-                    var oldHolder = (TimeEntryHolder)ItemCollection.ElementAt (args.NewStartingIndex);
+                    var timeEntryList = GetListOfTimeEntries (data);
+                    var newHolder = new TimeEntryHolder (timeEntryList);
+                    await newHolder.LoadAsync ();
+                    ItemCollection.Insert (newStartingIndex, newHolder);
+                    newObject = newHolder;
+                }
+                args = new NotifyCollectionChangedEventArgs (action, newObject, newStartingIndex);
+            }
+
+            if (action == NotifyCollectionChangedAction.Move) {
+                var savedItem = ItemCollection [oldStartingIndex];
+                ItemCollection.RemoveAt (oldStartingIndex);
+                ItemCollection.Insert (newStartingIndex, savedItem);
+                args = new NotifyCollectionChangedEventArgs (action, savedItem, newStartingIndex, oldStartingIndex);
+            }
+
+            if (action == NotifyCollectionChangedAction.Remove) {
+                var deletedItem = ItemCollection [oldStartingIndex];
+                ItemCollection.RemoveAt (oldStartingIndex);
+                args = new NotifyCollectionChangedEventArgs (action, deletedItem, oldStartingIndex);
+            }
+
+            if (action == NotifyCollectionChangedAction.Replace) {
+                object newObject;
+                if (data is IDateGroup) {
+                    newObject = data;
+                    ItemCollection [newStartingIndex] = data;
+                } else {
+                    var oldHolder = (TimeEntryHolder)ItemCollection.ElementAt (newStartingIndex);
                     var timeEntryList = GetListOfTimeEntries (data);
                     await oldHolder.UpdateAsync (timeEntryList);
-                    // Weird case,
-                    // For further investigation
-                    if (args.NewStartingIndex > ItemCollection.Count) {
-                        return;
-                    }
-                    ItemCollection [args.NewStartingIndex] = oldHolder;
+                    ItemCollection [newStartingIndex] = oldHolder;
+                    newObject = oldHolder;
                 }
+                args = new NotifyCollectionChangedEventArgs (action, newObject, new object (), newStartingIndex);
             }
 
+            DispatchEventCollection (args);
+        }
+
+        private void DispatchEventCollection (NotifyCollectionChangedEventArgs args)
+        {
             // Dispatch Observable collection event.
             var handler = CollectionChanged;
             if (handler != null) {
@@ -359,7 +379,15 @@ namespace Toggl.Phoebe.Data.Views
         {
             updateMode = UpdateMode.Immediate;
             if (UpdatedCount > lastNumberOfItems) {
-                await UpdateCollectionAsync (null, NotifyCollectionChangedAction.Add, lastNumberOfItems, UpdatedCount - lastNumberOfItems, true);
+
+                // Get new added items
+                var updatedItems = new List<object> (UpdatedList);
+                var newItems = new List<object> ();
+                for (int i = lastNumberOfItems; i < (UpdatedCount - lastNumberOfItems); i++) {
+                    newItems.Add (updatedItems [i]);
+                }
+
+                await UpdateCollectionAsync (newItems, NotifyCollectionChangedAction.Add, lastNumberOfItems);
             }
         }
 

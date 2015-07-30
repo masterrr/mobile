@@ -59,21 +59,21 @@ namespace Toggl.Phoebe.Data.Utils
     public static class CollectionEventBuilder
     {
 
-        public static NotifyCollectionChangedEventArgs GetEvent (NotifyCollectionChangedAction action, int newIndex, int oldIndex, object newObject)
+        public static NotifyCollectionChangedEventArgs GetEvent (NotifyCollectionChangedAction action, int newIndex, int oldIndex)
         {
             NotifyCollectionChangedEventArgs args;
             switch (action) {
             case NotifyCollectionChangedAction.Move:
-                args = new NotifyCollectionChangedEventArgs (action, newObject, newIndex, oldIndex);
+                args = new NotifyCollectionChangedEventArgs (action, new object (), newIndex, oldIndex);
                 break;
             case NotifyCollectionChangedAction.Replace:
-                args = new NotifyCollectionChangedEventArgs (action, newObject, new object (), newIndex);
+                args = new NotifyCollectionChangedEventArgs (action, new object (), new object (), newIndex);
                 break;
             case NotifyCollectionChangedAction.Reset:
                 args = new NotifyCollectionChangedEventArgs (action);
                 break;
             default:
-                args = new NotifyCollectionChangedEventArgs (action, newObject, newIndex);
+                args = new NotifyCollectionChangedEventArgs (action, new object (), newIndex);
                 break;
             }
             return args;

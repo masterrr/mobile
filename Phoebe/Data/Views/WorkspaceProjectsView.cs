@@ -71,7 +71,8 @@ namespace Toggl.Phoebe.Data.Views
             }
 
             displayTaskForProjectPosition = position;
-            DispatchCollectionEvent (CollectionEventBuilder.GetEvent (NotifyCollectionChangedAction.Reset, -1, -1));
+            var args = CollectionEventBuilder.GetEvent (NotifyCollectionChangedAction.Reset, -1, -1);
+            DispatchCollectionEvent (args);
         }
 
         public void Dispose ()
@@ -321,7 +322,8 @@ namespace Toggl.Phoebe.Data.Views
 
         private void OnUpdated ()
         {
-            DispatchCollectionEvent (CollectionEventBuilder.GetEvent (NotifyCollectionChangedAction.Reset, -1, -1));
+            var args = CollectionEventBuilder.GetEvent (NotifyCollectionChangedAction.Reset, -1, -1);
+            DispatchCollectionEvent (args);
         }
 
         public event NotifyCollectionChangedEventHandler CollectionChanged;
