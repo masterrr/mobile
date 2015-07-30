@@ -3,11 +3,20 @@ using System.Linq;
 using System.Threading.Tasks;
 using Toggl.Phoebe.Data.DataObjects;
 using Toggl.Phoebe.Data.Views;
+using XPlatUtils;
+using Toggl.Phoebe.Net;
+using Toggl.Phoebe.Tests.Net;
 
 namespace Toggl.Phoebe.Tests.Views
 {
     public class CollectionDataViewTest : Test
     {
+        public override void SetUp ()
+        {
+            base.SetUp ();
+            ServiceContainer.Register<ITogglClient> (() => new TogglClientMock ());
+        }
+
         protected DateTime MakeTime (int hour, int minute, int second = 0)
         {
             return Time.UtcNow.Date
@@ -49,23 +58,6 @@ namespace Toggl.Phoebe.Tests.Views
             };
 
             view.OnIsLoadingChanged += onUpdated;
-            await tcs.Task.ConfigureAwait (false);
-        }
-
-        protected async Task WaitForUpdates<T> (ICollectionDataView<T> view, int count = 1)
-        {
-            var tcs = new TaskCompletionSource<object> ();
-            EventHandler onCollectionChanged = null;
-
-            onCollectionChanged = delegate {
-                if (--count > 0) {
-                    return;
-                }
-                view.CollectionChanged -= onCollectionChanged;
-                tcs.TrySetResult (null);
-            };
-
-            view.CollectionChanged += onCollectionChanged;
             await tcs.Task.ConfigureAwait (false);
         }
     }

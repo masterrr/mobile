@@ -89,6 +89,7 @@
     <Compile Include="Views\CollectionDataViewTest.cs" />
     <Compile Include="Views\TimeEntriesCollectionTest.cs" />
     <Compile Include="Views\LogTimeEntriesViewTest.cs" />
+    <Compile Include="Net\TogglClientMock.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -109,5 +110,6 @@
     <Folder Include="Data\Json\Converters\" />
     <Folder Include="Data\Merge\" />
     <Folder Include="Analytics\" />
+    <Folder Include="Net\" />
   </ItemGroup>
 </Project>

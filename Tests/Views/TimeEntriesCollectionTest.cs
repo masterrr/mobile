@@ -1,10 +1,9 @@
-﻿using Moq;
+﻿using System.Threading.Tasks;
+using Moq;
 using Toggl.Phoebe.Data;
 using Toggl.Phoebe.Data.DataObjects;
 using Toggl.Phoebe.Net;
 using XPlatUtils;
-using System.Threading.Tasks;
-using Toggl.Phoebe.Data.Views;
 
 namespace Toggl.Phoebe.Tests.Views
 {
@@ -26,9 +25,9 @@ namespace Toggl.Phoebe.Tests.Views
                 await CreateTestData ();
 
                 ServiceContainer.Register<ISyncManager> (Mock.Of<ISyncManager> (
-                            (mgr) => mgr.IsRunning == false));
+                            mgr => !mgr.IsRunning));
                 ServiceContainer.Register<ISettingsStore> (Mock.Of<ISettingsStore> (
-                            (store) => store.ApiToken == "test" &&
+                            store => store.ApiToken == "test" &&
                             store.UserId == user.Id));
                 ServiceContainer.Register<AuthManager> (new AuthManager ());
             });
@@ -36,24 +35,24 @@ namespace Toggl.Phoebe.Tests.Views
 
         private async Task CreateTestData ()
         {
-            workspace = await DataStore.PutAsync (new WorkspaceData () {
+            workspace = await DataStore.PutAsync (new WorkspaceData {
                 RemoteId = 1,
                 Name = "Unit Testing",
             });
 
-            user = await DataStore.PutAsync (new UserData () {
-                RemoteId = 1,
+            user = await DataStore.PutAsync (new UserData {
+                RemoteId = 2,
                 Name = "Tester",
                 DefaultWorkspaceId = workspace.Id,
             });
 
-            var project = await DataStore.PutAsync (new ProjectData () {
-                RemoteId = 1,
+            var project = await DataStore.PutAsync (new ProjectData {
+                RemoteId = 3,
                 Name = "Ad design",
                 WorkspaceId = workspace.Id,
             });
 
-            await DataStore.PutAsync (new TimeEntryData () {
+            await DataStore.PutAsync (new TimeEntryData {
                 RemoteId = 1,
                 Description = "Initial concept",
                 State = TimeEntryState.Finished,
@@ -64,7 +63,7 @@ namespace Toggl.Phoebe.Tests.Views
                 UserId = user.Id,
             });
 
-            await DataStore.PutAsync (new TimeEntryData () {
+            await DataStore.PutAsync (new TimeEntryData {
                 RemoteId = 2,
                 Description = "Breakfast",
                 State = TimeEntryState.Finished,
@@ -74,9 +73,9 @@ namespace Toggl.Phoebe.Tests.Views
                 UserId = user.Id,
             });
 
-            await DataStore.PutAsync (new TimeEntryData () {
+            await DataStore.PutAsync (new TimeEntryData {
                 RemoteId = 3,
-                Description = "Initial concept",
+                Description = "Programmers meeting",
                 State = TimeEntryState.Finished,
                 StartTime = MakeTime (10, 35),
                 StopTime = MakeTime (12, 21),
@@ -85,8 +84,9 @@ namespace Toggl.Phoebe.Tests.Views
                 UserId = user.Id,
             });
 
-            await DataStore.PutAsync (new TimeEntryData () {
+            await DataStore.PutAsync (new TimeEntryData {
                 RemoteId = 4,
+                Description = "Design stuff",
                 State = TimeEntryState.Finished,
                 StartTime = MakeTime (12, 25),
                 StopTime = MakeTime (13, 57),
@@ -95,8 +95,9 @@ namespace Toggl.Phoebe.Tests.Views
                 UserId = user.Id,
             });
 
-            await DataStore.PutAsync (new TimeEntryData () {
+            await DataStore.PutAsync (new TimeEntryData {
                 RemoteId = 5,
+                Description = "Bug fixed",
                 State = TimeEntryState.Finished,
                 StartTime = MakeTime (14, 0),
                 StopTime = MakeTime (14, 36),
