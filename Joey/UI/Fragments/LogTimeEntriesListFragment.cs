@@ -23,7 +23,7 @@ using Toolbar = Android.Support.V7.Widget.Toolbar;
 
 namespace Toggl.Joey.UI.Fragments
 {
-    public class LogTimeEntriesListFragment : Fragment, SwipeDismissCallback.IDismissListener, ItemTouchListener.IItemTouchListener
+    public class LogTimeEntriesListFragment : Fragment, SwipeDismissCallback.IDismissListener, ItemTouchListener.IItemTouchListener, AppBarLayout.IOnOffsetChangedListener
     {
         private RecyclerView recyclerView;
         private View emptyMessageView;
@@ -37,8 +37,7 @@ namespace Toggl.Joey.UI.Fragments
         private bool isEditShowed;
         private HomeScreenEditFragment manualEditFragment;
 
-        private TogglAppBar HomeAppBar;
-        private Toolbar HomeToolbar;
+        private TogglAppBar appBar;
 
         // Recycler setup
         private DividerItemDecoration dividerDecoration;
@@ -57,7 +56,6 @@ namespace Toggl.Joey.UI.Fragments
             recyclerView.SetLayoutManager (new LinearLayoutManager (Activity));
             coordinatorLayout = view.FindViewById<CoordinatorLayout> (Resource.Id.logCoordinatorLayout);
             manualEntry = view.FindViewById<FrameLayout> (Resource.Id.EditFormView);
-
             HomeAppBar = view.FindViewById<TogglAppBar> (Resource.Id.HomeAppBar);
             HomeAppBar.OffsetChanged +=  OnChange;
             HomeToolbar = view.FindViewById<Toolbar> (Resource.Id.HomeToolbar);
@@ -76,6 +74,9 @@ namespace Toggl.Joey.UI.Fragments
                 transaction.Add (Resource.Id.EditFormView, manualEditFragment).Commit();
                 EditFormVisible = true;
             }
+            appBar.AddOnOffsetChangedListener (this);
+            var activity = (MainDrawerActivity)Activity;
+            activity.Timer.CompactView = true;
         }
 
 
@@ -248,6 +249,12 @@ namespace Toggl.Joey.UI.Fragments
 
                 }
             }
+        public void OnOffsetChanged (AppBarLayout layout, int verticalOffset)
+        {
+            var activity = (MainDrawerActivity)Activity;
+            float progress = (float)Math.Abs (verticalOffset) / (float) appBar.TotalScrollRange;
+            activity.Timer.AnimateState = progress;
+            manualEntry.Alpha = 1 - progress;
         }
     }
 }
