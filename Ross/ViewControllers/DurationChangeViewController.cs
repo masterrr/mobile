@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UIKit;
 using Toggl.Phoebe.Analytics;
 using Toggl.Phoebe.Data;
@@ -6,6 +7,7 @@ using Toggl.Phoebe.Data.Models;
 using XPlatUtils;
 using Toggl.Ross.Theme;
 using Toggl.Ross.Views;
+using Toggl.Phoebe.Data.DataObjects;
 
 namespace Toggl.Ross.ViewControllers
 {
@@ -90,7 +92,7 @@ namespace Toggl.Ross.ViewControllers
 
                 if (model == null) {
                     var m = await TimeEntryModel.CreateFinishedAsync (duration);
-                    var controller = new EditTimeEntryViewController (m);
+                    var controller = new EditTimeEntryViewController (new List<TimeEntryData> { m });
 
                     // Replace self with edit controller on the stack
                     var vcs = NavigationController.ViewControllers;
