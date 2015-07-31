@@ -2,6 +2,7 @@
 using Moq;
 using Toggl.Phoebe.Data;
 using Toggl.Phoebe.Data.DataObjects;
+using Toggl.Phoebe.Data.Json.Converters;
 using Toggl.Phoebe.Net;
 using XPlatUtils;
 
@@ -30,6 +31,7 @@ namespace Toggl.Phoebe.Tests.Views
                             (store) => store.ApiToken == "test" &&
                             store.UserId == user.Id));
                 ServiceContainer.Register<AuthManager> (new AuthManager ());
+                ServiceContainer.Register<TimeEntryJsonConverter> (new TimeEntryJsonConverter ());
             });
         }
 

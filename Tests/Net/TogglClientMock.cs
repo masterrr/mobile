@@ -87,7 +87,9 @@ namespace Toggl.Phoebe.Tests.Net
 
         public Task<List<TimeEntryJson>> ListTimeEntries (DateTime end, int days)
         {
-            throw new NotImplementedException ();
+            var startDate = end.Date;
+            var endDate = startDate.Date.AddDays (-days);
+            return SimulateListTimeEntries (startDate, endDate);
         }
 
         public Task<UserRelatedJson> GetChanges (DateTime? since)
@@ -104,8 +106,9 @@ namespace Toggl.Phoebe.Tests.Net
 
         private async Task<List<TimeEntryJson>> SimulateListTimeEntries (DateTime start, DateTime end)
         {
-            const int workspaceId = 2;
-            const int userId = 3;
+            const int workspaceId = 1;
+            const int userId = 2;
+            const int projectId = 3;
 
             var random = new Random ();
             var itemNumber = random.Next (10, 50);
@@ -113,13 +116,20 @@ namespace Toggl.Phoebe.Tests.Net
             var entries = new List<TimeEntryJson> ();
 
             for (int i = 0; i < itemNumber; i++) {
+                var startTime = dates [i];
                 var t = new TimeEntryJson {
-                    Id = i,
+                    Id = 1000 + i,
+                    ModifiedAt = startTime,
+                    IsBillable = false,
+                    DurationOnly = false,
+                    Tags = new List<string> {"mobile"},
+                    CreatedWith = "TestMock",
                     Description = "Remote Entry " + i,
-                    StartTime = dates [i],
-                    StopTime = dates [i].AddMinutes ((double)random.Next (5, 300)),
+                    StartTime = startTime,
                     WorkspaceId = workspaceId,
                     UserId = userId,
+                    ProjectId = projectId,
+                    Duration = random.Next (50, 18000) // Duration from 50s to 5h
                 };
                 entries.Add (t);
             }
@@ -138,13 +148,17 @@ namespace Toggl.Phoebe.Tests.Net
             int day;
 
             for (int i = 0; i < numberOfDates; i++) {
-                year = start.Year == end.Year ? start.Year : random.Next (start.Year, end.Year);
-                month = start.Month == end.Month ? start.Month : random.Next (start.Month, end.Month);
-                day = (start.Day) == end.Day ? start.Day : random.Next (start.Day, end.Day);
+                year = start.Year == end.Year ? start.Year : random.Next (end.Year, start.Year);
+                month = start.Month == end.Month ? start.Month : random.Next (end.Month, start.Month);
+                if (start.Month == end.Month) {
+                    day = start.Day == end.Day ? start.Day : random.Next (end.Day, start.Day);
+                } else {
+                    day = month == start.Month ? random.Next (start.Day, 30) : random.Next (1, 30);
+                }
                 var date = new DateTime (year, month, day, random.Next (0, 24), random.Next (0, 60), random.Next (0, 60));
                 dates.Add (date);
             }
-            dates.Sort ((a, b) => a.CompareTo (b));
+            dates.Sort ((a, b) => b.CompareTo (a));
             return dates;
         }
 
