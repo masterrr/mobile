@@ -59,6 +59,9 @@ namespace Toggl.Joey.UI.Fragments
             HomeAppBar = view.FindViewById<TogglAppBar> (Resource.Id.HomeAppBar);
             HomeAppBar.OffsetChanged +=  OnChange;
             HomeToolbar = view.FindViewById<Toolbar> (Resource.Id.HomeToolbar);
+
+            appBar = view.FindViewById<TogglAppBar> (Resource.Id.HomeAppBar);
+
             return view;
         }
 
@@ -75,10 +78,21 @@ namespace Toggl.Joey.UI.Fragments
                 EditFormVisible = true;
             }
             appBar.AddOnOffsetChangedListener (this);
+            startStopBtn.Click += OnActionClick;
+            manualEditFragment.FABStateChange += OnFABChange;
             var activity = (MainDrawerActivity)Activity;
             activity.Timer.CompactView = true;
         }
 
+        private void OnFABChange (object sender, EventArgs e)
+        {
+            startStopBtn.ButtonAction = manualEditFragment.EntryState;
+        }
+
+        private void OnActionClick (object sender, EventArgs e)
+        {
+            manualEditFragment.RequestAction();
+        }
 
         public bool EditFormVisible
         {
@@ -132,6 +146,9 @@ namespace Toggl.Joey.UI.Fragments
                 bus.Unsubscribe (subscriptionSettingChanged);
                 subscriptionSettingChanged = null;
             }
+
+            manualEditFragment.FABStateChange -= OnFABChange;
+            startStopBtn.Click -= OnActionClick;
 
             ReleaseRecyclerView ();
 
