@@ -34,6 +34,7 @@ namespace Toggl.Joey.UI.Fragments
         private PropertyChangeTracker propertyTracker;
         private MainDrawerActivity activity;
         private TimerComponent timer;
+        private FABButtonState entryState;
 
         public HomeScreenEditFragment (MainDrawerActivity activity)
         {
@@ -61,7 +62,6 @@ namespace Toggl.Joey.UI.Fragments
         {
             Rebind ();
         }
-
 
         private void ResetTrackedObservables ()
         {
@@ -147,6 +147,7 @@ namespace Toggl.Joey.UI.Fragments
         {
             ResetTrackedObservables();
             ResetTagsView ();
+            SendState();
             var currentEntry = ActiveTimeEntry;
             if (currentEntry == null || !canRebind) {
                 return;
@@ -238,8 +239,6 @@ namespace Toggl.Joey.UI.Fragments
 
         protected ImageButton DeleteImageButton { get; private set; }
 
-        protected Button DummyStartButton { get; private set; }
-
         protected TogglField ProjectBit { get; private set; }
 
         protected TogglTagsField TagsBit { get; private set; }
@@ -264,9 +263,6 @@ namespace Toggl.Joey.UI.Fragments
 
             BillableCheckBox = view.FindViewById<CheckBox> (Resource.Id.BillableCheckBox).SetFont (Font.RobotoLight);
 
-
-            DummyStartButton = view.FindViewById<Button> (Resource.Id.DummyStartStopButton);
-            DummyStartButton.Click += OnStartButtonClicked;
             StartTimeEditText.Click += OnStartTimeEditTextClick;
             StopTimeEditText.Click += OnStopTimeEditTextClick;
             DescriptionEditText.TextChanged += OnDescriptionTextChanged;
@@ -282,7 +278,7 @@ namespace Toggl.Joey.UI.Fragments
             return view;
         }
 
-        private async void  OnStartButtonClicked (object sender, EventArgs e)
+        public async void RequestAction ()
         {
             // Protect from double clicks
             if (isProcessingAction) {
@@ -297,19 +293,15 @@ namespace Toggl.Joey.UI.Fragments
                 }
 
                 // Make sure that we work on the copy of the entry to not affect the rest of the logic.
-                entry = (ITimeEntryModel)new TimeEntryModel (new TimeEntryData (entry.Data));
-
-                var showProjectSelection = false;
+                entry = new TimeEntryModel (new TimeEntryData (entry.Data));
 
                 try {
                     if (entry.State == TimeEntryState.New && entry.StopTime.HasValue) {
                         await entry.StoreAsync ();
-
                         // Ping analytics
                         ServiceContainer.Resolve<ITracker> ().SendTimerStartEvent (TimerStartSource.AppManual);
                     } else if (entry.State == TimeEntryState.Running) {
                         await entry.StopAsync ();
-
                         // Ping analytics
                         ServiceContainer.Resolve<ITracker> ().SendTimerStopEvent (TimerStopSource.App);
                     } else {
@@ -325,6 +317,31 @@ namespace Toggl.Joey.UI.Fragments
             } finally {
                 isProcessingAction = false;
                 Rebind();
+            }
+        }
+
+        public EventHandler FABStateChange;
+
+        public FABButtonState EntryState
+        {
+            get {
+                return entryState;
+            }
+        }
+
+        private void SendState ()
+        {
+            if (ActiveTimeEntry == null) {
+                entryState = FABButtonState.Start;
+            } else if (ActiveTimeEntry.State == TimeEntryState.New && ActiveTimeEntry.StopTime.HasValue) {
+                entryState = FABButtonState.Save;
+            } else if ( ActiveTimeEntry.State == TimeEntryState.Running) {
+                entryState = FABButtonState.Stop;
+            } else {
+                entryState = FABButtonState.Start;
+            }
+            if (FABStateChange != null) {
+                FABStateChange.Invoke (this, EventArgs.Empty); // Initial rendering
             }
         }
 
