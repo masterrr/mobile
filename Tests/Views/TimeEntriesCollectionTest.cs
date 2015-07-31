@@ -25,15 +25,15 @@ namespace Toggl.Phoebe.Tests.Views
                 await CreateTestData ();
 
                 ServiceContainer.Register<ISyncManager> (Mock.Of<ISyncManager> (
-                            mgr => !mgr.IsRunning));
+                            (mgr) => mgr.IsRunning == false));
                 ServiceContainer.Register<ISettingsStore> (Mock.Of<ISettingsStore> (
-                            store => store.ApiToken == "test" &&
+                            (store) => store.ApiToken == "test" &&
                             store.UserId == user.Id));
                 ServiceContainer.Register<AuthManager> (new AuthManager ());
             });
         }
 
-        private async Task CreateTestData ()
+        protected async Task CreateTestData ()
         {
             workspace = await DataStore.PutAsync (new WorkspaceData {
                 RemoteId = 1,
