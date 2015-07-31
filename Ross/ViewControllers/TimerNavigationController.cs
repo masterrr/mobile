@@ -5,6 +5,7 @@ using CoreFoundation;
 using UIKit;
 using Toggl.Phoebe.Analytics;
 using Toggl.Phoebe.Data;
+using Toggl.Phoebe.Data.DataObjects;
 using Toggl.Phoebe.Data.Models;
 using Toggl.Phoebe.Data.Utils;
 using XPlatUtils;
@@ -87,7 +88,7 @@ namespace Toggl.Ross.ViewControllers
                     await currentTimeEntry.StartAsync ();
 
                     var controllers = new List<UIViewController> (parentController.NavigationController.ViewControllers);
-                    controllers.Add (new EditTimeEntryViewController (currentTimeEntry));
+                    controllers.Add (new EditTimeEntryViewController (new List<TimeEntryData> { currentTimeEntry }));
                     if (ServiceContainer.Resolve<SettingsStore> ().ChooseProjectForNew) {
                         controllers.Add (new ProjectSelectionViewController (currentTimeEntry));
                     }

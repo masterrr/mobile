@@ -9,6 +9,8 @@ using Toggl.Phoebe.Net;
 using Toggl.Ross.ViewControllers;
 using UIKit;
 using XPlatUtils;
+using Toggl.Phoebe.Data.DataObjects;
+
 
 namespace Toggl.Ross.Data
 {
@@ -130,7 +132,7 @@ namespace Toggl.Ross.Data
             if (topVCList.Count > 0) {
                 // Get current VC's navigation
                 var controllers = new List<UIViewController> (topVCList[0].NavigationController.ViewControllers);
-                controllers.Add (new EditTimeEntryViewController (currentTimeEntry));
+                controllers.Add (new EditTimeEntryViewController (new List<TimeEntryData> { currentTimeEntry }));
                 if (ServiceContainer.Resolve<SettingsStore> ().ChooseProjectForNew) {
                     controllers.Add (new ProjectSelectionViewController (currentTimeEntry));
                 }

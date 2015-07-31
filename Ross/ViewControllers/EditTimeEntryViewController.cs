@@ -12,6 +12,7 @@ using Toggl.Phoebe.Data.DataObjects;
 using Toggl.Phoebe.Data.Models;
 using Toggl.Phoebe.Data.Utils;
 using Toggl.Phoebe.Data.Views;
+using Toggl.Phoebe.Data.ViewModels;
 using Toggl.Ross.DataSources;
 using Toggl.Ross.Theme;
 using Toggl.Ross.Views;
@@ -52,7 +53,8 @@ namespace Toggl.Ross.ViewControllers
         private UIButton deleteButton;
         private bool hideDatePicker = true;
         private readonly List<NSObject> notificationObjects = new List<NSObject> ();
-        private readonly TimeEntryModel model;
+        private EditTimeEntryViewModel viewModel;
+        private ITimeEntryModel model;
         private readonly TimeEntryTagsView tagsView;
         private PropertyChangeTracker propertyTracker = new PropertyChangeTracker ();
         private bool descriptionChanging;
@@ -63,13 +65,22 @@ namespace Toggl.Ross.ViewControllers
         private UIBarButtonItem autoCompletionDoneBarButtonItem;
         private Stack<UIBarButtonItem> barButtonItemsStack = new Stack<UIBarButtonItem> ();
 
-        public EditTimeEntryViewController (TimeEntryModel model)
+        public EditTimeEntryViewController (IList<TimeEntryData> timeEntryList)
         {
-            this.model = model;
+            viewModel = new EditTimeEntryViewModel (timeEntryList);
+            viewModel.OnIsLoadingChanged += OnModelLoaded;
+            viewModel.Init ();
 
             tagsView = new TimeEntryTagsView (model.Id);
+            timerController = new TimerNavigationController (viewModel.Model);
+        }
 
-            timerController = new TimerNavigationController (model);
+        void OnModelLoaded (object sender, EventArgs e)
+        {
+            if (viewModel.IsLoading || viewModel == null) {
+                return;
+            }
+            model = viewModel.Model;
         }
 
         protected override void Dispose (bool disposing)

@@ -310,7 +310,7 @@ namespace Toggl.Ross.ViewControllers
                 var data = (TimeEntryHolder)dataView.Data.ElementAt (index);
                 if (data != null) {
                     controller.NavigationController.PushViewController (
-                        new EditTimeEntryViewController ((TimeEntryModel)data.TimeEntryData), true);
+                        new EditTimeEntryViewController (data.TimeEntryDataList), true);
                 } else {
                     tableView.DeselectRow (indexPath, true);
                 }
