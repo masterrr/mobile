@@ -8,5 +8,6 @@
     android:paddingLeft="16dp"
     android:paddingRight="16dp"
     android:paddingTop="8dp"
+    android:layout_marginTop="?attr/actionBarSize"
     android:paddingBottom="8dp"
     android:clipToPadding="true" />
