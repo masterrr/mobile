@@ -25,6 +25,10 @@ namespace Toggl.Phoebe.Data.ViewModels
 
         public void Init ()
         {
+            if (timeEntryList == null) {
+                return;
+            }
+
             IsLoading = true;
 
             model = new TimeEntryGroup (timeEntryList);
