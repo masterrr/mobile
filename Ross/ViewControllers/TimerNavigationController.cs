@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.ComponentModel;
 using CoreFoundation;
@@ -11,6 +12,7 @@ using Toggl.Phoebe.Data.Utils;
 using XPlatUtils;
 using Toggl.Ross.Data;
 using Toggl.Ross.Theme;
+using Toggl.Phoebe.Data.ViewModels;
 
 namespace Toggl.Ross.ViewControllers
 {
@@ -22,17 +24,28 @@ namespace Toggl.Ross.ViewControllers
         private UIButton durationButton;
         private UIButton actionButton;
         private UIBarButtonItem navigationButton;
-        private TimeEntryModel currentTimeEntry;
+
+        private IList<TimeEntryData> timeEntryList;
+        private ITimeEntryModel currentTimeEntry;
+        private EditTimeEntryViewModel viewModel;
+
         private ActiveTimeEntryManager timeEntryManager;
         private PropertyChangeTracker propertyTracker;
         private bool isStarted;
         private int rebindCounter;
         private bool isActing;
 
-        public TimerNavigationController (TimeEntryModel model = null)
+        public TimerNavigationController (IList<TimeEntryData> timeEntryList = null)
         {
-            showRunning = model == null;
-            currentTimeEntry = model;
+            this.timeEntryList = timeEntryList;
+            viewModel = new EditTimeEntryViewModel (timeEntryList);
+            viewModel.OnIsLoadingChanged += (s, e) => {
+                if (viewModel.IsLoading || viewModel == null) {
+                    return;
+                }
+                currentTimeEntry = viewModel.Model;
+            };
+            viewModel.Init ();
         }
 
         public void Attach (UIViewController parentController)
@@ -88,9 +101,9 @@ namespace Toggl.Ross.ViewControllers
                     await currentTimeEntry.StartAsync ();
 
                     var controllers = new List<UIViewController> (parentController.NavigationController.ViewControllers);
-                    controllers.Add (new EditTimeEntryViewController (new List<TimeEntryData> { currentTimeEntry }));
+                    controllers.Add (new EditTimeEntryViewController (timeEntryList));
                     if (ServiceContainer.Resolve<SettingsStore> ().ChooseProjectForNew) {
-                        controllers.Add (new ProjectSelectionViewController (currentTimeEntry));
+                        controllers.Add (new ProjectSelectionViewController (timeEntryList));
                     }
                     parentController.NavigationController.SetViewControllers (controllers.ToArray (), true);
 
