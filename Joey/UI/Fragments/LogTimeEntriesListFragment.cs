@@ -34,6 +34,7 @@ namespace Toggl.Joey.UI.Fragments
         private FrameLayout manualEntry;
         private bool isEditShowed;
         private HomeScreenEditFragment manualEditFragment;
+        private StartStopFab startStopBtn;
         private TogglAppBar appBar;
         private DividerItemDecoration dividerDecoration;
         private ShadowItemDecoration shadowDecoration;
@@ -49,14 +50,11 @@ namespace Toggl.Joey.UI.Fragments
             emptyMessageView.Visibility = ViewStates.Gone;
             recyclerView = view.FindViewById<RecyclerView> (Resource.Id.LogRecyclerView);
             recyclerView.SetLayoutManager (new LinearLayoutManager (Activity));
+            startStopBtn = view.FindViewById<StartStopFab> (Resource.Id.StartStopBtn);
             coordinatorLayout = view.FindViewById<CoordinatorLayout> (Resource.Id.logCoordinatorLayout);
             manualEntry = view.FindViewById<FrameLayout> (Resource.Id.EditFormView);
-            HomeAppBar = view.FindViewById<TogglAppBar> (Resource.Id.HomeAppBar);
-            HomeAppBar.OffsetChanged +=  OnChange;
-            HomeToolbar = view.FindViewById<Toolbar> (Resource.Id.HomeToolbar);
-
             appBar = view.FindViewById<TogglAppBar> (Resource.Id.HomeAppBar);
-
+            appBar.Click += OnAppClick;
             return view;
         }
 
@@ -77,6 +75,13 @@ namespace Toggl.Joey.UI.Fragments
             manualEditFragment.FABStateChange += OnFABChange;
             var activity = (MainDrawerActivity)Activity;
             activity.Timer.CompactView = true;
+        }
+
+        private void OnAppClick (object sender, EventArgs e)
+        {
+            CoordinatorLayout.LayoutParams p = new CoordinatorLayout.LayoutParams (startStopBtn.LayoutParameters) ;
+            p.AnchorId = manualEntry.Id;
+            startStopBtn.LayoutParameters = p;
         }
 
         private void OnFABChange (object sender, EventArgs e)
@@ -260,6 +265,8 @@ namespace Toggl.Joey.UI.Fragments
 
                 }
             }
+        }
+
         public void OnOffsetChanged (AppBarLayout layout, int verticalOffset)
         {
             var activity = (MainDrawerActivity)Activity;
@@ -268,7 +275,8 @@ namespace Toggl.Joey.UI.Fragments
             manualEntry.Alpha = 1 - progress;
             manualEntry.TranslationY = -verticalOffset;
             var fab_margin = activity.ApplicationContext.Resources.GetDimensionPixelSize (Resource.Dimension.fab_margin);
-            startStopBtn.TranslationY = (recyclerView.Bottom - startStopBtn.Bottom - fab_margin) * (progress);
+
+//            startStopBtn.TranslationY = (recyclerView.Bottom - startStopBtn.Bottom - fab_margin) * (progress);
         }
     }
 }
