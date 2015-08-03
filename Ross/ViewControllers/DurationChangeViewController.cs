@@ -13,12 +13,12 @@ namespace Toggl.Ross.ViewControllers
 {
     public class DurationChangeViewController : UIViewController
     {
-        private readonly TimeEntryModel model;
+        private readonly ITimeEntryModel model;
         private DurationView durationView;
         private UIBarButtonItem barButtonItem;
         private bool isSaving;
 
-        public DurationChangeViewController (TimeEntryModel model)
+        public DurationChangeViewController (ITimeEntryModel model)
         {
             this.model = model;
         }
