@@ -1,28 +1,36 @@
 using System;
 using System.Collections.Generic;
-using CoreGraphics;
 using CoreAnimation;
+using CoreGraphics;
 using Foundation;
-using UIKit;
 using Toggl.Phoebe.Analytics;
 using Toggl.Phoebe.Data.DataObjects;
 using Toggl.Phoebe.Data.Models;
+using Toggl.Phoebe.Data.ViewModels;
 using Toggl.Phoebe.Data.Views;
-using XPlatUtils;
 using Toggl.Ross.DataSources;
 using Toggl.Ross.Theme;
 using Toggl.Ross.Views;
+using UIKit;
+using XPlatUtils;
+
 
 namespace Toggl.Ross.ViewControllers
 {
     public class ProjectSelectionViewController : UITableViewController
     {
         private const float CellSpacing = 4f;
-        private readonly TimeEntryModel model;
 
-        public ProjectSelectionViewController (TimeEntryModel model) : base (UITableViewStyle.Plain)
+        private readonly ProjectListViewModel viewModel;
+
+        public ProjectSelectionViewController (TimeEntryData timeEntryData) : this (new List<TimeEntryData> { timeEntryData }) {
+
+        }
+
+        public ProjectSelectionViewController (IList<TimeEntryData> timeEntryList) : base (UITableViewStyle.Plain)
         {
-            this.model = model;
+            viewModel = new ProjectListViewModel (timeEntryList);
+            viewModel.Init ();
 
             Title = "ProjectTitle".Tr ();
         }
@@ -53,12 +61,12 @@ namespace Toggl.Ross.ViewControllers
                 workspace = project.Workspace;
             }
 
-            if (project != null || task != null || workspace != null) {
-                model.Workspace = workspace;
-                model.Project = project;
-                model.Task = task;
-                await model.SaveAsync ();
+            TaskData data = null;
+            if (task != null) {
+                data = task.Data;
             }
+
+            await viewModel.SaveModelAsync (project, workspace, data);
 
             var cb = ProjectSelected;
             if (cb != null) {
