@@ -31,30 +31,20 @@ namespace Toggl.Ross.ViewControllers
 
         public TagSelectionViewController (IList<TimeEntryData> timeEntryList) : base (UITableViewStyle.Plain)
         {
-            this.model = model;
-
             viewModel = new TagListViewModel (timeEntryList.First().WorkspaceId, timeEntryList);
             viewModel.OnIsLoadingChanged += (object sender, EventArgs e) => {
                 if (viewModel.IsLoading || viewModel.Model == null) {
                     return;
                 }
                 model = viewModel.Model;
+                modelTags = viewModel.Tags;
+                SetupDataSource();
             };
             viewModel.Init ();
 
             Title = "TagTitle".Tr ();
-
-            LoadTags ();
         }
-
-        private async void LoadTags ()
-        {
-            var dataStore = ServiceContainer.Resolve<IDataStore> ();
-            modelTags = await dataStore.Table<TimeEntryTagData> ()
-                        .QueryAsync (r => r.TimeEntryId == model.Id && r.DeletedAt == null);
-            SetupDataSource ();
-        }
-
+            
         private void SetupDataSource ()
         {
             var modelTagsReady = modelTags != null;
@@ -96,24 +86,7 @@ namespace Toggl.Ross.ViewControllers
 
             isSaving = true;
             try {
-                var tags = source.SelectedTags.ToList ();
-
-                // Delete unused tag relations:
-                var deleteTasks = modelTags
-                                  .Where (oldTag => !tags.Any (newTag => newTag.Id == oldTag.TagId))
-                                  .Select (data => new TimeEntryTagModel (data).DeleteAsync ()).ToList();
-
-                // Create new tag relations:
-                var createTasks = tags
-                                  .Where (newTag => !modelTags.Any (oldTag => oldTag.TagId == newTag.Id))
-                    .Select (data => new TimeEntryTagModel () { TimeEntry = (TimeEntryModel)model.Data, Tag = new TagModel (data) } .SaveAsync ()).ToList();
-
-                await Task.WhenAll (deleteTasks.Concat (createTasks));
-
-                if (deleteTasks.Count > 0 || createTasks.Count > 0) {
-                    model.Touch ();
-                    await model.SaveAsync ();
-                }
+                await viewModel.SaveChanges(source.SelectedTags.ToList ());
 
                 NavigationController.PopViewController (true);
             } finally {
