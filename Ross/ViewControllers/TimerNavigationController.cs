@@ -46,6 +46,8 @@ namespace Toggl.Ross.ViewControllers
                 currentTimeEntry = viewModel.Model;
             };
             viewModel.Init ();
+
+            showRunning = currentTimeEntry == null;
         }
 
         public void Attach (UIViewController parentController)
@@ -101,7 +103,7 @@ namespace Toggl.Ross.ViewControllers
                     await currentTimeEntry.StartAsync ();
 
                     var controllers = new List<UIViewController> (parentController.NavigationController.ViewControllers);
-                    controllers.Add (new EditTimeEntryViewController (timeEntryList));
+                    controllers.Add (new EditTimeEntryViewController (currentTimeEntry.Data));
                     if (ServiceContainer.Resolve<SettingsStore> ().ChooseProjectForNew) {
                         controllers.Add (new ProjectSelectionViewController (timeEntryList));
                     }

@@ -66,6 +66,11 @@ namespace Toggl.Ross.ViewControllers
         private UIBarButtonItem autoCompletionDoneBarButtonItem;
         private Stack<UIBarButtonItem> barButtonItemsStack = new Stack<UIBarButtonItem> ();
 
+        public EditTimeEntryViewController (TimeEntryData timeEntry) : this (new List<TimeEntryData> { timeEntry })
+        {
+
+        }
+
         public EditTimeEntryViewController (IList<TimeEntryData> timeEntryList)
         {
             this.timeEntryList = timeEntryList;
