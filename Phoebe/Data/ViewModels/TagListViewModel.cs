@@ -56,7 +56,7 @@ namespace Toggl.Phoebe.Data.ViewModels
             IsLoading = false;
         }
 
-        public async void SaveChanges (List<TagData> selectedTags)
+        public async Task SaveChanges (List<TagData> selectedTags)
         {
 
             // Delete unused tag relations:
@@ -88,6 +88,13 @@ namespace Toggl.Phoebe.Data.ViewModels
             model.PropertyChanged -= OnModelPropertyChanged;
             tagList.Dispose ();
             tagList = null;
+        }
+
+        public List<TimeEntryTagData> Tags 
+        {
+            get {
+                return modelTags;
+            }
         }
 
         public IList<TimeEntryData> TimeEntryList
