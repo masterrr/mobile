@@ -158,7 +158,7 @@
     <Compile Include="UI\Views\StartStopFab.cs" />
     <Compile Include="UI\Fragments\HomeScreenEditFragment.cs" />
     <Compile Include="UI\Views\TogglAppBar.cs" />
-    <Compile Include="UI\Utils\ManualFormBehavior.cs" />
+    <Compile Include="UI\Utils\FABBehavior.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />
