@@ -53,6 +53,7 @@ namespace Toggl.Ross.ViewControllers
         private UIButton deleteButton;
         private bool hideDatePicker = true;
         private readonly List<NSObject> notificationObjects = new List<NSObject> ();
+        private IList<TimeEntryData> timeEntryList;
         private EditTimeEntryViewModel viewModel;
         private ITimeEntryModel model;
         private readonly TimeEntryTagsView tagsView;
@@ -67,12 +68,13 @@ namespace Toggl.Ross.ViewControllers
 
         public EditTimeEntryViewController (IList<TimeEntryData> timeEntryList)
         {
+            this.timeEntryList = timeEntryList;
             viewModel = new EditTimeEntryViewModel (timeEntryList);
             viewModel.OnIsLoadingChanged += OnModelLoaded;
             viewModel.Init ();
 
             tagsView = new TimeEntryTagsView (model.Id);
-            timerController = new TimerNavigationController (viewModel.Model);
+            timerController = new TimerNavigationController (timeEntryList);
         }
 
         void OnModelLoaded (object sender, EventArgs e)
@@ -609,7 +611,7 @@ namespace Toggl.Ross.ViewControllers
 
         private void OnProjectButtonTouchUpInside (object sender, EventArgs e)
         {
-            var controller = new ProjectSelectionViewController (model);
+            var controller = new ProjectSelectionViewController (timeEntryList);
             NavigationController.PushViewController (controller, true);
         }
 
@@ -665,7 +667,7 @@ namespace Toggl.Ross.ViewControllers
 
         private void OnTagsButtonTouchUpInside (object sender, EventArgs e)
         {
-            var controller = new TagSelectionViewController (model);
+            var controller = new TagSelectionViewController (timeEntryList);
             NavigationController.PushViewController (controller, true);
         }
 
