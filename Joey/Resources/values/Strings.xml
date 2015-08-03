@@ -205,4 +205,6 @@
     <string name="SwitchViewText">or you can</string>
     <string name="LoginViewButtonText">Log in</string>
     <string name="SignupViewButtonText">Sign up</string>
+    <string name="TimerComponentNoProject">(no project)</string>
+    <string name="TimerComponentNoDescription">(no description)</string>
 </resources>

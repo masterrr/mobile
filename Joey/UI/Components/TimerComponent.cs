@@ -196,10 +196,10 @@ namespace Toggl.Joey.UI.Components
             ProjectTextView.Visibility = ViewStates.Visible;
             DescriptionTextView.Visibility = ViewStates.Visible;
             DurationTextView.Gravity = GravityFlags.Center;
-
+            var resources = activity.ApplicationContext.Resources;
             if (CompactView) {
-                ProjectTextView.Text = currentEntry.Project != null ? currentEntry.Project.Name : "(no project)";
-                DescriptionTextView.Text = currentEntry.Description.Length == 0 ? "(no description)" : currentEntry.Description;
+                ProjectTextView.Text = currentEntry.Project != null ? currentEntry.Project.Name : resources.GetText (Resource.String.TimerComponentNoProject);
+                DescriptionTextView.Text = currentEntry.Description.Length == 0 ?  resources.GetText (Resource.String.TimerComponentNoDescription) : currentEntry.Description;
             }
 
             var duration = currentEntry.GetDuration ();
