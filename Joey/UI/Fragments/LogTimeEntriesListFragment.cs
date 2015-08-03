@@ -18,6 +18,7 @@ using Toggl.Phoebe.Data;
 using Toggl.Phoebe.Data.Utils;
 using Toggl.Phoebe.Data.Views;
 using XPlatUtils;
+using Android.Graphics;
 
 namespace Toggl.Joey.UI.Fragments
 {
