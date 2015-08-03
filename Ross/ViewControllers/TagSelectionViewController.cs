@@ -14,20 +14,33 @@ using XPlatUtils;
 using Toggl.Ross.DataSources;
 using Toggl.Ross.Theme;
 using Toggl.Ross.Views;
+using Toggl.Phoebe.Data.ViewModels;
+
 
 namespace Toggl.Ross.ViewControllers
 {
     public class TagSelectionViewController : UITableViewController
     {
         private const float CellSpacing = 4f;
-        private readonly TimeEntryModel model;
+        private ITimeEntryModel model;
+        private readonly TagListViewModel viewModel;
+
         private List<TimeEntryTagData> modelTags;
         private Source source;
         private bool isSaving;
 
-        public TagSelectionViewController (TimeEntryModel model) : base (UITableViewStyle.Plain)
+        public TagSelectionViewController (IList<TimeEntryData> timeEntryList) : base (UITableViewStyle.Plain)
         {
             this.model = model;
+
+            viewModel = new TagListViewModel (timeEntryList.First().WorkspaceId, timeEntryList);
+            viewModel.OnIsLoadingChanged += (object sender, EventArgs e) => {
+                if (viewModel.IsLoading || viewModel.Model == null) {
+                    return;
+                }
+                model = viewModel.Model;
+            };
+            viewModel.Init ();
 
             Title = "TagTitle".Tr ();
 
@@ -93,7 +106,7 @@ namespace Toggl.Ross.ViewControllers
                 // Create new tag relations:
                 var createTasks = tags
                                   .Where (newTag => !modelTags.Any (oldTag => oldTag.TagId == newTag.Id))
-                .Select (data => new TimeEntryTagModel () { TimeEntry = model, Tag = new TagModel (data) } .SaveAsync ()).ToList();
+                    .Select (data => new TimeEntryTagModel () { TimeEntry = (TimeEntryModel)model.Data, Tag = new TagModel (data) } .SaveAsync ()).ToList();
 
                 await Task.WhenAll (deleteTasks.Concat (createTasks));
 
