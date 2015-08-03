@@ -30,16 +30,11 @@ namespace Toggl.Joey.UI.Fragments
         private Subscription<SettingChangedMessage> subscriptionSettingChanged;
         private LogTimeEntriesAdapter logAdapter;
         private CoordinatorLayout coordinatorLayout;
-
         private TimeEntriesCollectionView collectionView;
-
         private FrameLayout manualEntry;
         private bool isEditShowed;
         private HomeScreenEditFragment manualEditFragment;
-
         private TogglAppBar appBar;
-
-        // Recycler setup
         private DividerItemDecoration dividerDecoration;
         private ShadowItemDecoration shadowDecoration;
         private ItemTouchListener itemTouchListener;
@@ -149,7 +144,6 @@ namespace Toggl.Joey.UI.Fragments
 
             manualEditFragment.FABStateChange -= OnFABChange;
             startStopBtn.Click -= OnActionClick;
-
             ReleaseRecyclerView ();
 
             base.OnDestroyView ();
@@ -273,6 +267,8 @@ namespace Toggl.Joey.UI.Fragments
             activity.Timer.AnimateState = progress;
             manualEntry.Alpha = 1 - progress;
             manualEntry.TranslationY = -verticalOffset;
+            var fab_margin = activity.ApplicationContext.Resources.GetDimensionPixelSize (Resource.Dimension.fab_margin);
+            startStopBtn.TranslationY = (recyclerView.Bottom - startStopBtn.Bottom - fab_margin) * (progress);
         }
     }
 }

@@ -22,8 +22,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="310dp"
                 android:paddingTop="?attr/actionBarSize"
-                app:layout_collapseMode="parallax"
-                app:layout_scrollFlags="scroll" />
+                app:layout_collapseMode="pin" />
             <android.support.v7.widget.Toolbar
                 android:id="@+id/HomeToolbar"
                 android:layout_width="match_parent"
@@ -62,4 +61,14 @@
             android:text="@string/NoItemsText"
             android:gravity="center" />
     </LinearLayout>
+    <Toggl.Joey.UI.Views.StartStopFab
+        android:id="@+id/StartStopBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:backgroundTint="@color/bright_green"
+        android:src="@drawable/IcPlayArrowWhite"
+        app:layout_anchor="@+id/EditFormView"
+        app:layout_anchorGravity="bottom|right|end"
+        android:layout_margin="@dimen/fab_margin" />
 </android.support.design.widget.CoordinatorLayout>
