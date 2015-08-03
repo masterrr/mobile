@@ -54,7 +54,12 @@ namespace Toggl.Joey.UI.Fragments
             coordinatorLayout = view.FindViewById<CoordinatorLayout> (Resource.Id.logCoordinatorLayout);
             manualEntry = view.FindViewById<FrameLayout> (Resource.Id.EditFormView);
             appBar = view.FindViewById<TogglAppBar> (Resource.Id.HomeAppBar);
-            appBar.Click += OnAppClick;
+
+            var lp = new CoordinatorLayout.LayoutParams (startStopBtn.LayoutParameters);
+            lp.AnchorId = recyclerView.Id;
+            lp.AnchorGravity = (int) (GravityFlags.Bottom|GravityFlags.End|GravityFlags.Right);
+            lp.Behavior = new FABBehavior (Activity);
+            startStopBtn.LayoutParameters = lp;
             return view;
         }
 
@@ -75,13 +80,6 @@ namespace Toggl.Joey.UI.Fragments
             manualEditFragment.FABStateChange += OnFABChange;
             var activity = (MainDrawerActivity)Activity;
             activity.Timer.CompactView = true;
-        }
-
-        private void OnAppClick (object sender, EventArgs e)
-        {
-            CoordinatorLayout.LayoutParams p = new CoordinatorLayout.LayoutParams (startStopBtn.LayoutParameters) ;
-            p.AnchorId = manualEntry.Id;
-            startStopBtn.LayoutParameters = p;
         }
 
         private void OnFABChange (object sender, EventArgs e)
@@ -262,7 +260,6 @@ namespace Toggl.Joey.UI.Fragments
                     if (t.Text == Resources.GetString (Resource.String.UndoBarButtonText)) {
                         t.SetTextColor (Resources.GetColor (Resource.Color.material_green));
                     }
-
                 }
             }
         }
@@ -274,9 +271,6 @@ namespace Toggl.Joey.UI.Fragments
             activity.Timer.AnimateState = progress;
             manualEntry.Alpha = 1 - progress;
             manualEntry.TranslationY = -verticalOffset;
-            var fab_margin = activity.ApplicationContext.Resources.GetDimensionPixelSize (Resource.Dimension.fab_margin);
-
-//            startStopBtn.TranslationY = (recyclerView.Bottom - startStopBtn.Bottom - fab_margin) * (progress);
         }
     }
 }

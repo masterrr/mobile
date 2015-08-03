@@ -68,7 +68,5 @@
         android:clickable="true"
         android:backgroundTint="@color/bright_green"
         android:src="@drawable/IcPlayArrowWhite"
-        app:layout_anchor="@+id/EditFormView"
-        app:layout_anchorGravity="bottom|right|end"
         android:layout_margin="@dimen/fab_margin" />
 </android.support.design.widget.CoordinatorLayout>
