@@ -132,7 +132,7 @@ namespace Toggl.Ross.Data
             if (topVCList.Count > 0) {
                 // Get current VC's navigation
                 var controllers = new List<UIViewController> (topVCList[0].NavigationController.ViewControllers);
-                controllers.Add (new EditTimeEntryViewController (new List<TimeEntryData> { currentTimeEntry }));
+                controllers.Add (new EditTimeEntryViewController (currentTimeEntry.Data));
                 if (ServiceContainer.Resolve<SettingsStore> ().ChooseProjectForNew) {
                     controllers.Add (new ProjectSelectionViewController (currentTimeEntry));
                 }
