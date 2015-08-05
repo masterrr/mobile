@@ -85,12 +85,21 @@ namespace Toggl.Phoebe.Data.ViewModels
         }
 
         public event EventHandler OnProjectListChanged;
+        public event EventHandler OnStateTimeChanged;
 
         private void OnPropertyChange (object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == TimeEntryModel.PropertyProject) {
+            var p = e.PropertyName;
+            if (p == TimeEntryModel.PropertyProject) {
                 if (OnProjectListChanged != null) {
                     OnProjectListChanged.Invoke (sender, e);
+                }
+            }
+            if (p == TimeEntryModel.PropertyState
+                || p == TimeEntryModel.PropertyStartTime
+                || p == TimeEntryModel.PropertyStopTime) {
+                if (OnStateTimeChanged != null) {
+                    OnStateTimeChanged.Invoke (sender, e);
                 }
             }
 
