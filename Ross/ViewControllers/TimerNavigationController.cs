@@ -25,9 +25,7 @@ namespace Toggl.Ross.ViewControllers
         private UIButton actionButton;
         private UIBarButtonItem navigationButton;
 
-        private IList<TimeEntryData> timeEntryList;
         private ITimeEntryModel currentTimeEntry;
-        private EditTimeEntryViewModel viewModel;
 
         private ActiveTimeEntryManager timeEntryManager;
         private PropertyChangeTracker propertyTracker;
@@ -35,18 +33,9 @@ namespace Toggl.Ross.ViewControllers
         private int rebindCounter;
         private bool isActing;
 
-        public TimerNavigationController (IList<TimeEntryData> timeEntryList = null)
+        public TimerNavigationController (EditTimeEntryViewModel viewModel = null)
         {
-            this.timeEntryList = timeEntryList;
-            viewModel = new EditTimeEntryViewModel (timeEntryList);
-            viewModel.OnIsLoadingChanged += (s, e) => {
-                if (viewModel.IsLoading || viewModel == null) {
-                    return;
-                }
-                currentTimeEntry = viewModel.Model;
-            };
-            viewModel.Init ();
-
+            currentTimeEntry = viewModel == null ? null : viewModel.Model;
             showRunning = currentTimeEntry == null;
         }
 
@@ -77,8 +66,11 @@ namespace Toggl.Ross.ViewControllers
 
         private void OnDurationButtonTouchUpInside (object sender, EventArgs e)
         {
-            var controller = new DurationChangeViewController (currentTimeEntry);
-            parentController.NavigationController.PushViewController (controller, true);
+            // Duration change for the grouped mode is disabled
+            if (currentTimeEntry != null && !currentTimeEntry.Grouped) {
+                var controller = new DurationChangeViewController (currentTimeEntry);
+                parentController.NavigationController.PushViewController (controller, true);
+            }
         }
 
         private async void OnActionButtonTouchUpInside (object sender, EventArgs e)
@@ -91,7 +83,6 @@ namespace Toggl.Ross.ViewControllers
             try {
                 if (currentTimeEntry != null && currentTimeEntry.State == TimeEntryState.Running) {
                     await currentTimeEntry.StopAsync ();
-
                     // Ping analytics
                     ServiceContainer.Resolve<ITracker>().SendTimerStopEvent (TimerStopSource.App);
                 } else if (timeEntryManager != null) {
@@ -105,7 +96,7 @@ namespace Toggl.Ross.ViewControllers
                     var controllers = new List<UIViewController> (parentController.NavigationController.ViewControllers);
                     controllers.Add (new EditTimeEntryViewController (currentTimeEntry.Data));
                     if (ServiceContainer.Resolve<SettingsStore> ().ChooseProjectForNew) {
-                        controllers.Add (new ProjectSelectionViewController (timeEntryList));
+                        controllers.Add (new ProjectSelectionViewController (currentTimeEntry.Data));
                     }
                     parentController.NavigationController.SetViewControllers (controllers.ToArray (), true);
 
@@ -122,9 +113,7 @@ namespace Toggl.Ross.ViewControllers
             if (!isStarted) {
                 return;
             }
-
-            ResetTrackedObservables ();
-
+                                
             rebindCounter++;
 
             if (currentTimeEntry == null) {
@@ -146,30 +135,6 @@ namespace Toggl.Ross.ViewControllers
                         Rebind ();
                     }
                 });
-            }
-        }
-
-        private void ResetTrackedObservables ()
-        {
-            if (propertyTracker == null) {
-                return;
-            }
-
-            propertyTracker.MarkAllStale ();
-
-            if (currentTimeEntry != null) {
-                propertyTracker.Add (currentTimeEntry, HandleTimeEntryPropertyChanged);
-            }
-
-            propertyTracker.ClearStale ();
-        }
-
-        private void HandleTimeEntryPropertyChanged (string prop)
-        {
-            if (prop == TimeEntryModel.PropertyState
-                    || prop == TimeEntryModel.PropertyStartTime
-                    || prop == TimeEntryModel.PropertyStopTime) {
-                Rebind ();
             }
         }
 
