@@ -26,6 +26,7 @@ namespace Toggl.Ross.ViewControllers
         private UIBarButtonItem navigationButton;
 
         private ITimeEntryModel currentTimeEntry;
+        private readonly EditTimeEntryViewModel viewModel;
 
         private ActiveTimeEntryManager timeEntryManager;
         private PropertyChangeTracker propertyTracker;
@@ -35,8 +36,16 @@ namespace Toggl.Ross.ViewControllers
 
         public TimerNavigationController (EditTimeEntryViewModel viewModel = null)
         {
-            currentTimeEntry = viewModel == null ? null : viewModel.Model;
+            if (viewModel != null) {
+                this.viewModel = viewModel;
+                currentTimeEntry = viewModel.Model;
+            }
             showRunning = currentTimeEntry == null;
+        }
+
+        void OnStateTimeChanged (object sender, EventArgs e)
+        {
+            Rebind ();
         }
 
         public void Attach (UIViewController parentController)
@@ -172,6 +181,10 @@ namespace Toggl.Ross.ViewControllers
                 ResetModelToRunning ();
             }
 
+            if (viewModel != null) {
+                viewModel.OnStateTimeChanged += OnStateTimeChanged;
+            }
+
             isStarted = true;
             Rebind ();
         }
@@ -190,6 +203,11 @@ namespace Toggl.Ross.ViewControllers
                 timeEntryManager.PropertyChanged -= OnTimeEntryManagerPropertyChanged;
                 timeEntryManager = null;
             }
+
+            if (viewModel != null) {
+                viewModel.OnStateTimeChanged -= OnStateTimeChanged;
+            }
+
 
             if (showRunning) {
                 currentTimeEntry = null;
