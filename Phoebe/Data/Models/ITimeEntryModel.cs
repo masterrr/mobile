@@ -49,6 +49,8 @@ namespace Toggl.Phoebe.Data.Models
         void Touch ();
 
         Task LoadAsync ();
+
+        bool Grouped { get; }
     }
 }
 
