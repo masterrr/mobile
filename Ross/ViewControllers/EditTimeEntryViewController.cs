@@ -79,7 +79,7 @@ namespace Toggl.Ross.ViewControllers
             viewModel.Init ();
 
             tagsView = new TimeEntryTagsView (model.Id);
-            timerController = new TimerNavigationController (timeEntryList);
+            timerController = new TimerNavigationController (viewModel);
         }
 
         void OnModelLoaded (object sender, EventArgs e)
