@@ -54,6 +54,13 @@ namespace Toggl.Phoebe.Data.Models
         {
         }
 
+        public bool Grouped
+        {
+            get {
+                return false;
+            }
+        }
+
         protected override TimeEntryData Duplicate (TimeEntryData data)
         {
             return new TimeEntryData (data);

@@ -64,6 +64,13 @@ namespace Toggl.Phoebe.Data.Utils
             }
         }
 
+        public bool Grouped 
+        {
+            get {
+                return dataObjects.Count > 1;
+            }
+        }
+
         public IList<string> TimeEntryGuids
         {
             get {
@@ -254,7 +261,7 @@ namespace Toggl.Phoebe.Data.Utils
         public TimeEntryState State
         {
             get {
-                return TimeEntryList.Last ().State;
+                return Model.State;
             } set {
                 Model.State = value;
             }
