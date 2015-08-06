@@ -12,13 +12,11 @@ namespace Toggl.Joey.UI.Utils
     {
         private int minMarginBottom;
         private int shadowHeight;
-        private bool editFormCollapsed;
 
         public FABBehavior (Context context) : base ()
         {
             minMarginBottom = (int)TypedValue.ApplyDimension (ComplexUnitType.Dip, 16, context.Resources.DisplayMetrics);
             shadowHeight = context.Resources.GetDimensionPixelSize (Resource.Dimension.ToolbarDropShadowHeight);
-            editFormCollapsed = false;
         }
 
         public FABBehavior (Context context, IAttributeSet attrs)
@@ -40,7 +38,7 @@ namespace Toggl.Joey.UI.Utils
                 if (dependency.Top > dependency.Height /5) {
                     ViewCompat.SetTranslationY (child, - (child.Top - dependency.Top) - shadowHeight - (child.Height / 2));
                 }
-            } else if (dependency is LinearLayout && editFormCollapsed) {
+            } else if (dependency is LinearLayout) {
                 ViewCompat.SetTranslationY (child,  dependency.TranslationY - (child.Height / 2));
             }
             return true;
