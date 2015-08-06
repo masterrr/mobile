@@ -60,6 +60,10 @@ namespace Toggl.Joey.UI.Fragments
             lp.AnchorGravity = (int) (GravityFlags.Bottom|GravityFlags.End|GravityFlags.Right);
             lp.Behavior = new FABBehavior (Activity);
             startStopBtn.LayoutParameters = lp;
+
+            var lp2= new CoordinatorLayout.LayoutParams (appBar.LayoutParameters);
+            lp2.Behavior = new AppBarBehavior (Activity);
+            appBar.LayoutParameters = lp2;
             return view;
         }
 

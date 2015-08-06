@@ -159,6 +159,7 @@
     <Compile Include="UI\Fragments\HomeScreenEditFragment.cs" />
     <Compile Include="UI\Views\TogglAppBar.cs" />
     <Compile Include="UI\Utils\FABBehavior.cs" />
+    <Compile Include="UI\Utils\AppBarBehavior.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />
