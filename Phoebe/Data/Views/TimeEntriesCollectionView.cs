@@ -201,6 +201,7 @@ namespace Toggl.Phoebe.Data.Views
             }
 
             if (action == NotifyCollectionChangedAction.Remove) {
+                oldStartingIndex = newStartingIndex;
                 var deletedItem = ItemCollection [oldStartingIndex];
                 ItemCollection.RemoveAt (oldStartingIndex);
                 args = new NotifyCollectionChangedEventArgs (action, deletedItem, oldStartingIndex);
