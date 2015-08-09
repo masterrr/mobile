@@ -8,14 +8,12 @@ using Android.Widget;
 
 namespace Toggl.Joey.UI.Utils
 {
-    public class FABBehavior : FloatingActionButton.Behavior
+    public class FABBehavior : CoordinatorLayout.Behavior
     {
-        private int minMarginBottom;
         private int shadowHeight;
 
         public FABBehavior (Context context) : base ()
         {
-            minMarginBottom = (int)TypedValue.ApplyDimension (ComplexUnitType.Dip, 16, context.Resources.DisplayMetrics);
             shadowHeight = context.Resources.GetDimensionPixelSize (Resource.Dimension.ToolbarDropShadowHeight);
         }
 
@@ -23,23 +21,24 @@ namespace Toggl.Joey.UI.Utils
         {
         }
 
-        public override bool LayoutDependsOn (CoordinatorLayout parent, FloatingActionButton child, View dependency)
+        public override bool LayoutDependsOn (CoordinatorLayout parent, Java.Lang.Object child, View dependency)
         {
             return dependency.Id == Resource.Id.HomeAppBar || dependency is LinearLayout;
         }
 
-        public override bool OnDependentViewChanged (CoordinatorLayout parent, FloatingActionButton child, View dependency)
+        public override bool OnDependentViewChanged (CoordinatorLayout parent, Java.Lang.Object child, View dependency)
         {
+            var childView = ((View)child);
             if (dependency.Id == Resource.Id.HomeAppBar) {
                 float progress = (float) (dependency.Bottom - 120) / (float) (dependency.Height - 120);
-                float delta = child.Top - dependency.Height + (float) (child.Height / 2) + shadowHeight;
-                ViewCompat.SetTranslationY (child, - (delta * progress));
+                float delta = childView.Top - dependency.Height + (float) (childView.Height / 2) + shadowHeight;
+                ViewCompat.SetTranslationY (childView, - (delta * progress));
             } else if (dependency.Id == Resource.Id.LogRecyclerView) {
-                if (dependency.Top > dependency.Height /5) {
-                    ViewCompat.SetTranslationY (child, - (child.Top - dependency.Top) - shadowHeight - (child.Height / 2));
+                if (dependency.Top > dependency.Height / 5) {
+                    ViewCompat.SetTranslationY (childView, - (childView.Top - dependency.Top) - shadowHeight - (childView.Height / 2));
                 }
-            } else if (dependency is LinearLayout) {
-                ViewCompat.SetTranslationY (child,  dependency.TranslationY - (child.Height / 2));
+            } else if (dependency is LinearLayout && Math.Abs (childView.TranslationY) < childView.Height) {
+                ViewCompat.SetTranslationY (childView, dependency.TranslationY - (childView.Height / 2));
             }
             return true;
         }
