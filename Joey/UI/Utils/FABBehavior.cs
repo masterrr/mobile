@@ -23,7 +23,7 @@ namespace Toggl.Joey.UI.Utils
 
         public override bool LayoutDependsOn (CoordinatorLayout parent, Java.Lang.Object child, View dependency)
         {
-            return dependency.Id == Resource.Id.HomeAppBar || dependency is LinearLayout;
+            return dependency.Id == Resource.Id.HomeAppBar || dependency is LinearLayout; // To catch SnackBar events.
         }
 
         public override bool OnDependentViewChanged (CoordinatorLayout parent, Java.Lang.Object child, View dependency)
