@@ -179,6 +179,10 @@ namespace Toggl.Joey.UI.Components
             if (currentEntry == null) {
                 return;
             }
+            if (animateState == 1) {
+                Root.PerformClick ();
+                return;
+            }
             new ChangeTimeEntryDurationDialogFragment (currentEntry).Show (activity.SupportFragmentManager, "duration_dialog");
         }
 
