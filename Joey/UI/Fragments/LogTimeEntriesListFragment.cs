@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Android.Content;
+using Android.Graphics;
 using Android.OS;
 using Android.Support.Design.Widget;
 using Android.Support.V4.App;
@@ -11,6 +12,7 @@ using Android.Widget;
 using Toggl.Joey.Data;
 using Toggl.Joey.UI.Activities;
 using Toggl.Joey.UI.Adapters;
+using Toggl.Joey.UI.Components;
 using Toggl.Joey.UI.Utils;
 using Toggl.Joey.UI.Views;
 using Toggl.Phoebe;
@@ -18,7 +20,6 @@ using Toggl.Phoebe.Data;
 using Toggl.Phoebe.Data.Utils;
 using Toggl.Phoebe.Data.Views;
 using XPlatUtils;
-using Android.Graphics;
 using Toolbar = Android.Support.V7.Widget.Toolbar;
 
 namespace Toggl.Joey.UI.Fragments
@@ -54,16 +55,8 @@ namespace Toggl.Joey.UI.Fragments
             coordinatorLayout = view.FindViewById<CoordinatorLayout> (Resource.Id.logCoordinatorLayout);
             manualEntry = view.FindViewById<FrameLayout> (Resource.Id.EditFormView);
             appBar = view.FindViewById<TogglAppBar> (Resource.Id.HomeAppBar);
+            SetupCoordinatorViews ();
 
-            var lp = new CoordinatorLayout.LayoutParams (startStopBtn.LayoutParameters);
-            lp.AnchorId = recyclerView.Id;
-            lp.AnchorGravity = (int) (GravityFlags.Bottom|GravityFlags.End|GravityFlags.Right);
-            lp.Behavior = new FABBehavior (Activity);
-            startStopBtn.LayoutParameters = lp;
-
-            var lp2= new CoordinatorLayout.LayoutParams (appBar.LayoutParameters);
-            lp2.Behavior = new AppBarBehavior (Activity);
-            appBar.LayoutParameters = lp2;
             return view;
         }
 
@@ -81,9 +74,9 @@ namespace Toggl.Joey.UI.Fragments
             }
             appBar.AddOnOffsetChangedListener (this);
             startStopBtn.Click += OnActionClick;
+            timerComponent.Root.Click += OnToolbarClick;
             manualEditFragment.FABStateChange += OnFABChange;
-            var activity = (MainDrawerActivity)Activity;
-            activity.Timer.CompactView = true;
+            timerComponent.CompactView = true;
         }
 
         private void OnFABChange (object sender, EventArgs e)
@@ -94,6 +87,11 @@ namespace Toggl.Joey.UI.Fragments
         private void OnActionClick (object sender, EventArgs e)
         {
             manualEditFragment.RequestAction();
+        }
+
+        private void OnToolbarClick (object sender, EventArgs e)
+        {
+            appBar.Expand();
         }
 
         public bool EditFormVisible
@@ -151,6 +149,7 @@ namespace Toggl.Joey.UI.Fragments
 
             manualEditFragment.FABStateChange -= OnFABChange;
             startStopBtn.Click -= OnActionClick;
+            appBar.Click -= OnToolbarClick;
             ReleaseRecyclerView ();
 
             base.OnDestroyView ();
@@ -188,6 +187,20 @@ namespace Toggl.Joey.UI.Fragments
             itemTouchListener.Dispose ();
             dividerDecoration.Dispose ();
             shadowDecoration.Dispose ();
+        }
+
+        private void SetupCoordinatorViews ()
+        {
+            var fabLayoutParams = new CoordinatorLayout.LayoutParams (startStopBtn.LayoutParameters);
+            fabLayoutParams.AnchorId = recyclerView.Id;
+            fabLayoutParams.AnchorGravity = (int) (GravityFlags.Bottom | GravityFlags.End | GravityFlags.Right);
+            fabLayoutParams.Behavior = new FABBehavior (Activity);
+            startStopBtn.LayoutParameters = fabLayoutParams;
+
+            var appBarLayoutParamaters = new CoordinatorLayout.LayoutParams (appBar.LayoutParameters);
+            appBarLayoutParamaters.Behavior = new AppBarBehavior (Activity);
+            appBar.LayoutParameters = appBarLayoutParamaters;
+
         }
 
         private void OnSettingChanged (SettingChangedMessage msg)
@@ -270,11 +283,18 @@ namespace Toggl.Joey.UI.Fragments
 
         public void OnOffsetChanged (AppBarLayout layout, int verticalOffset)
         {
-            var activity = (MainDrawerActivity)Activity;
             float progress = (float)Math.Abs (verticalOffset) / (float) appBar.TotalScrollRange;
-            activity.Timer.AnimateState = progress;
+            timerComponent.AnimateState = progress;
             manualEntry.Alpha = 1 - progress;
             manualEntry.TranslationY = -verticalOffset;
+        }
+
+        private TimerComponent timerComponent
+        {
+            get {
+                var activity = (MainDrawerActivity)Activity;
+                return activity.Timer;
+            }
         }
     }
 }
