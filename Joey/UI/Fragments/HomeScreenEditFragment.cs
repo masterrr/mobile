@@ -126,6 +126,7 @@ namespace Toggl.Joey.UI.Fragments
                 tagsView = new TimeEntryTagsView (ActiveTimeEntry.Id);
                 tagsView.Updated += OnTimeEntryTagsUpdated;
             }
+            RebindTags ();
         }
 
         private ITimeEntryModel ActiveTimeEntry
