@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Android.App;
 using Android.Content;
 using Android.OS;
-using Android.Support.V7.App;
 using Android.Support.V7.Widget;
 using Android.Views;
 using Toggl.Joey.UI.Activities;
@@ -26,6 +25,7 @@ namespace Toggl.Joey.UI.Fragments
 
         private RecyclerView recyclerView;
         private ProjectListViewModel viewModel;
+        private Guid workspaceId;
 
         public ProjectListFragment ()
         {
@@ -35,9 +35,10 @@ namespace Toggl.Joey.UI.Fragments
         {
         }
 
-        public ProjectListFragment (IList<TimeEntryData> timeEntryList)
+        public ProjectListFragment (IList<TimeEntryData> timeEntryList, Guid workspaceId)
         {
-            viewModel = new ProjectListViewModel (timeEntryList);
+            this.workspaceId = workspaceId;
+            viewModel = new ProjectListViewModel (timeEntryList, this.workspaceId);
         }
 
         public override View OnCreateView (LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -49,13 +50,6 @@ namespace Toggl.Joey.UI.Fragments
             recyclerView.AddItemDecoration (new ShadowItemDecoration (Activity));
             recyclerView.AddItemDecoration (new DividerItemDecoration (Activity, DividerItemDecoration.VerticalList));
 
-            var activity = (AppCompatActivity)Activity;
-            var toolbar = view.FindViewById<Toolbar> (Resource.Id.ProjectListToolbar);
-            activity.SetSupportActionBar (toolbar);
-
-            var actionBar = activity.SupportActionBar;
-            actionBar.SetDisplayHomeAsUpEnabled (true);
-            actionBar.SetTitle (Resource.String.ChooseTimeEntryProjectDialogTitle);
             HasOptionsMenu = true;
 
             return view;
@@ -71,7 +65,7 @@ namespace Toggl.Joey.UI.Fragments
                     Activity.Finish ();
                     return;
                 }
-                viewModel = new ProjectListViewModel (timeEntryList);
+                viewModel = new ProjectListViewModel (timeEntryList, workspaceId);
             }
 
             var adapter = new ProjectListAdapter (recyclerView, viewModel.ProjectList);

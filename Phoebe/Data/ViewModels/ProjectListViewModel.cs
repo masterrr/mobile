@@ -17,10 +17,12 @@ namespace Toggl.Phoebe.Data.ViewModels
         private ITimeEntryModel model;
         private IList<TimeEntryData> timeEntryList;
         private WorkspaceProjectsView projectList;
+        private Guid workspaceId;
 
-        public ProjectListViewModel (IList<TimeEntryData> timeEntryList)
+        public ProjectListViewModel (IList<TimeEntryData> timeEntryList, Guid workspaceId)
         {
             this.timeEntryList = timeEntryList;
+            this.workspaceId = workspaceId;
             ServiceContainer.Resolve<ITracker> ().CurrentScreen = "Select Project";
         }
 
@@ -54,7 +56,7 @@ namespace Toggl.Phoebe.Data.ViewModels
         {
             get {
                 if (projectList == null) {
-                    projectList = new WorkspaceProjectsView ();
+                    projectList = new WorkspaceProjectsView (workspaceId);
                 }
                 return projectList;
             }

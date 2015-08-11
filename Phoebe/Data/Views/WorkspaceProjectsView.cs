@@ -22,6 +22,7 @@ namespace Toggl.Phoebe.Data.Views
         private int displayTaskForProjectPosition;
 
         private Project displayingTaskForProject;
+        private Guid workspaceId;
         public Project DisplayingTaskForProject
         {
             get {
@@ -31,10 +32,10 @@ namespace Toggl.Phoebe.Data.Views
 
         public bool SortByClients { private set; get; }
 
-        public WorkspaceProjectsView (bool sortByClients = false)
+        public WorkspaceProjectsView (Guid workspaceId,  bool sortByClients = false)
         {
             SortByClients = sortByClients;
-
+            this.workspaceId = workspaceId;
             var bus = ServiceContainer.Resolve<MessageBus> ();
             subscriptionDataChange = bus.Subscribe<DataChangeMessage> (OnDataChange);
 
@@ -346,7 +347,7 @@ namespace Toggl.Phoebe.Data.Views
                 clientDataObjects.Clear ();
 
                 var workspacesTask = store.Table<WorkspaceData> ()
-                                     .QueryAsync (r => r.DeletedAt == null);
+                                     .QueryAsync (r => r.Id == workspaceId);
                 var projectsTask = store.GetUserAccessibleProjects (userId ?? Guid.Empty);
                 var tasksTask = store.Table<TaskData> ()
                                 .QueryAsync (r => r.DeletedAt == null && r.IsActive == true);
@@ -453,16 +454,12 @@ namespace Toggl.Phoebe.Data.Views
                        ));
         }
 
-        public void LoadMore ()
-        {
-
-        }
+        public void LoadMore () {}
 
         public IEnumerable<object> Data
         {
             get {
                 var includeWorkspaces = workspaceWrappers.Count > 1;
-
                 foreach (var ws in workspaceWrappers) {
                     if (includeWorkspaces) {
                         yield return ws;
@@ -519,6 +516,15 @@ namespace Toggl.Phoebe.Data.Views
                     OnIsLoadingChanged (this, EventArgs.Empty);
                 }
             }
+        }
+
+        public static async Task<List<WorkspaceData>> GetWorkspaces()
+        {
+            var store = ServiceContainer.Resolve<IDataStore> ();
+            var workspacesTask = store.Table<WorkspaceData> ()
+                                 .QueryAsync (r => r.DeletedAt == null);
+            await Task.WhenAll (workspacesTask);
+            return workspacesTask.Result;
         }
 
         public class Workspace

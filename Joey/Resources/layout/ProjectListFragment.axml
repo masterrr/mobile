@@ -4,23 +4,9 @@
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/ProjectListToolbar"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/ProjectListRecyclerView"
+        android:background="#f8f8f8"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:minHeight="?attr/actionBarSize"
-        android:background="@drawable/ToolbarBgPattern" />
-	    <FrameLayout
-	    	android:layout_width="match_parent"
-	    	android:layout_height="match_parent">
-    	    <android.support.v7.widget.RecyclerView
-		        android:id="@+id/ProjectListRecyclerView"
-		        android:background="#f8f8f8"
-		        android:layout_width="match_parent"
-		        android:layout_height="fill_parent" />
-	        <View
-		        android:layout_width="match_parent"
-            	android:layout_height="@dimen/ToolbarDropShadowHeight"
-             	android:background="@drawable/DropShadowVertical" />
-    	</FrameLayout>
+        android:layout_height="fill_parent" />
 </LinearLayout>
