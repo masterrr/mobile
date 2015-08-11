@@ -24,15 +24,19 @@ namespace Toggl.Joey.UI.Activities
     public class ProjectListActivity : BaseActivity
     {
         public static readonly string ExtraTimeEntriesIds = "com.toggl.timer.time_entries_ids";
+        private static readonly int ProjectCreatedRequestCode = 1;
+
         private ViewPager viewPager;
         private ProjectFragmentAdapter projectFragmentAdapter;
         private TabLayout tabLayout;
+        private FloatingActionButton fab;
+        private IList<TimeEntryData> timeEntryList;
 
         protected async override void OnCreateActivity (Bundle state)
         {
             base.OnCreateActivity (state);
 
-            var timeEntryList = await GetIntentTimeEntryData (Intent);
+            timeEntryList = await GetIntentTimeEntryData (Intent);
             if (timeEntryList.Count == 0) {
                 Finish ();
             }
@@ -44,10 +48,21 @@ namespace Toggl.Joey.UI.Activities
             tabLayout = FindViewById<TabLayout> (Resource.Id.WorkspaceTabLayout);
             tabLayout.SetupWithViewPager (viewPager);
 
+            fab = FindViewById<FloatingActionButton> (Resource.Id.AddNewProjectFAB);
+            fab.Click += OnFABClick;
+
             var toolbar = FindViewById<Toolbar> (Resource.Id.ProjectListToolbar);
             SetSupportActionBar (toolbar);
             SupportActionBar.SetDisplayHomeAsUpEnabled (true);
             SupportActionBar.SetTitle (Resource.String.ChooseTimeEntryProjectDialogTitle);
+        }
+
+        private void OnFABClick (object sender, EventArgs e)
+        {
+            var entryList = new List<TimeEntryData> (timeEntryList);
+            var intent = BaseActivity.CreateDataIntent<NewProjectActivity, List<TimeEntryData>>
+                         (this, entryList, NewProjectActivity.ExtraTimeEntryDataListId);
+            StartActivityForResult (intent, ProjectCreatedRequestCode);
         }
 
         private class ProjectFragmentAdapter : FragmentPagerAdapter
