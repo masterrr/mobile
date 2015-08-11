@@ -156,7 +156,7 @@ namespace Toggl.Joey.UI.Fragments
 
         public async void OnDismiss (RecyclerView.ViewHolder viewHolder)
         {
-            var duration = TimeEntriesCollectionView.UndoSecondsInterval * 1000;
+            var duration = TimeEntriesCollectionView.UndoMilliSecondsInterval;
 
             await collectionView.RemoveItemWithUndoAsync (viewHolder.AdapterPosition);
             var snackBar = Snackbar

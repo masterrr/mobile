@@ -22,7 +22,7 @@ namespace Toggl.Phoebe.Data.Views
     /// </summary>
     public class TimeEntriesCollectionView : ICollectionDataView<object>, IDisposable
     {
-        public static int UndoSecondsInterval = 5;
+        public static int UndoMilliSecondsInterval = 5000;
 
         protected string Tag = "TimeEntriesCollectionView";
         protected TimeEntryHolder LastRemovedItem;
@@ -296,7 +296,7 @@ namespace Toggl.Phoebe.Data.Views
                 undoTimer.Elapsed -= OnUndoTimeFinished;
                 undoTimer.Close ();
             }
-            undoTimer = new Timer ((UndoSecondsInterval + 1) * 1000);
+            undoTimer = new Timer (UndoMilliSecondsInterval + 1);
             undoTimer.AutoReset = false;
             undoTimer.Elapsed += OnUndoTimeFinished;
             undoTimer.Start ();
