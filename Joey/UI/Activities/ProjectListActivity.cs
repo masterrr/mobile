@@ -8,6 +8,7 @@ using Android.Support.Design.Widget;
 using Android.Support.V4.App;
 using Android.Support.V4.View;
 using Android.Support.V7.Widget;
+using Android.Views;
 using Toggl.Joey.UI.Fragments;
 using Toggl.Phoebe.Data.DataObjects;
 using Toggl.Phoebe.Data.Utils;
@@ -47,6 +48,7 @@ namespace Toggl.Joey.UI.Activities
             viewPager.Adapter = projectFragmentAdapter;
             tabLayout = FindViewById<TabLayout> (Resource.Id.WorkspaceTabLayout);
             tabLayout.SetupWithViewPager (viewPager);
+            tabLayout.Visibility = projectFragmentAdapter.Count == 1 ? ViewStates.Gone : ViewStates.Visible;
 
             fab = FindViewById<FloatingActionButton> (Resource.Id.AddNewProjectFAB);
             fab.Click += OnFABClick;
