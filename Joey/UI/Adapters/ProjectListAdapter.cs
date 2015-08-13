@@ -18,11 +18,10 @@ namespace Toggl.Joey.UI.Adapters
     public class ProjectListAdapter : RecycledDataViewAdapter<object>
     {
         protected static readonly int ViewTypeContent = 1;
-        protected static readonly int ViewTypeWorkspace = ViewTypeContent;
-        protected static readonly int ViewTypeNoProject = ViewTypeContent + 1;
-        protected static readonly int ViewTypeProject = ViewTypeContent + 2;
-        protected static readonly int ViewTypeNewProject = ViewTypeContent + 3;
-        protected static readonly int ViewTypeTask = ViewTypeContent + 4;
+        protected static readonly int ViewTypeNoProject = ViewTypeContent;
+        protected static readonly int ViewTypeProject = ViewTypeContent + 1;
+        protected static readonly int ViewTypeNewProject = ViewTypeContent + 2;
+        protected static readonly int ViewTypeTask = ViewTypeContent + 3;
         protected static readonly int ViewTypeLoaderPlaceholder = 0;
 
         public Action<object> HandleProjectSelection { get; set; }
@@ -50,25 +49,19 @@ namespace Toggl.Joey.UI.Adapters
             View view;
             RecyclerView.ViewHolder holder;
 
-            if (viewType == ViewTypeWorkspace) {
-                // header
-                view = LayoutInflater.FromContext (ServiceContainer.Resolve<Context> ()).Inflate (Resource.Layout.ProjectListWorkspaceItem, parent, false);
-                holder = new WorkspaceListItemHolder (view);
+            // projects
+            if (viewType == ViewTypeProject) {
+                view =  LayoutInflater.FromContext (ServiceContainer.Resolve<Context> ()).Inflate (Resource.Layout.ProjectListProjectItem, parent, false);
+                holder = new ProjectListItemHolder (this, view, HandleTasksProjectItemClick, HandleProjectItemClick);
+            } else if (viewType == ViewTypeNewProject) {
+                view =  LayoutInflater.FromContext (ServiceContainer.Resolve<Context> ()).Inflate (Resource.Layout.ProjectListNewProjectItem, parent, false);
+                holder = new NewProjectListItemHolder (this, view);
+            } else if (viewType == ViewTypeTask) {
+                view =  LayoutInflater.FromContext (ServiceContainer.Resolve<Context> ()).Inflate (Resource.Layout.ProjectListTaskItem, parent, false);
+                holder = new ProjectListTaskItemHolder (this, view);
             } else {
-                // projects
-                if (viewType == ViewTypeProject) {
-                    view =  LayoutInflater.FromContext (ServiceContainer.Resolve<Context> ()).Inflate (Resource.Layout.ProjectListProjectItem, parent, false);
-                    holder = new ProjectListItemHolder (this, view, HandleTasksProjectItemClick, HandleProjectItemClick);
-                } else if (viewType == ViewTypeNewProject) {
-                    view =  LayoutInflater.FromContext (ServiceContainer.Resolve<Context> ()).Inflate (Resource.Layout.ProjectListNewProjectItem, parent, false);
-                    holder = new NewProjectListItemHolder (this, view);
-                } else if (viewType == ViewTypeTask) {
-                    view =  LayoutInflater.FromContext (ServiceContainer.Resolve<Context> ()).Inflate (Resource.Layout.ProjectListTaskItem, parent, false);
-                    holder = new ProjectListTaskItemHolder (this, view);
-                } else {
-                    view =  LayoutInflater.FromContext (ServiceContainer.Resolve<Context> ()).Inflate (Resource.Layout.ProjectListNoProjectItem, parent, false);
-                    holder = new NoProjectListItemHolder (this, view);
-                }
+                view =  LayoutInflater.FromContext (ServiceContainer.Resolve<Context> ()).Inflate (Resource.Layout.ProjectListNoProjectItem, parent, false);
+                holder = new NoProjectListItemHolder (this, view);
             }
             return holder;
         }
@@ -99,33 +92,29 @@ namespace Toggl.Joey.UI.Adapters
         {
             var viewType = GetItemViewType (position);
 
-            if (viewType == ViewTypeWorkspace) {
-                var workspaceHolder = (WorkspaceListItemHolder)holder;
-                workspaceHolder.Bind ((WorkspaceProjectsView.Workspace) GetEntry (position));
+            if (viewType == ViewTypeTask) {
+                var data = (TaskData)GetEntry (position);
+                var projectHolder = (ProjectListTaskItemHolder) holder;
+                projectHolder.Bind (data);
             } else {
-                if (viewType == ViewTypeTask) {
-                    var data = (TaskData)GetEntry (position);
-                    var projectHolder = (ProjectListTaskItemHolder) holder;
+                var data = (WorkspaceProjectsView.Project) GetEntry (position);
+                if (viewType == ViewTypeProject) {
+                    var projectHolder = (ProjectListItemHolder)holder;
+                    projectHolder.Bind (data);
+                    projectHolder.TasksButton.Selected |= null != collectionView.DisplayingTaskForProject && collectionView.DisplayingTaskForProject.Data.RemoteId == data.Data.RemoteId;
+                } else if (viewType == ViewTypeNewProject) {
+                    var projectHolder = (NewProjectListItemHolder)holder;
                     projectHolder.Bind (data);
                 } else {
-                    var data = (WorkspaceProjectsView.Project) GetEntry (position);
-                    if (viewType == ViewTypeProject) {
-                        var projectHolder = (ProjectListItemHolder)holder;
-                        projectHolder.Bind (data);
-                        projectHolder.TasksButton.Selected |= null != collectionView.DisplayingTaskForProject && collectionView.DisplayingTaskForProject.Data.RemoteId == data.Data.RemoteId;
-                    } else if (viewType == ViewTypeNewProject) {
-                        var projectHolder = (NewProjectListItemHolder)holder;
-                        projectHolder.Bind (data);
-                    } else {
-                        var projectHolder = (NoProjectListItemHolder)holder;
-                        projectHolder.Bind (data);
-                    }
+                    var projectHolder = (NoProjectListItemHolder)holder;
+                    projectHolder.Bind (data);
                 }
             }
         }
 
         public override int GetItemViewType (int position)
         {
+            Console.WriteLine ("position {0}, entry: {1}", position, GetEntry (position));
             if (position == DataView.Count) {
                 return ViewTypeLoaderPlaceholder;
             }
@@ -133,45 +122,13 @@ namespace Toggl.Joey.UI.Adapters
             var obj = GetEntry (position);
             if (obj is WorkspaceProjectsView.Project) {
                 var p = (WorkspaceProjectsView.Project)obj;
-                if (p.IsNewProject) {
-                    return ViewTypeNewProject;
-                }
 
                 return p.IsNoProject ? ViewTypeNoProject : ViewTypeProject;
             }
-            if (obj is TaskData) {
-                return ViewTypeTask;
-            }
-
-            return ViewTypeWorkspace;
+            return ViewTypeTask;
         }
 
         #region View holders
-
-        [Shadow (ShadowAttribute.Mode.Bottom)]
-        public class WorkspaceListItemHolder : RecycledBindableViewHolder<WorkspaceProjectsView.Workspace>
-        {
-            public TextView WorkspaceTextView { get; private set; }
-
-            public WorkspaceListItemHolder (IntPtr a, Android.Runtime.JniHandleOwnership b) : base (a, b)
-            {
-            }
-
-            public WorkspaceListItemHolder (View root) : base (root)
-            {
-                WorkspaceTextView = root.FindViewById<TextView> (Resource.Id.WorkspaceTextView).SetFont (Font.RobotoMedium);
-            }
-
-            protected override void Rebind ()
-            {
-                // Protect against Java side being GCed
-                if (Handle == IntPtr.Zero) {
-                    return;
-                }
-                var ctx = ServiceContainer.Resolve<Context> ();
-                WorkspaceTextView.Text = !String.IsNullOrWhiteSpace (DataSource.Data.Name) ? DataSource.Data.Name : ctx.GetString (Resource.String.ProjectsNamelessWorkspace);
-            }
-        }
 
         public class ProjectListItemHolder : RecycledBindableViewHolder<WorkspaceProjectsView.Project>, View.IOnClickListener
         {
