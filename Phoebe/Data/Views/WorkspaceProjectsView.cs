@@ -332,10 +332,6 @@ namespace Toggl.Phoebe.Data.Views
                     return a.IsNoProject ? -1 : 1;
                 }
 
-                if (a.IsNewProject != b.IsNewProject) {
-                    return a.IsNewProject ? 1 : -1;
-                }
-
                 var res = 0;
 
                 if (!sortByClients) {
@@ -451,10 +447,6 @@ namespace Toggl.Phoebe.Data.Views
             {
                 this.dataObject = dataObject;
                 projects.Add (new Project (dataObject));
-                projects.Add (new Project (new ProjectData () {
-                    WorkspaceId = dataObject.Id,
-                    Color = new Random ().Next (),
-                }));
             }
 
             public WorkspaceData Data

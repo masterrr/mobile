@@ -20,8 +20,7 @@ namespace Toggl.Joey.UI.Adapters
         protected static readonly int ViewTypeContent = 1;
         protected static readonly int ViewTypeNoProject = ViewTypeContent;
         protected static readonly int ViewTypeProject = ViewTypeContent + 1;
-        protected static readonly int ViewTypeNewProject = ViewTypeContent + 2;
-        protected static readonly int ViewTypeTask = ViewTypeContent + 3;
+        protected static readonly int ViewTypeTask = ViewTypeContent + 2;
         protected static readonly int ViewTypeLoaderPlaceholder = 0;
 
         public Action<object> HandleProjectSelection { get; set; }
@@ -49,13 +48,9 @@ namespace Toggl.Joey.UI.Adapters
             View view;
             RecyclerView.ViewHolder holder;
 
-            // projects
             if (viewType == ViewTypeProject) {
                 view =  LayoutInflater.FromContext (ServiceContainer.Resolve<Context> ()).Inflate (Resource.Layout.ProjectListProjectItem, parent, false);
                 holder = new ProjectListItemHolder (this, view, HandleTasksProjectItemClick, HandleProjectItemClick);
-            } else if (viewType == ViewTypeNewProject) {
-                view =  LayoutInflater.FromContext (ServiceContainer.Resolve<Context> ()).Inflate (Resource.Layout.ProjectListNewProjectItem, parent, false);
-                holder = new NewProjectListItemHolder (this, view);
             } else if (viewType == ViewTypeTask) {
                 view =  LayoutInflater.FromContext (ServiceContainer.Resolve<Context> ()).Inflate (Resource.Layout.ProjectListTaskItem, parent, false);
                 holder = new ProjectListTaskItemHolder (this, view);
@@ -102,9 +97,6 @@ namespace Toggl.Joey.UI.Adapters
                     var projectHolder = (ProjectListItemHolder)holder;
                     projectHolder.Bind (data);
                     projectHolder.TasksButton.Selected |= null != collectionView.DisplayingTaskForProject && collectionView.DisplayingTaskForProject.Data.RemoteId == data.Data.RemoteId;
-                } else if (viewType == ViewTypeNewProject) {
-                    var projectHolder = (NewProjectListItemHolder)holder;
-                    projectHolder.Bind (data);
                 } else {
                     var projectHolder = (NoProjectListItemHolder)holder;
                     projectHolder.Bind (data);
@@ -114,7 +106,6 @@ namespace Toggl.Joey.UI.Adapters
 
         public override int GetItemViewType (int position)
         {
-            Console.WriteLine ("position {0}, entry: {1}", position, GetEntry (position));
             if (position == DataView.Count) {
                 return ViewTypeLoaderPlaceholder;
             }
@@ -273,43 +264,6 @@ namespace Toggl.Joey.UI.Adapters
             protected override void Rebind ()
             {
                 ProjectTextView.SetText (Resource.String.ProjectsNoProject);
-            }
-
-            public void OnClick (View v)
-            {
-                adapter.HandleProjectSelection (DataSource);
-            }
-        }
-
-        [Shadow (ShadowAttribute.Mode.Top)]
-        public class NewProjectListItemHolder : RecycledBindableViewHolder<WorkspaceProjectsView.Project>, View.IOnClickListener
-        {
-            private readonly ProjectListAdapter adapter;
-
-            public TextView ProjectTextView { get; private set; }
-
-            public NewProjectListItemHolder (IntPtr a, Android.Runtime.JniHandleOwnership b) : base (a, b)
-            {
-            }
-
-            public NewProjectListItemHolder (ProjectListAdapter adapter, View root) : base (root)
-            {
-                this.adapter = adapter;
-                ProjectTextView = root.FindViewById<TextView> (Resource.Id.ProjectTextView).SetFont (Font.Roboto);
-                root.SetOnClickListener (this);
-            }
-
-            private ProjectModel model;
-
-            protected override void Rebind ()
-            {
-                model = null;
-                if (DataSource != null && DataSource.Data != null) {
-                    model = new ProjectModel (DataSource.Data);
-                }
-
-                var color = Color.ParseColor (model.GetHexColor ());
-                ProjectTextView.SetText (Resource.String.ProjectsNewProject);
             }
 
             public void OnClick (View v)
