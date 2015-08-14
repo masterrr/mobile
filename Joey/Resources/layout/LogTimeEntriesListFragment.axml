@@ -11,7 +11,7 @@
         <android.support.design.widget.CollapsingToolbarLayout
             android:id="@+id/collapsing_toolbar"
             android:layout_width="match_parent"
-            android:layout_height="310dp"
+            android:layout_height="330dp"
             android:fitsSystemWindows="true"
             android:minHeight="?attr/actionBarSize"
             android:background="@drawable/BgArrowsPattern"
@@ -20,7 +20,7 @@
             <FrameLayout
                 android:id="@+id/EditFormView"
                 android:layout_width="match_parent"
-                android:layout_height="310dp"
+                android:layout_height="330dp"
                 android:paddingTop="?attr/actionBarSize"
                 app:layout_collapseMode="pin" />
             <android.support.v7.widget.Toolbar
