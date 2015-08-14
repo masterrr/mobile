@@ -12,7 +12,6 @@
             android:layout_height="wrap_content"
             android:paddingRight="32dp"
             android:paddingLeft="32dp"
-            android:paddingBottom="42dp"
             android:layout_marginTop="20dp">
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -117,7 +116,7 @@
                 android:textColor="@color/BillableTextColor"
                 android:gravity="center_vertical"
                 android:button="@null"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="20dp"
                 android:drawableLeft="@drawable/IcBillableGreen"
                 android:drawablePadding="5dp" />
         </LinearLayout>
