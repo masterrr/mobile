@@ -61,7 +61,6 @@ namespace Toggl.Phoebe.Data.Views
 
             displayTaskForProjectPosition = position;
             UpdateCollection ();
-            DispatchCollectionEvent (CollectionEventBuilder.GetEvent (NotifyCollectionChangedAction.Reset, -1, -1));
         }
 
         public void Dispose ()
@@ -121,11 +120,10 @@ namespace Toggl.Phoebe.Data.Views
             if (isExcluded) {
                 if (FindProject (data.Id, out project)) {
                     currentWorkspace.Projects.Remove (project);
-                    OnUpdated ();
+                    UpdateCollection ();
                 }
             } else {
                 data = new ProjectData (data);
-
                 if (FindProject (data.Id, out project)) {
                     var existingData = project.Data;
 
@@ -135,11 +133,12 @@ namespace Toggl.Phoebe.Data.Views
                     if (shouldSort) {
                         SortProjects (currentWorkspace.Projects, clientDataObjects, SortByClients);
                     }
-                    OnUpdated ();
+                    UpdateCollection();
                 } else if (data.WorkspaceId == currentWorkspace.Data.Id) {
+                    project = new Project (data);
                     currentWorkspace.Projects.Add (project);
                     SortProjects (currentWorkspace.Projects, clientDataObjects, SortByClients);
-                    OnUpdated ();
+                    UpdateCollection();
                 }
             }
         }
@@ -156,7 +155,7 @@ namespace Toggl.Phoebe.Data.Views
             if (isExcluded) {
                 if (FindTask (data.Id, out project, out existingData)) {
                     project.Tasks.Remove (existingData);
-                    OnUpdated ();
+                    UpdateCollection ();
                 }
             } else {
                 data = new TaskData (data);
@@ -179,12 +178,11 @@ namespace Toggl.Phoebe.Data.Views
                     if (shouldSort) {
                         SortTasks (project.Tasks);
                     }
-
-                    OnUpdated ();
+                    UpdateCollection ();
                 } else if (FindProject (data.ProjectId, out project)) {
                     project.Tasks.Add (data);
                     SortTasks (project.Tasks);
-                    OnUpdated ();
+                    UpdateCollection ();
                 }
             }
         }
@@ -317,7 +315,6 @@ namespace Toggl.Phoebe.Data.Views
             } finally {
                 IsLoading = false;
                 UpdateCollection ();
-                DispatchCollectionEvent (CollectionEventBuilder.GetEvent (NotifyCollectionChangedAction.Reset, -1, -1));
 
                 if (shouldSubscribe) {
                     subscriptionDataChange = bus.Subscribe<DataChangeMessage> (OnDataChange);
@@ -383,6 +380,7 @@ namespace Toggl.Phoebe.Data.Views
                     }
                 }
             }
+            OnUpdated ();
         }
 
         public IEnumerable<object> Data
