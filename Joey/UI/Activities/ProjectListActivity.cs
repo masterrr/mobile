@@ -62,9 +62,20 @@ namespace Toggl.Joey.UI.Activities
         private void OnFABClick (object sender, EventArgs e)
         {
             var entryList = new List<TimeEntryData> (timeEntryList);
+
+            ChangeListWorkspace (entryList, projectFragmentAdapter.GetWorkspaceIdOfPosition (tabLayout.SelectedTabPosition));
+
             var intent = BaseActivity.CreateDataIntent<NewProjectActivity, List<TimeEntryData>>
                          (this, entryList, NewProjectActivity.ExtraTimeEntryDataListId);
+
             StartActivityForResult (intent, ProjectCreatedRequestCode);
+        }
+
+        private void ChangeListWorkspace (List<TimeEntryData> list, Guid wsId)
+        {
+            foreach (var entry in list ) {
+                entry.WorkspaceId = wsId;
+            }
         }
 
         private class ProjectFragmentAdapter : FragmentPagerAdapter
@@ -98,6 +109,11 @@ namespace Toggl.Joey.UI.Activities
             public override Java.Lang.ICharSequence GetPageTitleFormatted (int position)
             {
                 return new Java.Lang.String (fragmentTitles[position]);
+            }
+
+            public Guid GetWorkspaceIdOfPosition (int position)
+            {
+                return workspaces [position].Id;
             }
         }
 

@@ -69,7 +69,7 @@ namespace Toggl.Phoebe.Data.ViewModels
                     return;
                 }
 
-                workspaceId = user.DefaultWorkspaceId;
+                workspaceId = timeEntryList[0].WorkspaceId;
                 workspaceModel = new WorkspaceModel (workspaceId);
                 await workspaceModel.LoadAsync ();
 
