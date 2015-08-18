@@ -156,6 +156,7 @@
     <Compile Include="UI\Utils\DimensionsExtensions.cs" />
     <Compile Include="UI\Utils\SwipeDismissCallback.cs" />
     <Compile Include="UI\Views\StartStopFab.cs" />
+    <Compile Include="UI\Views\AddProjectFab.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />
@@ -674,6 +675,10 @@
     <AndroidResource Include="Resources\drawable-hdpi\icTasks.png" />
     <AndroidResource Include="Resources\drawable-hdpi\icTasksSelected.png" />
     <AndroidResource Include="Resources\drawable\TasksButtonBackground.xml" />
+    <AndroidResource Include="Resources\drawable-hdpi\IcAdd.png" />
+    <AndroidResource Include="Resources\drawable-mdpi\IcAdd.png" />
+    <AndroidResource Include="Resources\drawable-xhdpi\IcAdd.png" />
+    <AndroidResource Include="Resources\drawable-xxhdpi\IcAdd.png" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Novell\Novell.MonoDroid.CSharp.targets" />
   <ItemGroup>

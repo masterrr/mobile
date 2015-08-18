@@ -38,12 +38,13 @@
         android:layout_height="match_parent"
         android:background="@android:color/background_light"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
-    <android.support.design.widget.FloatingActionButton
+    <Toggl.Joey.UI.Views.AddProjectFab
         android:id="@+id/AddNewProjectFAB"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/IcAddGrey"
+        android:clickable="true"
         android:layout_gravity="bottom|end|right"
-        android:layout_margin="@dimen/fab_margin"
-        android:clickable="true" />
+        android:backgroundTint="@color/material_red"
+        android:src="@drawable/IcAdd"
+        android:layout_margin="@dimen/fab_margin" />
 </android.support.design.widget.CoordinatorLayout>
