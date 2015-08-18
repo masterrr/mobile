@@ -6,6 +6,7 @@ using Toggl.Joey.UI.Fragments;
 using Activity = Android.Support.V7.App.AppCompatActivity;
 using Fragment = Android.Support.V4.App.Fragment;
 using FragmentManager = Android.Support.V4.App.FragmentManager;
+using Toggl.Joey.UI.Views;
 
 namespace Toggl.Joey.UI.Activities
 {
