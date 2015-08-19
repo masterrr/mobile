@@ -318,7 +318,12 @@ namespace Toggl.Joey.UI.Adapters
                     return;
                 }
 
-                ClientTextView.Text = model.Data.Name;
+                if (model.IsNoClient) {
+                    ClientTextView.SetText (Resource.String.ProjectsNoClient);
+                } else {
+                    ClientTextView.Text = model.Data.Name;
+                }
+
             }
 
         }

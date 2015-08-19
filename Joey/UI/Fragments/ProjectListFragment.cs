@@ -26,6 +26,7 @@ namespace Toggl.Joey.UI.Fragments
         private RecyclerView recyclerView;
         private ProjectListViewModel viewModel;
         private Guid workspaceId;
+        private bool sortByClients = true;
 
         public ProjectListFragment ()
         {

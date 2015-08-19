@@ -34,7 +34,7 @@ namespace Toggl.Phoebe.Data.Views
 
         public bool SortByClients { private set; get; }
 
-        public WorkspaceProjectsView (Guid workspaceId,  bool sortByClients = true)
+        public WorkspaceProjectsView (Guid workspaceId,  bool sortByClients = false)
         {
             SortByClients = sortByClients;
             this.workspaceId = workspaceId;
@@ -299,21 +299,27 @@ namespace Toggl.Phoebe.Data.Views
 
                 var clients = clientsTask.Result;
 
-                foreach (var client in clients) {
-                    var cl = new Client (client);
+                foreach (var clientData in clients) {
+                    Client client;
+                    IEnumerable<ProjectData> projectsOfClient;
 
-                    var clientProjectList = new List<Project> ();
-                    var clientProjects = projects.Where (r => r.ClientId == client.Id);
+                    if (currentWorkspace.Clients.Count == 0) { // first element
+                        client = new Client (currentWorkspace.Data);
+                        projectsOfClient = projects.Where (r => r.ClientId == null);
+                    } else {
+                        client = new Client (clientData);
+                        projectsOfClient = projects.Where (r => r.ClientId == clientData.Id);
+                    }
 
-                    foreach (var projectData in clientProjects) {
+                    foreach (var projectData in projectsOfClient) {
                         var project = new Project (projectData);
 
                         var tasks = tasksTask.Result.Where (r => r.ProjectId == projectData.Id);
                         project.Tasks.AddRange (tasks);
 
-                        cl.Projects.Add (project);
+                        client.Projects.Add (project);
                     }
-                    currentWorkspace.Clients.Add (cl);
+                    currentWorkspace.Clients.Add (client);
                 }
 
                 clientDataObjects.AddRange (clients);
@@ -366,11 +372,16 @@ namespace Toggl.Phoebe.Data.Views
 
         private static void SortClients (List<Client> data)
         {
-            data.Sort ((a, b) => String.Compare (
+            data.Sort ((a, b) => {
+                if (a.IsNoClient != b.IsNoClient) {
+                    return a.IsNoClient ? -1 : 1;
+                }
+                return String.Compare (
                            a.Data.Name ?? String.Empty,
                            b.Data.Name ?? String.Empty,
                            StringComparison.Ordinal
-                       ));
+                       );
+            });
         }
         private static void SortTasks (List<TaskData> data)
         {
@@ -533,13 +544,11 @@ namespace Toggl.Phoebe.Data.Views
             public Client (WorkspaceData workspaceData)
             {
                 dataObject = null;
+                IsNoClient = true;
                 workspaceId = workspaceData.Id;
             }
 
-            public bool IsNoClient
-            {
-                get { return dataObject == null; }
-            }
+            public bool IsNoClient { get; set; }
 
             public Guid WorkspaceId
             {
