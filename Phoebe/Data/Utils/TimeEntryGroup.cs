@@ -199,7 +199,7 @@ namespace Toggl.Phoebe.Data.Utils
 
         public Task StopAsync ()
         {
-            return Model.StopAsync ();
+            return Model.StopAsync ().ContinueWith (tt => { UpdateIfPossible(Model.Data); });
         }
 
         public async Task DeleteAsync ()
