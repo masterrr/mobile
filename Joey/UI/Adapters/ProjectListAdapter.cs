@@ -106,6 +106,7 @@ namespace Toggl.Joey.UI.Adapters
                 var clientHolder = (ClientListItemHolder)holder;
                 clientHolder.Bind (data);
             } else {
+
                 var data = (WorkspaceProjectsView.Project) GetEntry (position);
                 if (viewType == ViewTypeProject) {
                     var projectHolder = (ProjectListItemHolder)holder;
@@ -294,7 +295,6 @@ namespace Toggl.Joey.UI.Adapters
         public class ClientListItemHolder : RecycledBindableViewHolder<WorkspaceProjectsView.Client>
         {
             private WorkspaceProjectsView.Client model;
-
             public TextView ClientTextView { get; private set; }
 
             public ClientListItemHolder (IntPtr a, Android.Runtime.JniHandleOwnership b) : base (a, b)
