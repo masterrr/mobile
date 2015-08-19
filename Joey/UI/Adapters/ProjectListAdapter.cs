@@ -19,8 +19,9 @@ namespace Toggl.Joey.UI.Adapters
     {
         protected static readonly int ViewTypeContent = 1;
         protected static readonly int ViewTypeNoProject = ViewTypeContent;
-        protected static readonly int ViewTypeProject = ViewTypeContent + 1;
-        protected static readonly int ViewTypeTask = ViewTypeContent + 2;
+        protected static readonly int ViewTypeClient = ViewTypeContent + 1;
+        protected static readonly int ViewTypeProject = ViewTypeContent + 2;
+        protected static readonly int ViewTypeTask = ViewTypeContent + 3;
         protected static readonly int ViewTypeLoaderPlaceholder = 0;
 
         public Action<object> HandleProjectSelection { get; set; }
@@ -48,7 +49,10 @@ namespace Toggl.Joey.UI.Adapters
             View view;
             RecyclerView.ViewHolder holder;
 
-            if (viewType == ViewTypeProject) {
+            if (viewType == ViewTypeClient) {
+                view =  LayoutInflater.FromContext (ServiceContainer.Resolve<Context> ()).Inflate (Resource.Layout.ProjectListClientItem, parent, false);
+                holder = new ClientListItemHolder (this, view);
+            } else if (viewType == ViewTypeProject) {
                 view =  LayoutInflater.FromContext (ServiceContainer.Resolve<Context> ()).Inflate (Resource.Layout.ProjectListProjectItem, parent, false);
                 holder = new ProjectListItemHolder (this, view, HandleTasksProjectItemClick, HandleProjectItemClick);
             } else if (viewType == ViewTypeTask) {
@@ -91,7 +95,12 @@ namespace Toggl.Joey.UI.Adapters
                 var data = (TaskData)GetEntry (position);
                 var projectHolder = (ProjectListTaskItemHolder) holder;
                 projectHolder.Bind (data);
+            } else if (viewType == ViewTypeClient) {
+                var data = (WorkspaceProjectsView.Client)GetEntry (position);
+                var clientHolder = (ClientListItemHolder)holder;
+                clientHolder.Bind (data);
             } else {
+
                 var data = (WorkspaceProjectsView.Project) GetEntry (position);
                 if (viewType == ViewTypeProject) {
                     var projectHolder = (ProjectListItemHolder)holder;
@@ -115,6 +124,8 @@ namespace Toggl.Joey.UI.Adapters
                 var p = (WorkspaceProjectsView.Project)obj;
 
                 return p.IsNoProject ? ViewTypeNoProject : ViewTypeProject;
+            } else if (obj is WorkspaceProjectsView.Client) {
+                return ViewTypeClient;
             }
             return ViewTypeTask;
         }
@@ -270,6 +281,44 @@ namespace Toggl.Joey.UI.Adapters
             {
                 adapter.HandleProjectSelection (DataSource);
             }
+        }
+
+        public class ClientListItemHolder : RecycledBindableViewHolder<WorkspaceProjectsView.Client>
+        {
+            private WorkspaceProjectsView.Client model;
+            private readonly ProjectListAdapter adapter;
+
+            public TextView ClientTextView { get; private set; }
+
+            public ClientListItemHolder (IntPtr a, Android.Runtime.JniHandleOwnership b) : base (a, b)
+            {
+            }
+
+            public ClientListItemHolder (ProjectListAdapter adapter, View root) : base (root)
+            {
+                this.adapter = adapter;
+                ClientTextView = root.FindViewById<TextView> (Resource.Id.ClientTextView).SetFont (Font.Roboto);
+            }
+
+            protected async override void Rebind ()
+            {
+                // Protect against Java side being GCed
+                if (Handle == IntPtr.Zero) {
+                    return;
+                }
+
+                model = null;
+                if (DataSource != null) {
+                    model = DataSource;
+                }
+
+                if (model == null) {
+                    return;
+                }
+
+                ClientTextView.Text = model.Data.Name;
+            }
+
         }
         #endregion
     }

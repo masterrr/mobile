@@ -34,7 +34,7 @@ namespace Toggl.Phoebe.Data.Views
 
         public bool SortByClients { private set; get; }
 
-        public WorkspaceProjectsView (Guid workspaceId,  bool sortByClients = false)
+        public WorkspaceProjectsView (Guid workspaceId,  bool sortByClients = true)
         {
             SortByClients = sortByClients;
             this.workspaceId = workspaceId;
@@ -297,20 +297,32 @@ namespace Toggl.Phoebe.Data.Views
 
                 var projects = projectsTask.Result.Where (r => r.WorkspaceId == currentWorkspace.Data.Id);
 
-                foreach (var projectData in projects) {
-                    var project = new Project (projectData);
+                var clients = clientsTask.Result;
 
-                    var tasks = tasksTask.Result.Where (r => r.ProjectId == projectData.Id);
-                    project.Tasks.AddRange (tasks);
+                foreach (var client in clients) {
+                    var cl = new Client (client);
 
-                    currentWorkspace.Projects.Add (project);
+                    var clientProjectList = new List<Project> ();
+                    var clientProjects = projects.Where (r => r.ClientId == client.Id);
+
+                    foreach (var projectData in clientProjects) {
+                        var project = new Project (projectData);
+
+                        var tasks = tasksTask.Result.Where (r => r.ProjectId == projectData.Id);
+                        project.Tasks.AddRange (tasks);
+
+                        cl.Projects.Add (project);
+                    }
+                    currentWorkspace.Clients.Add (cl);
                 }
 
-                clientDataObjects.AddRange (clientsTask.Result);
-
-                SortProjects (currentWorkspace.Projects, clientDataObjects, SortByClients);
-                foreach (var project in currentWorkspace.Projects) {
-                    SortTasks (project.Tasks);
+                clientDataObjects.AddRange (clients);
+                SortClients (currentWorkspace.Clients);
+                foreach (var client in currentWorkspace.Clients) {
+                    SortProjects (client.Projects, new List<ClientData> (), false);
+                    foreach (var project in client.Projects) {
+                        SortTasks (project.Tasks);
+                    }
                 }
             } finally {
                 IsLoading = false;
@@ -352,6 +364,14 @@ namespace Toggl.Phoebe.Data.Views
             });
         }
 
+        private static void SortClients (List<Client> data)
+        {
+            data.Sort ((a, b) => String.Compare (
+                           a.Data.Name ?? String.Empty,
+                           b.Data.Name ?? String.Empty,
+                           StringComparison.Ordinal
+                       ));
+        }
         private static void SortTasks (List<TaskData> data)
         {
             data.Sort ((a, b) => String.Compare (
@@ -367,19 +387,24 @@ namespace Toggl.Phoebe.Data.Views
         {
             dataObjects.Clear();
 
-            if (currentWorkspace == null || currentWorkspace.Projects == null) {
+            if (currentWorkspace == null || currentWorkspace.Projects == null || currentWorkspace.Clients == null) {
                 return;
             }
-
-            foreach (var project in currentWorkspace.Projects) {
-
-                dataObjects.Add (project);
-                if (displayingTaskForProject != null && project == displayingTaskForProject) {
-                    foreach (var task in project.Tasks) {
-                        dataObjects.Add (task);
+            foreach (var client in currentWorkspace.Clients) {
+                if (client.Projects.Count == 0) {
+                    continue;
+                }
+                dataObjects.Add (client);
+                foreach (var project in client.Projects) {
+                    dataObjects.Add (project);
+                    if (displayingTaskForProject != null && project == displayingTaskForProject) {
+                        foreach (var task in project.Tasks) {
+                            dataObjects.Add (task);
+                        }
                     }
                 }
             }
+
             OnUpdated ();
         }
 
@@ -460,6 +485,7 @@ namespace Toggl.Phoebe.Data.Views
         {
             private WorkspaceData dataObject;
             private readonly List<Project> projects = new List<Project> ();
+            private readonly List<Client> clients = new List<Client> ();
 
             public Workspace (WorkspaceData dataObject)
             {
@@ -476,6 +502,60 @@ namespace Toggl.Phoebe.Data.Views
                     }
                     if (dataObject.Id != value.Id) {
                         throw new ArgumentException ("Cannot change Id of the workspace.", "value");
+                    }
+                    dataObject = value;
+                }
+            }
+
+            public List<Project> Projects
+            {
+                get { return projects; }
+            }
+
+            public List<Client> Clients
+            {
+                get { return clients; }
+            }
+        }
+
+        public class Client
+        {
+            private ClientData dataObject;
+            private readonly Guid workspaceId;
+            private readonly List<Project> projects = new List<Project> ();
+
+            public Client (ClientData dataObject)
+            {
+                this.dataObject = dataObject;
+                workspaceId = dataObject.WorkspaceId;
+            }
+
+            public Client (WorkspaceData workspaceData)
+            {
+                dataObject = null;
+                workspaceId = workspaceData.Id;
+            }
+
+            public bool IsNoClient
+            {
+                get { return dataObject == null; }
+            }
+
+            public Guid WorkspaceId
+            {
+                get { return dataObject != null ? dataObject.WorkspaceId : workspaceId; }
+            }
+
+            public ClientData Data
+            {
+                get { return dataObject; }
+                set {
+                    if (value == null) {
+                        throw new ArgumentNullException ("value");
+                    }
+
+                    if (dataObject.Id != value.Id) {
+                        throw new ArgumentException ("Cannot change Id of the project.", "value");
                     }
                     dataObject = value;
                 }

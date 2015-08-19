@@ -685,6 +685,7 @@
     <AndroidResource Include="Resources\layout\ClientListActivity.axml" />
     <AndroidResource Include="Resources\layout\ClientListFragment.axml" />
     <AndroidResource Include="Resources\layout\ClientListClientItem.axml" />
+    <AndroidResource Include="Resources\layout\ProjectListClientItem.axml" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Novell\Novell.MonoDroid.CSharp.targets" />
   <ItemGroup>
