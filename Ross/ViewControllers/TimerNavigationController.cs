@@ -151,23 +151,33 @@ namespace Toggl.Ross.ViewControllers
         {
             if (args.PropertyName == ActiveTimeEntryManager.PropertyRunning) {
                 ResetModelToRunning ();
-                Rebind ();
             }
         }
 
-        private void ResetModelToRunning ()
+        private async void ResetModelToRunning ()
         {
             if (timeEntryManager == null) {
                 return;
             }
 
             if (currentTimeEntry == null) {
-                currentTimeEntry = (TimeEntryModel)timeEntryManager.Running;
+                if (timeEntryManager.Running != null) {
+                    var grp = new TimeEntryGroup (timeEntryManager.Running);
+                    await grp.LoadGroup ();
+                    currentTimeEntry = grp;
+                } else {
+                    currentTimeEntry = null;
+
+                }
+
+              //  currentTimeEntry = (TimeEntryModel)timeEntryManager.Running;
             } else if (timeEntryManager.Running != null) {
                 currentTimeEntry.Data = timeEntryManager.Running;
             } else {
                 currentTimeEntry = null;
             }
+
+            Rebind ();
         }
 
         public void Start ()
