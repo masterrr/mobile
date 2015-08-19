@@ -688,7 +688,6 @@
     <AndroidResource Include="Resources\drawable-mdpi\IcAdd.png" />
     <AndroidResource Include="Resources\drawable-xhdpi\IcAdd.png" />
     <AndroidResource Include="Resources\drawable-xxhdpi\IcAdd.png" />
-    <AndroidResource Include="Resources\layout\ProjectListClientItem.axml" />
     <AndroidResource Include="Resources\drawable-xxhdpi\IcArrowProjectEmptyState.png" />
     <AndroidResource Include="Resources\drawable-xxhdpi\IcTogglerProjectEmptyState.png" />
     <AndroidResource Include="Resources\drawable-xhdpi\IcArrowProjectEmptyState.png" />
