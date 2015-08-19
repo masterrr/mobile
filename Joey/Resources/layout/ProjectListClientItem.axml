@@ -10,7 +10,6 @@
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/play_button_background"
         android:gravity="center_vertical">
         <toggl.joey.ui.views.FadeLinearLayout
             android:layout_width="match_parent"
