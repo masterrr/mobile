@@ -50,6 +50,9 @@ namespace Toggl.Phoebe.Data.Utils
             get {
                 if (model == null) {
                     model = (TimeEntryModel)dataObjects.Last();
+                    if (model == null) {
+                        return null;
+                    }
                     model.PropertyChanged += (sender, e) => {
                         if (PropertyChanged != null) {
                             PropertyChanged.Invoke (sender, e);
@@ -137,6 +140,13 @@ namespace Toggl.Phoebe.Data.Utils
         {
             if (CanContain (entry)) {
                 Add (entry);
+            }
+        }
+
+        public void UpdateIfPossible(List<TimeEntryData> entryList)
+        {
+            foreach (var entry in entryList) {
+                UpdateIfPossible (entry);
             }
         }
 
@@ -400,6 +410,25 @@ namespace Toggl.Phoebe.Data.Utils
             return store.Table<TimeEntryTagData>()
                    .Where (t => t.TimeEntryId == Id)
                    .CountAsync ();
+        }
+
+        public async Task LoadGroup()
+        {
+            var store = ServiceContainer.Resolve<IDataStore> ();
+
+            if (Model == null) {
+                return;
+            }
+
+            var baseQuery = store.Table<TimeEntryData> ()
+                .Where (r => r.StartTime > DateTime.Today.Date);
+
+            var result = await baseQuery.QueryAsync ();
+
+            foreach (var item in result.ToList ()) {
+                UpdateIfPossible (item);
+            }
+
         }
     }
 }
