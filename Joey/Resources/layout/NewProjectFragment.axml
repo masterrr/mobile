@@ -21,6 +21,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/NewProjectProjectNameBit" />
+        <Toggl.Joey.UI.Views.TogglField
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:id="@+id/SelectClientNameBit" />
         <TextView
             android:id="@+id/NewProjectProjectColorTitleTextView"
             android:layout_width="fill_parent"

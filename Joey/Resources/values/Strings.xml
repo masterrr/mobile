@@ -77,6 +77,7 @@
     <string name="ProjectsNamelessWorkspace">(nameless workspace)</string>
     <string name="NewProjectTitle">New project</string>
     <string name="NewProjectProjectFieldName">Project Name</string>
+    <string name="NewProjectSelectClientFieldName">Select client</string>    
     <string name="NewProjectClientFieldName">Client</string>
     <string name="NewProjectSaveButtonText">Save</string>
     <string name="NewProjectEmptyDialogTitle">Empty name</string>
@@ -205,4 +206,6 @@
     <string name="SwitchViewText">or you can</string>
     <string name="LoginViewButtonText">Log in</string>
     <string name="SignupViewButtonText">Sign up</string>
+    <string name="ClientsNoClient">No client</string>
+    <string name="SelectClientTitle">Select client</string>
 </resources>
