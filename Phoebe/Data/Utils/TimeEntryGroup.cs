@@ -44,7 +44,7 @@ namespace Toggl.Phoebe.Data.Utils
             }
             return list;
         }
-
+            
         public TimeEntryModel Model
         {
             get {
@@ -199,7 +199,7 @@ namespace Toggl.Phoebe.Data.Utils
 
         public Task StopAsync ()
         {
-            return Model.StopAsync ().ContinueWith (tt => { UpdateIfPossible(Model.Data); });
+            return Model.StopAsync ().ContinueWith (tt => { Update(Model.Data); });
         }
 
         public async Task DeleteAsync ()
