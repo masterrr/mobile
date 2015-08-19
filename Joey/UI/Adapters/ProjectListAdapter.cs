@@ -148,9 +148,11 @@ namespace Toggl.Joey.UI.Adapters
 
             private Action<int> clickListener;
 
+            private bool displayClientText;
 
             public ProjectListItemHolder (ProjectListAdapter adapter, View root, Action<int> tasksClickListener, Action<int> clickListener) : base (root)
             {
+                displayClientText = !adapter.collectionView.SortByClients;
                 ColorView = root.FindViewById<View> (Resource.Id.ColorView);
                 ProjectTextView = root.FindViewById<TextView> (Resource.Id.ProjectTextView).SetFont (Font.Roboto);
                 ClientTextView = root.FindViewById<TextView> (Resource.Id.ClientTextView).SetFont (Font.RobotoLight);
@@ -199,7 +201,7 @@ namespace Toggl.Joey.UI.Adapters
                 ClientTextView.SetTextColor (color);
 
                 ProjectTextView.Text = model.Name;
-                if (model.Client != null) {
+                if (model.Client != null && displayClientText) {
                     ClientTextView.Text = model.Client.Name;
                     ClientTextView.Visibility = ViewStates.Visible;
                 } else {
