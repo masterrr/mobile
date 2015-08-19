@@ -15,16 +15,21 @@ using Activity = Android.Support.V7.App.AppCompatActivity;
 using AlertDialog = Android.Support.V7.App.AlertDialog;
 using Fragment = Android.Support.V4.App.Fragment;
 using Toolbar = Android.Support.V7.Widget.Toolbar;
+using Android.Widget;
 
 namespace Toggl.Joey.UI.Fragments
 {
     public class NewProjectFragment : Fragment
     {
+        public static readonly int ClientSelectedRequestCode = 1;
+
         private ActionBar Toolbar;
         private bool isSaving;
         private NewProjectViewModel viewModel;
 
         public TogglField ProjectBit { get; private set; }
+        public TogglField SelectClientBit { get; private set; }
+        private EditText ClientEditText { get; set; }
         public ColorPickerRecyclerView ColorPicker { get; private set; }
 
         public NewProjectFragment ()
@@ -56,6 +61,14 @@ namespace Toggl.Joey.UI.Fragments
                          .DestroyAssistView().DestroyArrow()
                          .SetName (Resource.String.NewProjectProjectFieldName);
             ProjectBit.TextField.TextChanged += ProjectBitTextChangedHandler;
+
+            SelectClientBit = view.FindViewById<TogglField> (Resource.Id.SelectClientNameBit)
+                              .SetName (Resource.String.NewProjectSelectClientFieldName)
+                              .SimulateButton();
+
+            ClientEditText = SelectClientBit.TextField;
+            ClientEditText.Click += SelectClientBitClickedHandler;
+            SelectClientBit.Click += SelectClientBitClickedHandler;
 
             ColorPicker = view.FindViewById<ColorPickerRecyclerView> (Resource.Id.NewProjectColorPickerRecyclerView);
             ColorPicker.SelectedColorChanged += (sender, e) => {
@@ -145,6 +158,16 @@ namespace Toggl.Joey.UI.Fragments
             if (t != viewModel.Model.Name) {
                 viewModel.Model.Name = t;
             }
+        }
+
+        private void SelectClientBitClickedHandler (object sender, EventArgs e)
+        {
+            var guidList = new List<Guid> ();
+            guidList.Add (viewModel.Model.Data.WorkspaceId);
+            var intent = BaseActivity.CreateDataIntent<ClientListActivity, List<Guid>>
+                         (Activity, guidList, ClientListActivity.ExtraWorkspaceId);
+
+            StartActivityForResult (intent, ClientSelectedRequestCode);
         }
 
         public override void OnCreateOptionsMenu (IMenu menu, MenuInflater inflater)

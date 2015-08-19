@@ -167,6 +167,9 @@
     <Compile Include="UI\Views\StartStopFab.cs" />
     <Compile Include="UI\Views\AddProjectFab.cs" />
     <Compile Include="UI\Views\TogglAppBar.cs" />
+    <Compile Include="UI\Activities\ClientListActivity.cs" />
+    <Compile Include="UI\Fragments\ClientListFragment.cs" />
+    <Compile Include="UI\Adapters\ClientListAdapter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />
@@ -701,6 +704,9 @@
     <AndroidResource Include="Resources\drawable-xhdpi\ic_menu_black_24dp.png" />
     <AndroidResource Include="Resources\drawable-xxhdpi\ic_menu_black_24dp.png" />
     <AndroidResource Include="Resources\drawable\TabsBgPattern.xml" />
+    <AndroidResource Include="Resources\layout\ClientListActivity.axml" />
+    <AndroidResource Include="Resources\layout\ClientListFragment.axml" />
+    <AndroidResource Include="Resources\layout\ClientListClientItem.axml" />
   </ItemGroup>
   <Import Project="..\packages\Xamarin.Insights.1.10.6\build\MonoAndroid10\Xamarin.Insights.targets" Condition="Exists('..\packages\Xamarin.Insights.1.10.6\build\MonoAndroid10\Xamarin.Insights.targets')" />
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
