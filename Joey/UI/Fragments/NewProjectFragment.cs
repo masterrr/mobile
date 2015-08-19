@@ -63,6 +63,7 @@ namespace Toggl.Joey.UI.Fragments
             ProjectBit.TextField.TextChanged += ProjectBitTextChangedHandler;
 
             SelectClientBit = view.FindViewById<TogglField> (Resource.Id.SelectClientNameBit)
+                              .DestroyAssistView()
                               .SetName (Resource.String.NewProjectSelectClientFieldName)
                               .SimulateButton();
 
