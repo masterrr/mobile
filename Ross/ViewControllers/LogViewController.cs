@@ -151,11 +151,6 @@ namespace Toggl.Ross.ViewControllers
                 this.controller = controller;
                 this.dataView = dataView;
 
-                NSTimer.CreateRepeatingScheduledTimer (5.0f, delegate {
-                    var syncManager = ServiceContainer.Resolve<ISyncManager> ();
-                    syncManager.Run (SyncMode.Pull);
-                });
-
                 controller.TableView.RegisterClassForCellReuse (typeof (TimeEntryCell), EntryCellId);
                 controller.TableView.RegisterClassForHeaderFooterViewReuse (typeof (SectionHeaderView), SectionHeaderId);
             }
