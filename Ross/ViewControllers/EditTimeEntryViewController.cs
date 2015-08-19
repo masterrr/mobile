@@ -422,7 +422,10 @@ namespace Toggl.Ross.ViewControllers
 
             var billableHidden = billableSwitch.Hidden;
 
-            startStopView.Apply (BindStartStopView);
+            if (startStopView != null) {
+                startStopView.Apply (BindStartStopView);
+            }
+
             datePicker.Apply (BindDatePicker);
             projectButton.Apply (BindProjectButton);
             descriptionTextField.Apply (BindDescriptionField);
@@ -476,13 +479,15 @@ namespace Toggl.Ross.ViewControllers
                 TranslatesAutoresizingMaskIntoConstraints = false,
             });
 
-            wrapper.Add (startStopView = new StartStopView () {
-                TranslatesAutoresizingMaskIntoConstraints = false,
-                StartTime = model.StartTime,
-                StopTime = model.StopTime,
-            } .Apply (BindStartStopView));
-            startStopView.SelectedChanged += OnStartStopViewSelectedChanged;
-
+            if (!viewModel.Model.Grouped) {
+                wrapper.Add (startStopView = new StartStopView () {
+                    TranslatesAutoresizingMaskIntoConstraints = false,
+                    StartTime = model.StartTime,
+                    StopTime = model.StopTime,
+                } .Apply (BindStartStopView));
+                startStopView.SelectedChanged += OnStartStopViewSelectedChanged;
+            }
+                
             wrapper.Add (datePicker = new UIDatePicker () {
                 TranslatesAutoresizingMaskIntoConstraints = false,
                 Hidden = DatePickerHidden,
@@ -594,9 +599,17 @@ namespace Toggl.Ross.ViewControllers
             }
         }
 
+        private void SetAlphaForViews(float alpha, UIView[] views) {
+            foreach (var view in views) {
+                if (view != null) {
+                    view.Alpha = alpha;
+                }
+            }
+        }
+
         private void SetEditingModeViewsHidden (bool editingMode)
         {
-            billableSwitch.Alpha = tagsButton.Alpha = startStopView.Alpha = projectButton.Alpha = deleteButton.Alpha = editingMode ? 0 : 1;
+            SetAlphaForViews(editingMode ? 0 : 1, new UIView[] { billableSwitch, tagsButton, startStopView, projectButton, deleteButton });
             autoCompletionTableView.Alpha = 1 - tagsButton.Alpha;
         }
 
@@ -789,7 +802,9 @@ namespace Toggl.Ross.ViewControllers
         private void ForceDimissDatePicker()
         {
             DatePickerHidden = true;
-            startStopView.Selected = TimeKind.None;
+            if (startStopView != null) {
+                startStopView.Selected = TimeKind.None;
+            }
         }
 
         private bool DatePickerHidden
