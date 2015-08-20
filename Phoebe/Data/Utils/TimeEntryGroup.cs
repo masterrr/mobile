@@ -163,10 +163,10 @@ namespace Toggl.Phoebe.Data.Utils
         {
             dataObjects.Sort ((a, b) => a.StartTime.CompareTo (b.StartTime));
         }
-
+            
         public bool CanContain (TimeEntryData data)
         {
-            return dataObjects.Last().IsGroupableWith (data);
+            return dataObjects.Last().IsGroupableWith (data) && !dataObjects.Any(t => t.Id == data.Id);
         }
 
         public bool Contains (TimeEntryData entry, out TimeEntryData existingTimeEntry)
@@ -412,23 +412,28 @@ namespace Toggl.Phoebe.Data.Utils
                    .CountAsync ();
         }
 
-        public async Task LoadGroup()
+        public static async Task<TimeEntryGroup> GetLoadedGroup(TimeEntryData data, DateTime day)
         {
             var store = ServiceContainer.Resolve<IDataStore> ();
 
-            if (Model == null) {
-                return;
-            }
-
+            var maxDay = day.Date.AddDays (1).AddTicks (-1);
+                
             var baseQuery = store.Table<TimeEntryData> ()
-                .Where (r => r.StartTime > DateTime.Today.Date);
+                .Where (r => r.StartTime > day.Date && r.StartTime < maxDay && r.Id != data.Id);
 
             var result = await baseQuery.QueryAsync ();
 
+            var list = new List<TimeEntryData>();
+
             foreach (var item in result.ToList ()) {
-                UpdateIfPossible (item);
+                if (data.IsGroupableWith(item)) {
+                    list.Add (item);
+                }
             }
 
+            list.Add (data);
+
+            return new TimeEntryGroup (list);
         }
     }
 }
