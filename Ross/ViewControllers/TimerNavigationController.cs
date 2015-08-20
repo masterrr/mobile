@@ -121,8 +121,7 @@ namespace Toggl.Ross.ViewControllers
         {
             if (!isStarted) {
                 return;
-            }
-                                
+            }                               
             rebindCounter++;
 
             if (currentTimeEntry == null) {
@@ -160,19 +159,12 @@ namespace Toggl.Ross.ViewControllers
                 return;
             }
 
-            if (currentTimeEntry == null) {
-                if (timeEntryManager.Running != null) {
-                    var grp = new TimeEntryGroup (timeEntryManager.Running);
-                    await grp.LoadGroup ();
-                    currentTimeEntry = grp;
+            if (timeEntryManager.Running != null) {
+                if (currentTimeEntry == null) {
+                    currentTimeEntry = await TimeEntryGroup.GetLoadedGroup(timeEntryManager.Running, DateTime.UtcNow);
                 } else {
-                    currentTimeEntry = null;
-
+                    currentTimeEntry.Data = timeEntryManager.Running;
                 }
-
-              //  currentTimeEntry = (TimeEntryModel)timeEntryManager.Running;
-            } else if (timeEntryManager.Running != null) {
-                currentTimeEntry.Data = timeEntryManager.Running;
             } else {
                 currentTimeEntry = null;
             }
