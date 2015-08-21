@@ -77,7 +77,6 @@
     <string name="ProjectsNamelessWorkspace">(nameless workspace)</string>
     <string name="NewProjectTitle">New project</string>
     <string name="NewProjectProjectFieldName">Project Name</string>
-    <string name="NewProjectSelectClientFieldName">Select client</string>    
     <string name="NewProjectClientFieldName">Client</string>
     <string name="NewProjectSaveButtonText">Save</string>
     <string name="NewProjectEmptyDialogTitle">Empty name</string>
@@ -211,6 +210,4 @@
     <string name="ProjectListToolbarMenuTitle">SORT BY</string>
     <string name="ProjectListToolbarMenuProjects">Projects</string>
     <string name="ProjectListToolbarMenuClients">Clients</string>
-    <string name="SelectClientTitle">Select client</string>
 </resources>
->>>>>>> 74fe5bb... Initial client select list for new project screen.
