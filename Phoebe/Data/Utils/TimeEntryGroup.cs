@@ -195,6 +195,11 @@ namespace Toggl.Phoebe.Data.Utils
 
         public void SetDuration (TimeSpan value)
         {
+            // Setting duration is possible only for 1 TE
+            if (dataObjects.Count == 1) {
+                Model.SetDuration (value);
+                Touch ();
+            }
         }
 
         public Task StartAsync ()
@@ -236,7 +241,7 @@ namespace Toggl.Phoebe.Data.Utils
         public void Touch ()
         {
             for (int i = 0; i < dataObjects.Count; i++) {
-                var newData = new TimeEntryData (dataObjects[i]);;
+                var newData = new TimeEntryData (dataObjects[i]);
                 Model<TimeEntryData>.MarkDirty (newData);
                 dataObjects[i] = newData;
             }
