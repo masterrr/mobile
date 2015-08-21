@@ -352,7 +352,7 @@ namespace Toggl.Phoebe.Data.Views
                 if (!sortByClients) {
                     var aName = a.Data != null ? (a.Data.Name ?? String.Empty) : String.Empty;
                     var bName = b.Data != null ? (b.Data.Name ?? String.Empty) : String.Empty;
-                    res = String.Compare (aName, bName, StringComparison.Ordinal);
+                    res = String.Compare (aName, bName, StringComparison.OrdinalIgnoreCase);
                 }
 
                 // Try to order by client name when same project name
@@ -363,7 +363,7 @@ namespace Toggl.Phoebe.Data.Views
                     var aClientName = aClient != null ? aClient.Name ?? String.Empty : String.Empty;
                     var bClientName = bClient != null ? bClient.Name ?? String.Empty : String.Empty;
 
-                    res = String.Compare (aClientName, bClientName, StringComparison.Ordinal);
+                    res = String.Compare (aClientName, bClientName, StringComparison.OrdinalIgnoreCase);
                 }
 
                 return res;
@@ -379,7 +379,7 @@ namespace Toggl.Phoebe.Data.Views
                 return String.Compare (
                            a.Data.Name ?? String.Empty,
                            b.Data.Name ?? String.Empty,
-                           StringComparison.Ordinal
+                           StringComparison.OrdinalIgnoreCase
                        );
             });
         }
@@ -388,7 +388,7 @@ namespace Toggl.Phoebe.Data.Views
             data.Sort ((a, b) => String.Compare (
                            a.Name ?? String.Empty,
                            b.Name ?? String.Empty,
-                           StringComparison.Ordinal
+                           StringComparison.OrdinalIgnoreCase
                        ));
         }
 
