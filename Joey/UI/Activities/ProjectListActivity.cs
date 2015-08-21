@@ -23,7 +23,7 @@ namespace Toggl.Joey.UI.Activities
     [Activity (Label = "ProjectListActivity",
                ScreenOrientation = ScreenOrientation.Portrait,
                Theme = "@style/Theme.Toggl.App")]
-    public class ProjectListActivity : BaseActivity
+    public class ProjectListActivity : BaseActivity, AppBarLayout.IOnOffsetChangedListener
     {
         public static readonly string ExtraTimeEntriesIds = "com.toggl.timer.time_entries_ids";
         private static readonly int ProjectCreatedRequestCode = 1;
@@ -31,6 +31,8 @@ namespace Toggl.Joey.UI.Activities
         private ViewPager viewPager;
         private ProjectFragmentAdapter projectFragmentAdapter;
         private TabLayout tabLayout;
+        private AppBarLayout appBar;
+        private Toolbar toolbar;
         private FloatingActionButton fab;
         private IList<TimeEntryData> timeEntryList;
 
@@ -50,11 +52,12 @@ namespace Toggl.Joey.UI.Activities
             tabLayout = FindViewById<TabLayout> (Resource.Id.WorkspaceTabLayout);
             tabLayout.SetupWithViewPager (viewPager);
             tabLayout.Visibility = projectFragmentAdapter.Count == 1 ? ViewStates.Gone : ViewStates.Visible;
-
+            appBar = FindViewById<AppBarLayout> (Resource.Id.ProjectListAppBar);
+            appBar.AddOnOffsetChangedListener (this);
             fab = FindViewById<AddProjectFab> (Resource.Id.AddNewProjectFAB);
             fab.Click += OnFABClick;
 
-            var toolbar = FindViewById<Toolbar> (Resource.Id.ProjectListToolbar);
+            toolbar = FindViewById<Toolbar> (Resource.Id.ProjectListToolbar);
             SetSupportActionBar (toolbar);
             SupportActionBar.SetDisplayHomeAsUpEnabled (true);
             SupportActionBar.SetTitle (Resource.String.ChooseTimeEntryProjectDialogTitle);
@@ -92,7 +95,6 @@ namespace Toggl.Joey.UI.Activities
                     fragmentTitles.Add (ws.Name);
                     fragments.Add (new ProjectListFragment (timeEntryList, ws.Id));
                 }
-
             }
 
             public override int Count
@@ -130,6 +132,12 @@ namespace Toggl.Joey.UI.Activities
             var timeEntryList = await TimeEntryGroup.GetTimeEntryDataList (extraGuids);
             return timeEntryList;
         }
+
+        public void OnOffsetChanged (AppBarLayout layout, int verticalOffset)
+        {
+            tabLayout.TranslationY = (-verticalOffset) > 0 ? -verticalOffset : 0;
+        }
+
     }
 }
 
