@@ -160,6 +160,7 @@
     <Compile Include="UI\Activities\ClientListActivity.cs" />
     <Compile Include="UI\Fragments\ClientListFragment.cs" />
     <Compile Include="UI\Adapters\ClientListAdapter.cs" />
+    <Compile Include="UI\Views\TogglAppBar.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />

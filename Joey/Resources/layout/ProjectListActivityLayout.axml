@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/BgArrowsPattern">
-    <android.support.design.widget.AppBarLayout
+    <Toggl.Joey.UI.Views.TogglAppBar
         android:id="@+id/ProjectListAppBar"
         android:layout_width="match_parent"
         android:layout_height="110dp"
@@ -42,7 +42,7 @@
                 android:layout_height="@dimen/ToolbarDropShadowHeight"
                 android:background="@drawable/DropShadowVertical" />
         </LinearLayout>
-    </android.support.design.widget.AppBarLayout>
+    </Toggl.Joey.UI.Views.TogglAppBar>
 <!-- Actual toolbar -->
     <android.support.v7.widget.Toolbar
         android:id="@+id/ProjectListToolbar"

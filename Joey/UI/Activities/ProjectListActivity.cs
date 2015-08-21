@@ -31,7 +31,7 @@ namespace Toggl.Joey.UI.Activities
         private ViewPager viewPager;
         private ProjectFragmentAdapter projectFragmentAdapter;
         private TabLayout tabLayout;
-        private AppBarLayout appBar;
+        private TogglAppBar appBar;
         private Toolbar toolbar;
         private FloatingActionButton fab;
         private IList<TimeEntryData> timeEntryList;
@@ -52,8 +52,10 @@ namespace Toggl.Joey.UI.Activities
             tabLayout = FindViewById<TabLayout> (Resource.Id.WorkspaceTabLayout);
             tabLayout.SetupWithViewPager (viewPager);
             tabLayout.Visibility = projectFragmentAdapter.Count == 1 ? ViewStates.Gone : ViewStates.Visible;
-            appBar = FindViewById<AppBarLayout> (Resource.Id.ProjectListAppBar);
+            tabLayout.TabSelected += OnTabSelected;
+            appBar = FindViewById<TogglAppBar> (Resource.Id.ProjectListAppBar);
             appBar.AddOnOffsetChangedListener (this);
+            SetupCoordinatorViews ();
             fab = FindViewById<AddProjectFab> (Resource.Id.AddNewProjectFAB);
             fab.Click += OnFABClick;
 
@@ -61,6 +63,12 @@ namespace Toggl.Joey.UI.Activities
             SetSupportActionBar (toolbar);
             SupportActionBar.SetDisplayHomeAsUpEnabled (true);
             SupportActionBar.SetTitle (Resource.String.ChooseTimeEntryProjectDialogTitle);
+        }
+        private void SetupCoordinatorViews()
+        {
+            var appBarLayoutParamaters = new CoordinatorLayout.LayoutParams (appBar.LayoutParameters);
+            appBarLayoutParamaters.Behavior = new AppBarLayout.Behavior();
+            appBar.LayoutParameters = appBarLayoutParamaters;
         }
 
         private void OnFABClick (object sender, EventArgs e)
@@ -80,6 +88,11 @@ namespace Toggl.Joey.UI.Activities
             foreach (var entry in list ) {
                 entry.WorkspaceId = wsId;
             }
+        }
+
+        private void OnTabSelected (object sender, TabLayout.TabSelectedEventArgs e)
+        {
+            appBar.Expand ();
         }
 
         private class ProjectFragmentAdapter : FragmentPagerAdapter
