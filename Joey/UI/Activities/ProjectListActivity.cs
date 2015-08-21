@@ -10,13 +10,13 @@ using Android.Support.V4.View;
 using Android.Support.V7.Widget;
 using Android.Views;
 using Toggl.Joey.UI.Fragments;
+using Toggl.Joey.UI.Views;
 using Toggl.Phoebe.Data.DataObjects;
 using Toggl.Phoebe.Data.Utils;
 using Toggl.Phoebe.Data.Views;
 using Activity = Android.Support.V7.App.AppCompatActivity;
 using Fragment = Android.Support.V4.App.Fragment;
 using FragmentManager = Android.Support.V4.App.FragmentManager;
-using Toggl.Joey.UI.Views;
 
 namespace Toggl.Joey.UI.Activities
 {

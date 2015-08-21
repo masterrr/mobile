@@ -6,6 +6,7 @@ using Android.OS;
 using Android.Text;
 using Android.Views;
 using Android.Views.InputMethods;
+using Android.Widget;
 using Toggl.Joey.UI.Activities;
 using Toggl.Joey.UI.Views;
 using Toggl.Phoebe.Data.DataObjects;
@@ -15,7 +16,6 @@ using Activity = Android.Support.V7.App.AppCompatActivity;
 using AlertDialog = Android.Support.V7.App.AlertDialog;
 using Fragment = Android.Support.V4.App.Fragment;
 using Toolbar = Android.Support.V7.Widget.Toolbar;
-using Android.Widget;
 
 namespace Toggl.Joey.UI.Fragments
 {
