@@ -16,6 +16,7 @@ using ActionBar = Android.Support.V7.App.ActionBar;
 using Activity = Android.Support.V7.App.AppCompatActivity;
 using Fragment = Android.Support.V4.App.Fragment;
 using Toolbar = Android.Support.V7.Widget.Toolbar;
+using Android.Widget;
 
 namespace Toggl.Joey.UI.Fragments
 {
@@ -24,6 +25,7 @@ namespace Toggl.Joey.UI.Fragments
         private static readonly int ProjectCreatedRequestCode = 1;
 
         private RecyclerView recyclerView;
+        private LinearLayout emptyStateLayout;
         private ProjectListViewModel viewModel;
         private Guid workspaceId;
         private bool sortByClients = true;
@@ -50,6 +52,7 @@ namespace Toggl.Joey.UI.Fragments
             recyclerView.SetLayoutManager (new LinearLayoutManager (Activity));
             recyclerView.AddItemDecoration (new ShadowItemDecoration (Activity));
             recyclerView.AddItemDecoration (new DividerItemDecoration (Activity, DividerItemDecoration.VerticalList));
+            emptyStateLayout = view.FindViewById<LinearLayout> (Resource.Id.ProjectListEmptyState);
 
             HasOptionsMenu = true;
 
@@ -72,8 +75,9 @@ namespace Toggl.Joey.UI.Fragments
             var adapter = new ProjectListAdapter (recyclerView, viewModel.ProjectList);
             adapter.HandleProjectSelection = OnItemSelected;
             recyclerView.SetAdapter (adapter);
-
+            EnsureCorrectState ();
             viewModel.OnIsLoadingChanged += OnModelLoaded;
+            viewModel.ProjectList.OnIsLoadingChanged += OnListLoaded;
             await viewModel.Init ();
         }
 
@@ -83,6 +87,23 @@ namespace Toggl.Joey.UI.Fragments
                 if (viewModel.Model == null) {
                     Activity.Finish ();
                 }
+
+            }
+        }
+
+        private void OnListLoaded (object sender, EventArgs e)
+        {
+            EnsureCorrectState ();
+        }
+
+        private void EnsureCorrectState()
+        {
+            if (viewModel.ProjectList.Count == 0) {
+                recyclerView.Visibility = ViewStates.Gone;
+                emptyStateLayout.Visibility = ViewStates.Visible;
+            } else {
+                emptyStateLayout.Visibility = ViewStates.Gone;
+                recyclerView.Visibility = ViewStates.Visible;
             }
         }
 
@@ -151,6 +172,8 @@ namespace Toggl.Joey.UI.Fragments
             if (disposing) {
                 viewModel.OnIsLoadingChanged -= OnModelLoaded;
                 viewModel.Dispose ();
+                viewModel.ProjectList.OnIsLoadingChanged -= OnListLoaded;
+                viewModel.ProjectList.Dispose ();
             }
             base.Dispose (disposing);
         }

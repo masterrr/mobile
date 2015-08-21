@@ -331,8 +331,8 @@ namespace Toggl.Phoebe.Data.Views
                     }
                 }
             } finally {
-                IsLoading = false;
                 UpdateCollection ();
+                IsLoading = false;
 
                 if (shouldSubscribe) {
                     subscriptionDataChange = bus.Subscribe<DataChangeMessage> (OnDataChange);

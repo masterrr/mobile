@@ -2,11 +2,46 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/ProjectListFragment"
     android:orientation="vertical"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <LinearLayout
+        android:id="@+id/ProjectListEmptyState"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_gravity="bottom"
+        android:gravity="bottom"
+        android:background="@drawable/BgArrows"
+        android:paddingBottom="80dp"
+        android:visibility="gone">
+        <ImageView
+            android:id="@+id/LittleTogglerImageView"
+            android:src="@drawable/IcTogglerProjectEmptyState"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/EmptyStateTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/ProjectListEmptyStateText"
+            android:gravity="center"
+            android:textColor="@color/material_black"
+            android:textSize="@dimen/largTextSize"
+            android:paddingRight="30dp"
+            android:paddingLeft="30dp"
+            android:layout_marginTop="20dp" />
+        <ImageView
+            android:id="@+id/EmtpyStateArrowImageView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/IcArrowProjectEmptyState"
+            android:layout_gravity="right"
+            android:layout_marginRight="70dp"
+            android:layout_marginTop="15dp" />
+    </LinearLayout>
     <android.support.v7.widget.RecyclerView
         android:id="@+id/ProjectListRecyclerView"
         android:background="#f8f8f8"
         android:layout_width="match_parent"
-        android:layout_height="fill_parent" />
+        android:layout_height="match_parent" />
 </LinearLayout>
