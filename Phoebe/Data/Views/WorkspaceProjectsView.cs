@@ -463,7 +463,7 @@ namespace Toggl.Phoebe.Data.Views
             }
         }
 
-        public static async Task<List<WorkspaceData>> GetWorkspaces() // TODO: Add sort mechanism.
+        public static async Task<List<WorkspaceData>> GetWorkspaces()
         {
             var store = ServiceContainer.Resolve<IDataStore> ();
             var workspacesTask = store.Table<WorkspaceData> ()

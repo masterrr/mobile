@@ -12,7 +12,7 @@
         android:layout_gravity="bottom"
         android:gravity="bottom"
         android:background="@drawable/BgArrows"
-        android:paddingBottom="80dp"
+        android:paddingBottom="140dp"
         android:visibility="gone">
         <ImageView
             android:id="@+id/LittleTogglerImageView"
