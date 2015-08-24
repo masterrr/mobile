@@ -103,7 +103,6 @@ namespace Toggl.Ross.ViewControllers
                     ServiceContainer.Resolve<ITracker>().SendTimerStartEvent (TimerStartSource.AppManual);
                 } else {
                     model.SetDuration (duration);
-                    await model.SaveAsync ();
                     NavigationController.PopViewController (true);
                 }
             } finally {

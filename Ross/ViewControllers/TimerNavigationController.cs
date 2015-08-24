@@ -76,7 +76,7 @@ namespace Toggl.Ross.ViewControllers
         private void OnDurationButtonTouchUpInside (object sender, EventArgs e)
         {
             // Duration change for the grouped mode is disabled
-            if (currentTimeEntry != null && !currentTimeEntry.Grouped) {
+            if (currentTimeEntry != null && !currentTimeEntry.Grouped && !ServiceContainer.Resolve<ISettingsStore> ().GroupedTimeEntries) {
                 var controller = new DurationChangeViewController (currentTimeEntry);
                 parentController.NavigationController.PushViewController (controller, true);
             }
