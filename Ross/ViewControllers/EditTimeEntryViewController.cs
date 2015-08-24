@@ -8,6 +8,7 @@ using CoreGraphics;
 using Foundation;
 using Toggl.Phoebe;
 using Toggl.Phoebe.Analytics;
+using Toggl.Phoebe.Data;
 using Toggl.Phoebe.Data.DataObjects;
 using Toggl.Phoebe.Data.Models;
 using Toggl.Phoebe.Data.Utils;
@@ -479,7 +480,7 @@ namespace Toggl.Ross.ViewControllers
                 TranslatesAutoresizingMaskIntoConstraints = false,
             });
 
-            if (!viewModel.Model.Grouped) {
+            if (!viewModel.Model.Grouped && !ServiceContainer.Resolve<ISettingsStore> ().GroupedTimeEntries) {
                 wrapper.Add (startStopView = new StartStopView () {
                     TranslatesAutoresizingMaskIntoConstraints = false,
                     StartTime = model.StartTime,

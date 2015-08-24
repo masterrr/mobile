@@ -199,7 +199,7 @@ namespace Toggl.Phoebe.Data.Utils
             if (dataObjects.Count == 1) {
                 Model.SetDuration (value);
                 Model.SaveAsync ();
-                dataObjects[0] = Model.Data;
+                TimeEntryList[0] = Model.Data;
             }
         }
 
@@ -290,9 +290,7 @@ namespace Toggl.Phoebe.Data.Utils
             } set {
                 if (TimeEntryList.Count == 1) {
                     Model.StartTime = value;
-                } else {
-                    var startModel = new TimeEntryModel (TimeEntryList.FirstOrDefault ());
-                    startModel.StartTime = value;
+                    TimeEntryList [0] = Model.Data;
                 }
             }
         }
@@ -302,7 +300,10 @@ namespace Toggl.Phoebe.Data.Utils
             get {
                 return Model.StopTime;
             } set {
-                Model.StopTime = value;
+                if (TimeEntryList.Count == 1) {
+                    Model.StopTime = value;
+                    TimeEntryList [0] = Model.Data;
+                }
             }
         }
 
