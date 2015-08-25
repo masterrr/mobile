@@ -249,6 +249,23 @@ namespace Toggl.Phoebe.Data.Views
         }
         #endregion
 
+        public void RemoveItem (int index)
+        {
+            // Get data holder
+            var timeEntryHolder = GetHolderFromIndex (index);
+            if (timeEntryHolder == null) {
+                return;
+            }
+            RemoveItemPermanentlyAsync (timeEntryHolder);
+        }
+
+        public int Count
+        {
+            get {
+                return ItemCollection.Count;
+            }
+        }
+            
         #region Undo
         public async Task RemoveItemWithUndoAsync (int index)
         {

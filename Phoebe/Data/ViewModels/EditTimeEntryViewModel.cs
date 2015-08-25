@@ -96,8 +96,8 @@ namespace Toggl.Phoebe.Data.ViewModels
                 }
             }
             if (p == TimeEntryModel.PropertyState
-                || p == TimeEntryModel.PropertyStartTime
-                || p == TimeEntryModel.PropertyStopTime) {
+                    || p == TimeEntryModel.PropertyStartTime
+                    || p == TimeEntryModel.PropertyStopTime) {
                 if (OnStateTimeChanged != null) {
                     OnStateTimeChanged.Invoke (sender, e);
                 }

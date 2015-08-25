@@ -44,7 +44,7 @@ namespace Toggl.Ross.ViewControllers
 
             Title = "TagTitle".Tr ();
         }
-            
+
         private void SetupDataSource ()
         {
             var modelTagsReady = modelTags != null;
@@ -86,7 +86,7 @@ namespace Toggl.Ross.ViewControllers
 
             isSaving = true;
             try {
-                await viewModel.SaveChanges(source.SelectedTags.ToList ());
+                await viewModel.SaveChanges (source.SelectedTags.ToList ());
 
                 NavigationController.PopViewController (true);
             } finally {

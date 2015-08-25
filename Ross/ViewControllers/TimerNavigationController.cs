@@ -121,7 +121,7 @@ namespace Toggl.Ross.ViewControllers
         {
             if (!isStarted) {
                 return;
-            }                               
+            }
             rebindCounter++;
 
             if (currentTimeEntry == null) {
@@ -161,7 +161,7 @@ namespace Toggl.Ross.ViewControllers
 
             if (timeEntryManager.Running != null) {
                 if (currentTimeEntry == null) {
-                    currentTimeEntry = await TimeEntryGroup.GetLoadedGroup(timeEntryManager.Running, DateTime.UtcNow);
+                    currentTimeEntry = await TimeEntryGroup.GetLoadedGroup (timeEntryManager.Running, DateTime.UtcNow);
                 } else {
                     currentTimeEntry.Data = timeEntryManager.Running;
                 }

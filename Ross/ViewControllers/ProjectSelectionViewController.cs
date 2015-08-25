@@ -23,7 +23,8 @@ namespace Toggl.Ross.ViewControllers
 
         private readonly ProjectListViewModel viewModel;
 
-        public ProjectSelectionViewController (TimeEntryData timeEntryData) : this (new List<TimeEntryData> { timeEntryData }) {
+        public ProjectSelectionViewController (TimeEntryData timeEntryData) : this (new List<TimeEntryData> { timeEntryData })
+        {
 
         }
 
