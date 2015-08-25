@@ -626,6 +626,7 @@ namespace Toggl.Ross.ViewControllers
             }
 
             model.SaveAsync ();
+            Rebind ();
         }
 
         private void OnProjectButtonTouchUpInside (object sender, EventArgs e)
