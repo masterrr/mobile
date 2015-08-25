@@ -93,7 +93,7 @@ namespace Toggl.Phoebe.Data
         public static bool IsGroupableWith (this TimeEntryData data, TimeEntryData other)
         {
             return data.ProjectId == other.ProjectId &&
-                   string.Equals(data.Description, other.Description, StringComparison.Ordinal) &&
+                   string.Equals (data.Description, other.Description, StringComparison.Ordinal) &&
                    data.TaskId == other.TaskId &&
                    data.UserId == other.UserId &&
                    data.WorkspaceId == other.WorkspaceId &&

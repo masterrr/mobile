@@ -44,7 +44,7 @@ namespace Toggl.Phoebe.Data.Utils
             }
             return list;
         }
-            
+
         public TimeEntryModel Model
         {
             get {
@@ -67,7 +67,7 @@ namespace Toggl.Phoebe.Data.Utils
             }
         }
 
-        public bool Grouped 
+        public bool Grouped
         {
             get {
                 return dataObjects.Count > 1;
@@ -143,7 +143,7 @@ namespace Toggl.Phoebe.Data.Utils
             }
         }
 
-        public void UpdateIfPossible(List<TimeEntryData> entryList)
+        public void UpdateIfPossible (List<TimeEntryData> entryList)
         {
             foreach (var entry in entryList) {
                 UpdateIfPossible (entry);
@@ -163,10 +163,10 @@ namespace Toggl.Phoebe.Data.Utils
         {
             dataObjects.Sort ((a, b) => a.StartTime.CompareTo (b.StartTime));
         }
-            
+
         public bool CanContain (TimeEntryData data)
         {
-            return dataObjects.Last().IsGroupableWith (data) && !dataObjects.Any(t => t.Id == data.Id);
+            return dataObjects.Last().IsGroupableWith (data) && !dataObjects.Any (t => t.Id == data.Id);
         }
 
         public bool Contains (TimeEntryData entry, out TimeEntryData existingTimeEntry)
@@ -215,7 +215,7 @@ namespace Toggl.Phoebe.Data.Utils
 
         public Task StopAsync ()
         {
-            return Model.StopAsync ().ContinueWith (tt => { Update(Model.Data); });
+            return Model.StopAsync ().ContinueWith (tt => { Update (Model.Data); });
         }
 
         public async Task DeleteAsync ()
@@ -419,21 +419,21 @@ namespace Toggl.Phoebe.Data.Utils
                    .CountAsync ();
         }
 
-        public static async Task<TimeEntryGroup> GetLoadedGroup(TimeEntryData data, DateTime day)
+        public static async Task<TimeEntryGroup> GetLoadedGroup (TimeEntryData data, DateTime day)
         {
             var store = ServiceContainer.Resolve<IDataStore> ();
 
             var maxDay = day.Date.AddDays (1).AddTicks (-1);
-                
+
             var baseQuery = store.Table<TimeEntryData> ()
-                .Where (r => r.StartTime > day.Date && r.StartTime < maxDay && r.Id != data.Id);
+                            .Where (r => r.StartTime > day.Date && r.StartTime < maxDay && r.Id != data.Id);
 
             var result = await baseQuery.QueryAsync ();
 
             var list = new List<TimeEntryData>();
 
             foreach (var item in result.ToList ()) {
-                if (data.IsGroupableWith(item)) {
+                if (data.IsGroupableWith (item)) {
                     list.Add (item);
                 }
             }

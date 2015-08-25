@@ -114,8 +114,8 @@ namespace Toggl.Phoebe.Data.Views
         {
             var entry = msg.Data as TimeEntryData;
             var isExcluded = entry.DeletedAt != null
-                || msg.Action == DataAction.Delete
-                || entry.State == TimeEntryState.New;
+                             || msg.Action == DataAction.Delete
+                             || entry.State == TimeEntryState.New;
 
             if (isExcluded) {
                 await RemoveEntryAsync (entry);
@@ -262,10 +262,10 @@ namespace Toggl.Phoebe.Data.Views
         public int Count
         {
             get {
-               return ItemCollection.Count;
+                return ItemCollection.Count;
             }
         }
-        
+
 
         #region Undo
         public async Task RemoveItemWithUndoAsync (int index)
@@ -442,7 +442,7 @@ namespace Toggl.Phoebe.Data.Views
 
                         BeginUpdate ();
                         var entries = await dataStore.ExecuteInTransactionAsync (ctx =>
-                            jsonEntries.Select (json => json.Import (ctx)).ToList ());
+                                      jsonEntries.Select (json => json.Import (ctx)).ToList ());
 
                         // Add entries to list:
                         foreach (var entry in entries) {
@@ -473,13 +473,13 @@ namespace Toggl.Phoebe.Data.Views
                     var userId = ServiceContainer.Resolve<AuthManager> ().GetUserId ();
 
                     var baseQuery = store.Table<TimeEntryData> ()
-                        .OrderBy (r => r.StartTime, false)
-                        .Where (r => r.State != TimeEntryState.New
-                            && r.DeletedAt == null
-                            && r.UserId == userId);
+                                    .OrderBy (r => r.StartTime, false)
+                                    .Where (r => r.State != TimeEntryState.New
+                                            && r.DeletedAt == null
+                                            && r.UserId == userId);
                     var entries = await baseQuery
-                        .QueryAsync (r => r.StartTime <= endTime
-                            && r.StartTime > startTime);
+                                  .QueryAsync (r => r.StartTime <= endTime
+                                               && r.StartTime > startTime);
 
                     BeginUpdate ();
                     foreach (var entry in entries) {
@@ -488,7 +488,7 @@ namespace Toggl.Phoebe.Data.Views
 
                     if (!initialLoad) {
                         var count = await baseQuery
-                            .CountAsync (r => r.StartTime <= startTime);
+                                    .CountAsync (r => r.StartTime <= startTime);
                         HasMore = count > 0;
                     }
                 }

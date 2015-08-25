@@ -488,7 +488,7 @@ namespace Toggl.Ross.ViewControllers
                 } .Apply (BindStartStopView));
                 startStopView.SelectedChanged += OnStartStopViewSelectedChanged;
             }
-                
+
             wrapper.Add (datePicker = new UIDatePicker () {
                 TranslatesAutoresizingMaskIntoConstraints = false,
                 Hidden = DatePickerHidden,
@@ -600,7 +600,8 @@ namespace Toggl.Ross.ViewControllers
             }
         }
 
-        private void SetAlphaForViews(float alpha, UIView[] views) {
+        private void SetAlphaForViews (float alpha, UIView[] views)
+        {
             foreach (var view in views) {
                 if (view != null) {
                     view.Alpha = alpha;
@@ -610,7 +611,7 @@ namespace Toggl.Ross.ViewControllers
 
         private void SetEditingModeViewsHidden (bool editingMode)
         {
-            SetAlphaForViews(editingMode ? 0 : 1, new UIView[] { billableSwitch, tagsButton, startStopView, projectButton, deleteButton });
+            SetAlphaForViews (editingMode ? 0 : 1, new UIView[] { billableSwitch, tagsButton, startStopView, projectButton, deleteButton });
             autoCompletionTableView.Alpha = 1 - tagsButton.Alpha;
         }
 

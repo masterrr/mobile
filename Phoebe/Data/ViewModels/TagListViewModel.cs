@@ -90,7 +90,7 @@ namespace Toggl.Phoebe.Data.ViewModels
             tagList = null;
         }
 
-        public List<TimeEntryTagData> Tags 
+        public List<TimeEntryTagData> Tags
         {
             get {
                 return modelTags;
