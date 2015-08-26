@@ -167,7 +167,6 @@
     <Compile Include="UI\Views\StartStopFab.cs" />
     <Compile Include="UI\Views\AddProjectFab.cs" />
     <Compile Include="UI\Views\TogglAppBar.cs" />
-    <Compile Include="UI\Activities\ClientListActivity.cs" />
     <Compile Include="UI\Fragments\ClientListFragment.cs" />
     <Compile Include="UI\Adapters\ClientListAdapter.cs" />
   </ItemGroup>

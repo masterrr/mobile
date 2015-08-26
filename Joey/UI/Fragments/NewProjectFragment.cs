@@ -162,12 +162,7 @@ namespace Toggl.Joey.UI.Fragments
 
         private void SelectClientBitClickedHandler (object sender, EventArgs e)
         {
-            var guidList = new List<Guid> ();
-            guidList.Add (viewModel.Model.Data.WorkspaceId);
-            var intent = BaseActivity.CreateDataIntent<ClientListActivity, List<Guid>>
-                         (Activity, guidList, ClientListActivity.ExtraWorkspaceId);
-
-            StartActivityForResult (intent, ClientSelectedRequestCode);
+            new ClientListFragment (viewModel.Model.Data.WorkspaceId).Show (FragmentManager, "tags_dialog");
         }
 
         public override void OnCreateOptionsMenu (IMenu menu, MenuInflater inflater)

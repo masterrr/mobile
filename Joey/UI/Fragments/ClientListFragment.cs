@@ -23,11 +23,12 @@ using Toolbar = Android.Support.V7.Widget.Toolbar;
 
 namespace Toggl.Joey.UI.Fragments
 {
-    public class ClientListFragment : Fragment
+    public class ClientListFragment : BaseDialogFragment
     {
         private ActionBar Toolbar;
         private RecyclerView recyclerView;
         private ClientListViewModel viewModel;
+        private ClientListAdapter adapter;
         private Guid workspaceId;
 
         public ClientListFragment ()
@@ -43,59 +44,59 @@ namespace Toggl.Joey.UI.Fragments
             this.workspaceId = workspaceId;
             viewModel = new ClientListViewModel (this.workspaceId);
         }
-
-        public override View OnCreateView (LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+        public async override void OnCreate (Bundle savedInstanceState)
         {
-            var view = inflater.Inflate (Resource.Layout.ClientListFragment, container, false);
+            base.OnCreate (savedInstanceState);
 
-            var activity = (Activity)Activity;
-
-            var toolbar = view.FindViewById<Toolbar> (Resource.Id.ClientListToolbar);
-            activity.SetSupportActionBar (toolbar);
-
-            Toolbar = activity.SupportActionBar;
-            Toolbar.SetDisplayHomeAsUpEnabled (true);
-            Toolbar.SetTitle (Resource.String.SelectClientTitle);
-
-            recyclerView = view.FindViewById<RecyclerView> (Resource.Id.ClientListRecyclerView);
+            recyclerView = new RecyclerView (Activity);
             recyclerView.SetLayoutManager (new LinearLayoutManager (Activity));
             recyclerView.AddItemDecoration (new ShadowItemDecoration (Activity));
             recyclerView.AddItemDecoration (new DividerItemDecoration (Activity, DividerItemDecoration.VerticalList));
 
-            HasOptionsMenu = true;
-
-            return view;
-        }
-
-        public async override void OnViewCreated (View view, Bundle savedInstanceState)
-        {
-            base.OnViewCreated (view, savedInstanceState);
-
             if (viewModel == null) {
-                var workspaceIdInList = ClientListActivity.GetIntentWorkspaceId (Activity.Intent);
-                workspaceId = workspaceIdInList [0];
-                if (workspaceId == null || workspaceId == Guid.Empty) {
-                    Activity.Finish ();
-                    return;
-                }
-
                 viewModel = new ClientListViewModel (workspaceId);
             }
 
-            var adapter = new ClientListAdapter (recyclerView, viewModel.ClientList);
+            adapter = new ClientListAdapter (recyclerView, viewModel.ClientList);
             adapter.HandleClientSelection = OnItemSelected;
 
             recyclerView.SetAdapter (adapter);
 
             viewModel.OnIsLoadingChanged += OnModelLoaded;
             await viewModel.Init ();
+
+        }
+
+        public override Dialog OnCreateDialog (Bundle savedInstanceState)
+        {
+            var dia = new AlertDialog.Builder (Activity)
+            .SetTitle (Resource.String.SelectClientTitle)
+            .SetNegativeButton (Resource.String.ChooseTimeEntryTagsDialogCancel, OnCancelButtonClicked)
+            .SetPositiveButton (Resource.String.ChooseTimeEntryTagsDialogOk, OnOkButtonClicked)
+            .SetView (recyclerView)
+            .Create ();
+
+            return dia;
+        }
+
+        private void OnCancelButtonClicked (object sender, DialogClickEventArgs args)
+        {
+        }
+
+        private void OnOkButtonClicked (object sender, DialogClickEventArgs args)
+        {
+        }
+
+        public async override void OnViewCreated (View view, Bundle savedInstanceState)
+        {
+            base.OnViewCreated (view, savedInstanceState);
         }
 
         private void OnModelLoaded (object sender, EventArgs e)
         {
             if (!viewModel.IsLoading) {
                 if (viewModel.Model == null) {
-//                    Activity.Finish ();
+                    Dismiss ();
                 }
             }
         }
