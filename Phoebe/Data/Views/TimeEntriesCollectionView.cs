@@ -270,6 +270,8 @@ namespace Toggl.Phoebe.Data.Views
         #endregion
 
         #region Undo
+        public event EventHandler OnUndoItemRemoved;
+
         public async Task RemoveItemWithUndoAsync (int index)
         {
             // Get data holder
@@ -331,6 +333,10 @@ namespace Toggl.Phoebe.Data.Views
                 await timeEntryGroup.DeleteAsync ();
             } else {
                 await TimeEntryModel.DeleteTimeEntryDataAsync (holder.TimeEntryDataList.First ());
+            }
+
+            if (OnUndoItemRemoved != null) {
+                OnUndoItemRemoved.Invoke (this, EventArgs.Empty);
             }
         }
 

@@ -1,11 +1,11 @@
-﻿using System.Linq;
-using NUnit.Framework;
-using Toggl.Phoebe.Data.Views;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using Toggl.Phoebe.Data.Utils;
+using System.Linq;
 using System.Threading.Tasks;
+using NUnit.Framework;
 using Toggl.Phoebe.Data.DataObjects;
+using Toggl.Phoebe.Data.Utils;
+using Toggl.Phoebe.Data.Views;
 
 namespace Toggl.Phoebe.Tests.Views
 {
@@ -59,12 +59,14 @@ namespace Toggl.Phoebe.Tests.Views
             });
         }
 
-        [Test]
-        public void TestDeletePermanently ()
+        private void TestDeletePermanently ()
         {
             RunAsync (async delegate {
                 var view = await LogTimeEntriesView.CreateAsync ();
                 Assert.AreEqual (false, view.IsLoading);
+
+                // Small interval for testing
+                TimeEntriesCollectionView.UndoMilliSecondsInterval = 5;
 
                 await view.LoadMoreAsync ();
                 Assert.AreEqual (false, view.IsLoading);
@@ -72,16 +74,21 @@ namespace Toggl.Phoebe.Tests.Views
                 // Test delete
                 var itemIndex = GetRandomItemIndex (view.Data);
                 var itemToRemove = (TimeEntryHolder)view.Data.ElementAt (itemIndex);
+
+                view.OnUndoItemRemoved += async (sender, e) => {
+                    // Try to find the item
+                    Assert.IsTrue (view.Data.Count (d => AreEquals (d, itemToRemove)) == 0);
+
+                    var items = await DataStore.Table<TimeEntryData> ()
+                                .QueryAsync (entry => entry.Id == itemToRemove.Id);
+                    Assert.IsFalse (items.Count == 0);
+                };
+
+                // Delete for real
                 await view.RemoveItemWithUndoAsync (itemIndex);
                 Assert.IsTrue (view.Data.Count (d => AreEquals (d, itemToRemove)) == 0);
 
-                // Try to find the item after a time
-                await Task.Delay ((TimeEntriesCollectionView.UndoSecondsInterval + 2) * 1000);
-                Assert.IsTrue (view.Data.Count (d => AreEquals (d, itemToRemove)) == 0);
-
-                var items = await DataStore.Table<TimeEntryData> ()
-                            .QueryAsync (entry => entry.Id == itemToRemove.Id);
-                Assert.IsFalse (items.Count == 0);
+                await Task.Delay (TimeEntriesCollectionView.UndoMilliSecondsInterval + 10);
             });
         }
 

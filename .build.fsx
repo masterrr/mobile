@@ -16,6 +16,7 @@ Target "core-build" (fun () ->
 )
 
 Target "core-tests" (fun () ->
+    RestorePackages "Tests/packages.config"
     RunNUnitTests "Tests/bin/Debug/Tests.dll" "Tests/bin/Debug/TestResult.xml"
 )
 
