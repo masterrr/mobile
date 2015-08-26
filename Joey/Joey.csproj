@@ -706,6 +706,7 @@
     <AndroidResource Include="Resources\layout\ClientListActivity.axml" />
     <AndroidResource Include="Resources\layout\ClientListFragment.axml" />
     <AndroidResource Include="Resources\layout\ClientListClientItem.axml" />
+    <AndroidResource Include="Resources\layout\ProjectListClientItem.axml" />
   </ItemGroup>
   <Import Project="..\packages\Xamarin.Insights.1.10.6\build\MonoAndroid10\Xamarin.Insights.targets" Condition="Exists('..\packages\Xamarin.Insights.1.10.6\build\MonoAndroid10\Xamarin.Insights.targets')" />
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
