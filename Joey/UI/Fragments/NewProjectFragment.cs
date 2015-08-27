@@ -15,7 +15,6 @@ using Activity = Android.Support.V7.App.AppCompatActivity;
 using AlertDialog = Android.Support.V7.App.AlertDialog;
 using Fragment = Android.Support.V4.App.Fragment;
 using Toolbar = Android.Support.V7.Widget.Toolbar;
-using Android.Widget;
 
 namespace Toggl.Joey.UI.Fragments
 {
@@ -63,7 +62,7 @@ namespace Toggl.Joey.UI.Fragments
             ProjectBit.TextField.TextChanged += ProjectBitTextChangedHandler;
 
             SelectClientBit = view.FindViewById<TogglField> (Resource.Id.SelectClientNameBit)
-                              .SetName (Resource.String.NewProjectSelectClientFieldName)
+                              .DestroyAssistView().SetName (Resource.String.NewProjectSelectClientFieldName)
                               .SimulateButton();
 
             ClientEditText = SelectClientBit.TextField;
@@ -90,16 +89,12 @@ namespace Toggl.Joey.UI.Fragments
             }
 
             viewModel.OnIsLoadingChanged += OnModelLoaded;
+            viewModel.OnModelChanged += OnModelChanged;
             await viewModel.Init ();
         }
 
         private void OnModelLoaded (object sender, EventArgs e)
         {
-            if (!viewModel.IsLoading) {
-                if (viewModel == null) {
-                    Activity.Finish ();
-                }
-            }
         }
 
         public override void OnStart ()
@@ -116,6 +111,22 @@ namespace Toggl.Joey.UI.Fragments
             viewModel.OnIsLoadingChanged -= OnModelLoaded;
             viewModel.Dispose ();
             base.OnDestroyView ();
+        }
+
+        private void OnModelChanged (object sender, EventArgs e)
+        {
+            Rebind ();
+        }
+
+        private void Rebind()
+        {
+            if (viewModel.Model == null) {
+                return;
+            }
+            var project = viewModel.Model;
+            if (project.Client != null) {
+                ClientEditText.Text = project.Client.Name;
+            }
         }
 
         private async void SaveButtonHandler (object sender, EventArgs e)
@@ -162,7 +173,7 @@ namespace Toggl.Joey.UI.Fragments
 
         private void SelectClientBitClickedHandler (object sender, EventArgs e)
         {
-            new ClientListFragment (viewModel.Model.Data.WorkspaceId).Show (FragmentManager, "tags_dialog");
+            new ClientListFragment (viewModel.Model.Data.WorkspaceId, viewModel).Show (FragmentManager, "clients_dialog");
         }
 
         public override void OnCreateOptionsMenu (IMenu menu, MenuInflater inflater)
@@ -188,4 +199,3 @@ namespace Toggl.Joey.UI.Fragments
         }
     }
 }
-

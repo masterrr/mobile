@@ -182,9 +182,16 @@ namespace Toggl.Phoebe.Data.Views
                 } else if (FindWorkspace (data.WorkspaceId, out workspace)) {
                     project = new Project (data);
 
-                    workspace.Projects.Add (project);
-                    SortProjects (workspace.Projects, clientDataObjects);
-                    UpdateCollection ();
+                    if (project.Data.ClientId == null) {
+                        currentWorkspace.Clients.First ().Projects.Add (project);
+                    } else {
+                        currentWorkspace.Clients
+                        .Where (r => r.Data != null)
+                        .Where (r => r.Data.Id == project.Data.ClientId)
+                        .First ().Projects.Add (project);
+                    }
+                    SortEverything ();
+                    UpdateCollection();
                 }
             }
         }

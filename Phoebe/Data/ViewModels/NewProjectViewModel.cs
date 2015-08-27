@@ -39,6 +39,8 @@ namespace Toggl.Phoebe.Data.ViewModels
 
         public event EventHandler OnIsLoadingChanged;
 
+        public event EventHandler OnModelChanged;
+
         public bool IsLoading
         {
             get {
@@ -85,7 +87,15 @@ namespace Toggl.Phoebe.Data.ViewModels
             } catch (Exception ex) {
                 model = null;
             } finally {
+                model.PropertyChanged += OnModelChange;
                 IsLoading = false;
+            }
+        }
+
+        private void OnModelChange (object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (OnModelChanged != null) {
+                OnModelChanged (this, EventArgs.Empty);
             }
         }
 

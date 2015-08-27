@@ -25,11 +25,11 @@ namespace Toggl.Joey.UI.Fragments
 {
     public class ClientListFragment : BaseDialogFragment
     {
-        private ActionBar Toolbar;
         private RecyclerView recyclerView;
         private ClientListViewModel viewModel;
         private ClientListAdapter adapter;
         private Guid workspaceId;
+        private NewProjectViewModel projectModel;
 
         public ClientListFragment ()
         {
@@ -39,11 +39,13 @@ namespace Toggl.Joey.UI.Fragments
         {
         }
 
-        public ClientListFragment (Guid workspaceId)
+        public ClientListFragment (Guid workspaceId, NewProjectViewModel projectModel)
         {
             this.workspaceId = workspaceId;
+            this.projectModel = projectModel;
             viewModel = new ClientListViewModel (this.workspaceId);
         }
+
         public async override void OnCreate (Bundle savedInstanceState)
         {
             base.OnCreate (savedInstanceState);
@@ -69,14 +71,12 @@ namespace Toggl.Joey.UI.Fragments
 
         public override Dialog OnCreateDialog (Bundle savedInstanceState)
         {
-            var dia = new AlertDialog.Builder (Activity)
-            .SetTitle (Resource.String.SelectClientTitle)
-            .SetNegativeButton (Resource.String.ChooseTimeEntryTagsDialogCancel, OnCancelButtonClicked)
-            .SetPositiveButton (Resource.String.ChooseTimeEntryTagsDialogOk, OnOkButtonClicked)
-            .SetView (recyclerView)
-            .Create ();
-
-            return dia;
+            return new AlertDialog.Builder (Activity)
+                   .SetTitle (Resource.String.SelectClientTitle)
+                   .SetNegativeButton (Resource.String.ChooseTimeEntryTagsDialogCancel, OnCancelButtonClicked)
+                   .SetPositiveButton (Resource.String.ChooseTimeEntryTagsDialogOk, OnOkButtonClicked)
+                   .SetView (recyclerView)
+                   .Create ();
         }
 
         private void OnCancelButtonClicked (object sender, DialogClickEventArgs args)
@@ -87,7 +87,7 @@ namespace Toggl.Joey.UI.Fragments
         {
         }
 
-        public async override void OnViewCreated (View view, Bundle savedInstanceState)
+        public override void OnViewCreated (View view, Bundle savedInstanceState)
         {
             base.OnViewCreated (view, savedInstanceState);
         }
@@ -96,13 +96,14 @@ namespace Toggl.Joey.UI.Fragments
         {
             if (!viewModel.IsLoading) {
                 if (viewModel.Model == null) {
-                    Dismiss ();
                 }
             }
         }
 
-        private async void OnItemSelected (object m)
+        private void OnItemSelected (object m)
         {
+            projectModel.Model.Client =  new ClientModel (((WorkspaceClientsView.Client)m).Data);
+            Dismiss ();
         }
 
         public override bool OnOptionsItemSelected (IMenuItem item)
