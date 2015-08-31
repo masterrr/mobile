@@ -190,7 +190,7 @@ namespace Toggl.Ross.ViewControllers
                 var data = GetRow (indexPath);
                 if (data != null) {
                     controller.NavigationController.PushViewController (
-                        new EditTimeEntryViewController (data.TimeEntryDataList), true);
+                        new EditTimeEntryViewController (data), true);
                 } else {
                     tableView.DeselectRow (indexPath, true);
                 }

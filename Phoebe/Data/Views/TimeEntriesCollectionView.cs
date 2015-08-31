@@ -574,13 +574,6 @@ namespace Toggl.Phoebe.Data.Views
             }
         }
 
-        public int Count
-        {
-            get {
-                return ItemCollection.Count;
-            }
-        }
-
         #endregion
 
         public interface IDateGroup : IDisposable
