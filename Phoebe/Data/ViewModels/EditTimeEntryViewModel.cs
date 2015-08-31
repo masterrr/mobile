@@ -54,7 +54,12 @@ namespace Toggl.Phoebe.Data.ViewModels
             return model.SaveAsync ();
         }
 
-
+        public bool IsGrouped
+        {
+            get {
+                return model.TimeEntryList.Count > 1;
+            }
+        }
 
         public TimeEntryGroup Model
         {

@@ -67,13 +67,6 @@ namespace Toggl.Phoebe.Data.Utils
             }
         }
 
-        public bool Grouped
-        {
-            get {
-                return dataObjects.Count > 1;
-            }
-        }
-
         public IList<string> TimeEntryGuids
         {
             get {

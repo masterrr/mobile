@@ -480,7 +480,7 @@ namespace Toggl.Ross.ViewControllers
                 TranslatesAutoresizingMaskIntoConstraints = false,
             });
 
-            if (!viewModel.Model.Grouped && !ServiceContainer.Resolve<ISettingsStore> ().GroupedTimeEntries) {
+            if (!viewModel.IsGrouped && !ServiceContainer.Resolve<ISettingsStore> ().GroupedTimeEntries) {
                 wrapper.Add (startStopView = new StartStopView () {
                     TranslatesAutoresizingMaskIntoConstraints = false,
                     StartTime = model.StartTime,
