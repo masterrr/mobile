@@ -183,9 +183,9 @@ namespace Toggl.Phoebe.Data.Views
                     project = new Project (data);
 
                     if (project.Data.ClientId == null) {
-                        currentWorkspace.Clients.First ().Projects.Add (project);
+                        workspace.Clients.First ().Projects.Add (project);
                     } else {
-                        currentWorkspace.Clients
+                        workspace.Clients
                         .Where (r => r.Data != null)
                         .Where (r => r.Data.Id == project.Data.ClientId)
                         .First ().Projects.Add (project);
