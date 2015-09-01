@@ -186,13 +186,13 @@ namespace Toggl.Phoebe.Data.Utils
             return Duration;
         }
 
-        public void SetDuration (TimeSpan value)
+        public async void SetDuration (TimeSpan value)
         {
             // Allow changing duration if 1 TE
             if (dataObjects.Count == 1) {
                 Model.SetDuration (value);
-                Model.SaveAsync ();
                 TimeEntryList[0] = Model.Data;
+                await Model.SaveAsync ();
             }
         }
 
