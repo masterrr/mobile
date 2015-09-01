@@ -4,12 +4,12 @@ using Foundation;
 using Newtonsoft.Json;
 using NotificationCenter;
 using Toggl.Phoebe;
+using Toggl.Phoebe.Data.DataObjects;
 using Toggl.Phoebe.Data.Models;
 using Toggl.Phoebe.Net;
 using Toggl.Ross.ViewControllers;
 using UIKit;
 using XPlatUtils;
-using Toggl.Phoebe.Data.DataObjects;
 
 
 namespace Toggl.Ross.Data

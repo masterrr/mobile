@@ -84,7 +84,7 @@ namespace Toggl.Phoebe.Data.Views
                 TimeEntries.AddRange (entries.ToList());
                 foreach (var entry in TimeEntries) {
                     var description = entry.Description;
-                    trie.Add (description.Substring(0, Math.Min(description.Length, StringMaxLength)).ToLower(), entry);
+                    trie.Add (description.Substring (0, Math.Min (description.Length, StringMaxLength)).ToLower(), entry);
                 }
 
             } catch (Exception exc) {

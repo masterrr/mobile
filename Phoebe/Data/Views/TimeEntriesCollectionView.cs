@@ -265,7 +265,7 @@ namespace Toggl.Phoebe.Data.Views
                 return ItemCollection.Count;
             }
         }
-            
+
         #region Undo
         public async Task RemoveItemWithUndoAsync (int index)
         {

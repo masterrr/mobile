@@ -1,18 +1,16 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
 using System.ComponentModel;
 using CoreFoundation;
-using UIKit;
 using Toggl.Phoebe.Analytics;
 using Toggl.Phoebe.Data;
-using Toggl.Phoebe.Data.DataObjects;
 using Toggl.Phoebe.Data.Models;
 using Toggl.Phoebe.Data.Utils;
-using XPlatUtils;
+using Toggl.Phoebe.Data.ViewModels;
 using Toggl.Ross.Data;
 using Toggl.Ross.Theme;
-using Toggl.Phoebe.Data.ViewModels;
+using UIKit;
+using XPlatUtils;
 
 namespace Toggl.Ross.ViewControllers
 {
