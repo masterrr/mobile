@@ -43,6 +43,7 @@ namespace Toggl.Joey.UI.Fragments
         {
             this.workspaceId = workspaceId;
             this.projectModel = projectModel;
+            Console.WriteLine ("workspaceId: {0}", workspaceId);
             viewModel = new ClientListViewModel (this.workspaceId);
         }
 
@@ -102,7 +103,12 @@ namespace Toggl.Joey.UI.Fragments
 
         private void OnItemSelected (object m)
         {
-            projectModel.Model.Client =  new ClientModel (((WorkspaceClientsView.Client)m).Data);
+            var client = (WorkspaceClientsView.Client)m;
+            if (client.IsNewClient) {
+                new CreateClientDialogFragment (projectModel.Model).Show (FragmentManager, "new_client_dialog");
+            } else {
+                projectModel.Model.Client =  new ClientModel (((WorkspaceClientsView.Client)m).Data);
+            }
             Dismiss ();
         }
 

@@ -206,10 +206,13 @@
     <string name="SwitchViewText">or you can</string>
     <string name="LoginViewButtonText">Log in</string>
     <string name="SignupViewButtonText">Sign up</string>
-    <string name="ClientsNoClient">No client</string>
+    <string name="ClientsNewClient">New client</string>
     <string name="ProjectListEmptyStateText">You haven\'t created any projects\nin this workspace yet. <b>Create</b> one now!</string>
     <string name="ProjectListToolbarMenuTitle">SORT BY</string>
     <string name="ProjectListToolbarMenuProjects">Projects</string>
     <string name="ProjectListToolbarMenuClients">Clients</string>
     <string name="SelectClientTitle">Select client</string>
+    <string name="CreateClientDialogTitle">New client</string>
+    <string name="CreateClientDialogHint">Client name...</string>
+    <string name="CreateClientDialogOk">Create</string>
 </resources>

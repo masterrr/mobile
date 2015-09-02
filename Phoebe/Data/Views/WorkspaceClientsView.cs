@@ -44,8 +44,6 @@ namespace Toggl.Phoebe.Data.Views
         {
             if (msg.Data is UserData) {
                 OnDataChange ((UserData)msg.Data);
-            } else if (msg.Data is WorkspaceData) {
-                OnDataChange ((WorkspaceData)msg.Data, msg.Action);
             } else if (msg.Data is ClientData) {
                 OnDataChange ((ClientData)msg.Data, msg.Action);
             }
@@ -63,16 +61,6 @@ namespace Toggl.Phoebe.Data.Views
             userData = data;
         }
 
-        private void OnDataChange (WorkspaceData data, DataAction action)
-        {
-            var existingWorkspace = currentWorkspace;
-            currentWorkspace = new Workspace (data);
-            if (existingWorkspace == null || existingWorkspace.Data.Id != data.Id) {
-                OnUpdated ();
-            }
-            currentWorkspace = new Workspace (data);
-        }
-
         private void OnDataChange (ClientData data, DataAction action)
         {
             var isExcluded = action == DataAction.Delete
@@ -87,11 +75,7 @@ namespace Toggl.Phoebe.Data.Views
             } else {
                 var client = new Client (data);
 
-//                if (existingData != null) {
-//                    dataObjects.UpdateData (client);
-//                } else {
                 dataObjects.Add (client);
-//                }
             }
         }
 
@@ -139,6 +123,7 @@ namespace Toggl.Phoebe.Data.Views
 
                 await clientsTask;
                 var clients = clientsTask.Result;
+                dataObjects.Add (new Client (workspaceId));
 
                 foreach (var clientData in clients) {
                     var client = new Client (clientData);
@@ -158,11 +143,15 @@ namespace Toggl.Phoebe.Data.Views
 
         private static void SortClients (List<Client> data)
         {
-            data.Sort ((a, b) => String.Compare (
+            data.Sort ((a, b) => {
+                if (a.IsNewClient != b.IsNewClient) {
+                    return a.IsNewClient ? -1 : 1;
+                }
+                return String.Compare (
                            a.Data.Name ?? String.Empty,
-                           b.Data.Name ?? String.Empty,
-                           StringComparison.Ordinal
-                       ));
+                           b.Data.Name ?? String.Empty,StringComparison.OrdinalIgnoreCase
+                       );
+            });
         }
 
         public void LoadMore () {}
@@ -227,13 +216,13 @@ namespace Toggl.Phoebe.Data.Views
                 workspaceId = dataObject.WorkspaceId;
             }
 
-            public Client (WorkspaceData workspaceData)
+            public Client (Guid wsId)
             {
                 dataObject = null;
-                workspaceId = workspaceData.Id;
+                workspaceId = wsId;
             }
 
-            public bool IsNoClient
+            public bool IsNewClient
             {
                 get { return dataObject == null; }
             }
@@ -267,7 +256,6 @@ namespace Toggl.Phoebe.Data.Views
             public Workspace (WorkspaceData dataObject)
             {
                 this.dataObject = dataObject;
-                clients.Add (new Client (dataObject));  // No client row.
             }
 
             public WorkspaceData Data

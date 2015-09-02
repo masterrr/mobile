@@ -120,6 +120,7 @@ namespace Toggl.Joey.UI.Fragments
 
         private void Rebind()
         {
+            Console.WriteLine ("Rebind");
             if (viewModel.Model == null) {
                 return;
             }

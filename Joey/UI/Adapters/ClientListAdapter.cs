@@ -18,19 +18,16 @@ namespace Toggl.Joey.UI.Adapters
     public class ClientListAdapter : RecycledDataViewAdapter<object>
     {
         protected static readonly int ViewTypeContent = 1;
-        protected static readonly int ViewTypeNoClient = ViewTypeContent;
+        protected static readonly int ViewTypeNewClient = ViewTypeContent;
         protected static readonly int ViewTypeClient = ViewTypeContent + 1;
         protected static readonly int ViewTypeLoaderPlaceholder = 0;
+        public const long CreateClientId = -1;
+
 
         public Action<object> HandleClientSelection { get; set; }
 
-        private WorkspaceClientsView collectionView;
-        private RecyclerView owner;
-
         public ClientListAdapter (RecyclerView owner, WorkspaceClientsView collectionView) : base (owner, collectionView)
         {
-            this.owner = owner;
-            this.collectionView = collectionView;
         }
 
         protected override void CollectionChanged (NotifyCollectionChangedEventArgs e)
@@ -44,12 +41,12 @@ namespace Toggl.Joey.UI.Adapters
         {
             View view;
             RecyclerView.ViewHolder holder;
-            if (viewType == ViewTypeNoClient) {
+            if (viewType == ViewTypeNewClient) {
                 view = LayoutInflater.FromContext (ServiceContainer.Resolve<Context> ()).Inflate (Resource.Layout.ClientListClientItem, parent, false);
-                holder = new ClientListItemHolder (this, view);
+                holder = new NewClientListItemHolder (this, view);
             } else {
                 view = LayoutInflater.FromContext (ServiceContainer.Resolve<Context> ()).Inflate (Resource.Layout.ClientListClientItem, parent, false);
-                holder = new  ClientListItemHolder (this, view);
+                holder = new ClientListItemHolder (this, view);
             }
             return holder;
         }
@@ -72,8 +69,8 @@ namespace Toggl.Joey.UI.Adapters
             if (viewType == ViewTypeClient) {
                 var clientHolder = (ClientListItemHolder)holder;
                 clientHolder.Bind (data);
-            } else if ( viewType == ViewTypeNoClient) { // ViewTypeNoClient
-                var clientHolder = (NoClientListItemHolder)holder;
+            } else if ( viewType == ViewTypeNewClient) {
+                var clientHolder = (NewClientListItemHolder)holder;
                 clientHolder.Bind (data);
             }
         }
@@ -85,7 +82,7 @@ namespace Toggl.Joey.UI.Adapters
             }
             var obj = GetEntry (position);
             var p = (WorkspaceClientsView.Client)obj;
-            return p.IsNoClient ? ViewTypeNoClient : ViewTypeClient;
+            return p.IsNewClient ? ViewTypeNewClient : ViewTypeClient;
         }
 
         #region View holders
@@ -128,17 +125,17 @@ namespace Toggl.Joey.UI.Adapters
             }
         }
 
-        public class NoClientListItemHolder : RecycledBindableViewHolder<WorkspaceClientsView.Client>, View.IOnClickListener
+        public class NewClientListItemHolder : RecycledBindableViewHolder<WorkspaceClientsView.Client>, View.IOnClickListener
         {
             private readonly ClientListAdapter adapter;
 
             public TextView ClientTextView { get; private set; }
 
-            public NoClientListItemHolder (IntPtr a, Android.Runtime.JniHandleOwnership b) : base (a, b)
+            public NewClientListItemHolder (IntPtr a, Android.Runtime.JniHandleOwnership b) : base (a, b)
             {
             }
 
-            public NoClientListItemHolder (ClientListAdapter adapter, View root) : base (root)
+            public NewClientListItemHolder (ClientListAdapter adapter, View root) : base (root)
             {
                 this.adapter = adapter;
                 ClientTextView = root.FindViewById<TextView> (Resource.Id.ClientTextView).SetFont (Font.Roboto);
@@ -147,7 +144,7 @@ namespace Toggl.Joey.UI.Adapters
 
             protected override void Rebind ()
             {
-                ClientTextView.SetText (Resource.String.ClientsNoClient);
+                ClientTextView.SetText (Resource.String.ClientsNewClient);
             }
 
             public void OnClick (View v)
