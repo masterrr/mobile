@@ -195,7 +195,7 @@ namespace Toggl.Phoebe.Data.Models
                 return Data.StopTime;
             } set {
                 value = value.ToUtc ().Truncate (TimeSpan.TicksPerSecond);
-                if (StopTime == value) {
+                if (StopTime == value || StartTime > value) {
                     return;
                 }
 

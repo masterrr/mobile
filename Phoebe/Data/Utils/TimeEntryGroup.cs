@@ -279,7 +279,7 @@ namespace Toggl.Phoebe.Data.Utils
         public DateTime StartTime
         {
             get {
-                return TimeEntryList.FirstOrDefault ().StartTime;
+                return Model.StartTime;
             } set {
                 if (TimeEntryList.Count == 1) {
                     Model.StartTime = value;
