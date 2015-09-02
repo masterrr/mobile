@@ -22,7 +22,10 @@ namespace Toggl.Ross.ViewControllers
         private UIPanGestureRecognizer _panGesture;
         private CGPoint draggingPoint;
 
-        private int menuOffset = 60;
+        private const float menuSlideAnimationDuration = .3f;
+        private const int menuOffset = 60;
+        private const int velocityTreshold = 100; 
+
         private LeftViewController menu;
 
         public bool MenuEnabled {
@@ -113,13 +116,37 @@ namespace Toggl.Ross.ViewControllers
             } else if (recognizer.State == UIGestureRecognizerState.Changed) { 
                 var newX = CurrentX;
                 newX += movement;
-                if (newX > MinDraggingX || newX < MaxDraggingX) {
+                if (newX > MinDraggingX && newX < MaxDraggingX) {
                     MoveToLocation (newX);
                 }
                 draggingPoint = translation;
             } else if (recognizer.State == UIGestureRecognizerState.Ended) {
-                
+                if (Math.Abs (velocity.X) >= velocityTreshold) {
+                    if (velocity.X < 0) {
+                        CloseMenu ();
+                    } else {
+                        OpenMenu ();
+                    }
+                } else {
+                    if (Math.Abs (CurrentX) < (Width - menuOffset) / 2) {
+                        CloseMenu ();
+                    } else {
+                        OpenMenu ();
+                    }
+                }
             }
+        }
+
+        private void CloseMenu() {
+            UIView.Animate (menuSlideAnimationDuration, 0, UIViewAnimationOptions.CurveEaseOut, delegate {
+                MoveToLocation(0);
+            }, null);
+        }
+
+        private void OpenMenu() {
+            UIView.Animate (menuSlideAnimationDuration, 0, UIViewAnimationOptions.CurveEaseOut, delegate {
+                MoveToLocation(Width-menuOffset);
+            }, null);
         }
 
         private void MoveToLocation(nfloat x) {
