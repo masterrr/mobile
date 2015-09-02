@@ -393,7 +393,4 @@
       <Visible>False</Visible>
     </XamarinComponentReference>
   </ItemGroup>
-  <ItemGroup>
-    <InterfaceDefinition Include="ViewControllers\LeftViewController.xib" />
-  </ItemGroup>
 </Project>
