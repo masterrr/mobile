@@ -333,6 +333,7 @@
     <Compile Include="Views\TableViewRefreshView.cs" />
     <Compile Include="Net\OAuthManager.cs" />
     <Compile Include="ViewControllers\WebViewController.cs" />
+    <Compile Include="ViewControllers\LeftViewController.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Phoebe\Phoebe.iOS.csproj">
@@ -391,5 +392,8 @@
       <Version>1.2.3.1</Version>
       <Visible>False</Visible>
     </XamarinComponentReference>
+  </ItemGroup>
+  <ItemGroup>
+    <InterfaceDefinition Include="ViewControllers\LeftViewController.xib" />
   </ItemGroup>
 </Project>
