@@ -28,15 +28,7 @@ namespace Toggl.Ross.ViewControllers
 
         private LeftViewController menu;
 
-        public bool MenuEnabled {
-            get { 
-                return _tapGesture.Enabled || _panGesture.Enabled;
-            }
-            set {
-                _tapGesture.Enabled = _panGesture.Enabled = value;
-            }
-        }
-
+        public bool MenuEnabled { get; private set; }
 
         public override void ViewDidLoad ()
         {
@@ -61,17 +53,11 @@ namespace Toggl.Ross.ViewControllers
                 ShouldRecognizeSimultaneously = delegate {
                     return true;
                 },
-                CancelsTouchesInView = false
+                CancelsTouchesInView = true
             };
 
             _panGesture = new UIPanGestureRecognizer (OnPanGesture) {
-                ShouldReceiveTouch = delegate {
-                    return true;
-                },
-                ShouldRecognizeSimultaneously = delegate {
-                    return true;
-                },
-                CancelsTouchesInView = false
+                CancelsTouchesInView = true
             };
 
             View.AddGestureRecognizer (_tapGesture);
@@ -99,6 +85,12 @@ namespace Toggl.Ross.ViewControllers
         public nfloat MinDraggingX {
             get {
                 return 0;
+            }
+        }
+
+        public bool MenuOpen {
+            get {
+                return 0 != CurrentX;
             }
         }
 
@@ -137,16 +129,28 @@ namespace Toggl.Ross.ViewControllers
             }
         }
 
-        private void CloseMenu() {
+        public void CloseMenu() {
+            _tapGesture.Enabled = false;
+
             UIView.Animate (menuSlideAnimationDuration, 0, UIViewAnimationOptions.CurveEaseOut, delegate {
                 MoveToLocation(0);
             }, null);
         }
 
-        private void OpenMenu() {
+        public void OpenMenu() {
+            _tapGesture.Enabled = true;
+
             UIView.Animate (menuSlideAnimationDuration, 0, UIViewAnimationOptions.CurveEaseOut, delegate {
                 MoveToLocation(Width-menuOffset);
             }, null);
+        }
+
+        public void ToggleMenu() {
+            if (MenuOpen) {
+                CloseMenu ();
+            } else {
+                OpenMenu ();
+            }
         }
 
         private void MoveToLocation(nfloat x) {
@@ -158,8 +162,12 @@ namespace Toggl.Ross.ViewControllers
 
         private void OnTapGesture(UITapGestureRecognizer recognizer) 
         {
-            if (!MenuEnabled) {
+            if (!MenuEnabled || !_tapGesture.Enabled) {
                 return;
+            }
+
+            if (CurrentX > 0) {
+                CloseMenu ();
             }
         }
 
