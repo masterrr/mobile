@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -231,11 +232,16 @@ namespace Toggl.Phoebe.Net
             }
         }
 
-        private async Task<HttpResponseMessage> SendAsync (HttpRequestMessage httpReq)
+        private Task<HttpResponseMessage> SendAsync (HttpRequestMessage httpReq)
+        {
+            return SendAsync (httpReq, CancellationToken.None);
+        }
+
+        private async Task<HttpResponseMessage> SendAsync (HttpRequestMessage httpReq, CancellationToken cancellationToken)
         {
             using (var httpClient = MakeHttpClient ()) {
                 var reqTimer = Stopwatch.StartNew ();
-                var httpResp = await httpClient.SendAsync (httpReq)
+                var httpResp = await httpClient.SendAsync (httpReq, cancellationToken)
                                .ConfigureAwait (false);
                 reqTimer.Stop ();
 
@@ -297,7 +303,13 @@ namespace Toggl.Phoebe.Net
             return wrap.Data;
         }
 
-        private async Task<List<T>> ListObjects<T> (Uri url)
+        private Task<List<T>> ListObjects<T> (Uri url)
+        where T : CommonJson, new()
+        {
+            return ListObjects<T> (url, CancellationToken.None);
+        }
+
+        private async Task<List<T>> ListObjects<T> (Uri url, CancellationToken cancellationToken)
         where T : CommonJson, new()
         {
             var httpReq = SetupRequest (new HttpRequestMessage () {
@@ -305,7 +317,7 @@ namespace Toggl.Phoebe.Net
                 RequestUri = url,
             });
 
-            var httpResp = await SendAsync (httpReq)
+            var httpResp = await SendAsync (httpReq, cancellationToken)
                            .ConfigureAwait (false);
 
             var respData = await httpResp.Content.ReadAsStringAsync ()
@@ -508,6 +520,26 @@ namespace Toggl.Phoebe.Net
                                               days));
             var user = ServiceContainer.Resolve<AuthManager> ().User;
             return ListObjects<TimeEntryJson> (url);
+        }
+
+        public Task<List<TimeEntryJson>> ListTimeEntries (DateTime start, DateTime end, CancellationToken cancellationToken)
+        {
+            var url = new Uri (v8Url,
+                               String.Format ("time_entries?start_date={0}&end_date={1}",
+                                              WebUtility.UrlEncode (start.ToUtc ().ToString ("o")),
+                                              WebUtility.UrlEncode (end.ToUtc ().ToString ("o"))));
+            var user = ServiceContainer.Resolve<AuthManager> ().User;
+            return ListObjects<TimeEntryJson> (url, cancellationToken);
+        }
+
+        public Task<List<TimeEntryJson>> ListTimeEntries (DateTime end, int days, CancellationToken cancellationToken)
+        {
+            var url = new Uri (v8Url,
+                               String.Format ("time_entries?end_date={0}&num_of_days={1}",
+                                              WebUtility.UrlEncode (end.ToUtc ().ToString ("o")),
+                                              days));
+            var user = ServiceContainer.Resolve<AuthManager> ().User;
+            return ListObjects<TimeEntryJson> (url, cancellationToken);
         }
 
         public Task<TimeEntryJson> UpdateTimeEntry (TimeEntryJson jsonObject)

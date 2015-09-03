@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Toggl.Phoebe.Data.Json;
+using System.Threading;
 
 namespace Toggl.Phoebe.Net
 {
@@ -45,7 +46,11 @@ namespace Toggl.Phoebe.Net
 
         Task<List<ProjectUserJson>> ListProjectUsers (long projectId);
 
+        Task<List<TimeEntryJson>> ListTimeEntries (DateTime start, DateTime end, CancellationToken cancellationToken);
+
         Task<List<TimeEntryJson>> ListTimeEntries (DateTime start, DateTime end);
+
+        Task<List<TimeEntryJson>> ListTimeEntries (DateTime end, int days, CancellationToken cancellationToken);
 
         Task<List<TimeEntryJson>> ListTimeEntries (DateTime end, int days);
 
