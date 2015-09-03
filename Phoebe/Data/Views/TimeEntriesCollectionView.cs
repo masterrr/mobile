@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using System.Timers;
@@ -34,7 +35,7 @@ namespace Toggl.Phoebe.Data.Views
         private Subscription<DataChangeMessage> subscriptionDataChange;
         private Subscription<SyncFinishedMessage> subscriptionSyncFinished;
 
-        private Timer undoTimer;
+        private System.Timers.Timer undoTimer;
         private bool reloadScheduled;
         private bool isLoading;
         private bool hasMore;
@@ -44,16 +45,27 @@ namespace Toggl.Phoebe.Data.Views
         // BufferBlock is an element introduced to
         // deal with the fast producer, slow consumer effect.
         private BufferBlock<DataChangeMessage> bufferBlock = new BufferBlock<DataChangeMessage> ();
+        private CancellationTokenSource cts;
+        private CancellationToken cancellationToken;
 
         protected TimeEntriesCollectionView ()
         {
             var bus = ServiceContainer.Resolve<MessageBus> ();
             subscriptionDataChange = bus.Subscribe<DataChangeMessage> (OnDataChange);
             HasMore = true;
+
+            cts = new CancellationTokenSource ();
+            cancellationToken = cts.Token;
         }
 
         public void Dispose ()
         {
+            // cancel web request.
+            if (isLoading) {
+                cts.Cancel ();
+            }
+            cts.Dispose ();
+
             // Clean lists
             bufferBlock.Complete ();
             ItemCollection.Clear ();
@@ -298,7 +310,9 @@ namespace Toggl.Phoebe.Data.Views
                 undoTimer.Elapsed -= OnUndoTimeFinished;
                 undoTimer.Close ();
             }
-            undoTimer = new Timer (UndoMilliSecondsInterval + 1);
+
+            // Using the correct timer.
+            undoTimer = new System.Timers.Timer (UndoMilliSecondsInterval + 1);
             undoTimer.AutoReset = false;
             undoTimer.Elapsed += OnUndoTimeFinished;
             undoTimer.Start ();
@@ -454,7 +468,7 @@ namespace Toggl.Phoebe.Data.Views
                     const int numDays = 5;
                     try {
                         var minStart = endTime;
-                        var jsonEntries = await client.ListTimeEntries (endTime, numDays);
+                        var jsonEntries = await client.ListTimeEntries (endTime, numDays, cancellationToken);
 
                         BeginUpdate ();
                         var entries = await dataStore.ExecuteInTransactionAsync (ctx =>
