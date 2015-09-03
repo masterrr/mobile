@@ -122,7 +122,7 @@
     <string name="ChooseTimeEntryTagsDialogTitle">Select tags</string>
     <string name="ChooseTimeEntryTagsDialogCancel">Cancel</string>
     <string name="ChooseTimeEntryTagsDialogOk">Ok</string>
-    <string name="TagsAdapterCreateTag">New&#8230;</string>
+    <string name="TagsAdapterCreateTag">New tag</string>
     <string name="ChooseTimeEntryProjectDialogTitle">Select project</string>
     <string name="ChooseTimeEntryProjectDialogCancel">Cancel</string>
     <string name="WelcomeBoxTapToStart">Tap on the start button to start tracking</string>
