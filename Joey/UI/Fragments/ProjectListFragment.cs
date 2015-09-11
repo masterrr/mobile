@@ -122,10 +122,15 @@ namespace Toggl.Joey.UI.Fragments
                 foreach (var ws in viewModel.ProjectList.Workspaces) {
                     var tab = tabLayout.NewTab().SetText (ws.Data.Name);
                     tabLayout.AddTab (tab);
-                    if (ws.Data.Id == viewModel.TimeEntryList[0].WorkspaceId) {
-                        viewModel.ProjectList.CurrentWorkspaceIndex = i;
-                        tab.Select();
+                    try {
+                        if (ws.Data.Id == viewModel.TimeEntryList[0].WorkspaceId) {
+                            viewModel.ProjectList.CurrentWorkspaceIndex = i;
+                            tab.Select();
+                        }
+                    } catch (Exception ex) {
+                        Console.WriteLine ("here!");
                     }
+
                     i++;
                 }
             }
