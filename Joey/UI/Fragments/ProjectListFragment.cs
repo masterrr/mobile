@@ -157,11 +157,19 @@ namespace Toggl.Joey.UI.Fragments
         private void OnNewProjectFabClick (object sender, EventArgs e)
         {
             var entryList = new List<TimeEntryData> (viewModel.TimeEntryList);
+            ChangeListWorkspace (entryList, viewModel.ProjectList.Workspaces[viewModel.ProjectList.CurrentWorkspaceIndex].Data.Id);
 
             // Show create project activity instead
             var intent = BaseActivity.CreateDataIntent<NewProjectActivity, List<TimeEntryData>>
                          (Activity, entryList, NewProjectActivity.ExtraTimeEntryDataListId);
             StartActivityForResult (intent, ProjectCreatedRequestCode);
+        }
+
+        private void ChangeListWorkspace (List<TimeEntryData> list, Guid wsId)
+        {
+            foreach (var entry in list) {
+                entry.WorkspaceId = wsId;
+            }
         }
 
         private async void OnItemSelected (object m)
