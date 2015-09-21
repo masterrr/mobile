@@ -168,6 +168,9 @@
     <Compile Include="UI\Views\AddProjectFab.cs" />
     <Compile Include="UI\Views\TogglAppBar.cs" />
     <Compile Include="UI\Fragments\CreateClientDialogFragment.cs" />
+    <Compile Include="UI\Fragments\ClientListFragment.cs" />
+    <Compile Include="UI\Adapters\ClientListAdapter.cs" />
+  </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />
     <None Include="Assets\AboutAssets.txt" />

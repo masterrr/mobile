@@ -6,6 +6,7 @@ using Android.OS;
 using Android.Text;
 using Android.Views;
 using Android.Views.InputMethods;
+using Android.Widget;
 using Toggl.Joey.UI.Activities;
 using Toggl.Joey.UI.Views;
 using Toggl.Phoebe.Data.DataObjects;
