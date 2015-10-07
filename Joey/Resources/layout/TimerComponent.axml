@@ -24,6 +24,17 @@
             android:textColor="@color/material_black" />
     </LinearLayout>
     <TextView
+        android:id="@+id/TimerTitleTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:text="Timer"
+        android:textColor="@color/material_black"
+        android:singleLine="true"
+        android:textSize="20sp"
+        android:textStyle="normal"
+        android:layout_gravity="left"
+        android:gravity="center" />
+    <TextView
         android:id="@+id/DurationTextView"
         android:paddingLeft="@dimen/rightMargin"
         android:paddingRight="@dimen/rightMargin"
@@ -37,4 +48,11 @@
         android:textStyle="normal"
         android:fontFamily="sans-serif-light"
         android:layout_gravity="center" />
+    <ImageButton
+        android:id="@+id/ToggleFormButton"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:background="@drawable/buttonnoframe"
+        android:src="@drawable/icmanualmode"
+        android:layout_gravity="right" />
 </FrameLayout>

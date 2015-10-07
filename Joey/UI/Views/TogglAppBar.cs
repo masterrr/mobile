@@ -24,18 +24,38 @@ namespace Toggl.Joey.UI.Views
         {
             if (mBehavior == null) {
                 var lp = (CoordinatorLayout.LayoutParams)LayoutParameters;
-                mBehavior = (AppBarBehavior)lp.Behavior;
+                mBehavior = (AppBarLayout.Behavior)lp.Behavior;
             }
             if (xParent == null) {
                 xParent = Android.Runtime.Extensions.JavaCast<CoordinatorLayout> (Parent);
             }
         }
 
-        public void Collapse()
+        public bool Collapsed
+        {
+            get {
+                return Top != 0;
+            }
+        }
+
+        public void Toggle()
+        {
+            if (Collapsed) {
+                Expand();
+            } else {
+                Collapse();
+            }
+        }
+
+        public void Collapse (bool animate = true)
         {
             EnsureDependables ();
             if (xParent != null && mBehavior != null) {
-                mBehavior.OnNestedFling ((CoordinatorLayout)xParent, this, null, 0, Height, true);
+                if (animate) {
+                    mBehavior.OnNestedFling ((CoordinatorLayout)xParent, this, null, 0, 10000, true);
+                } else {
+                    mBehavior.OnNestedPreScroll ((CoordinatorLayout)xParent, this, null, 0, Height, new int[] {0, 0});
+                }
             }
         }
 
@@ -43,7 +63,7 @@ namespace Toggl.Joey.UI.Views
         {
             EnsureDependables ();
             if (xParent != null && mBehavior != null) {
-                mBehavior.OnNestedFling ((CoordinatorLayout)xParent, this, null, 0, -Height * 5, false);
+                mBehavior.OnNestedFling ((CoordinatorLayout)xParent, this, null, 0, -Height*5, false);
             }
         }
     }
