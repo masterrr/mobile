@@ -250,6 +250,8 @@ namespace Toggl.Joey.UI.Components
                 DescriptionTextView.Alpha = 0;
                 ProjectTextView.Alpha = 0;
                 DurationTextView.Alpha = 1 - animateState * animateState;
+                DurationTextView.TranslationX = 0;
+                DurationTextView.Gravity = GravityFlags.Center;
                 TimerTitleTextView.Alpha = animateState * animateState;
             }
         }
