@@ -37,7 +37,11 @@ namespace Toggl.Joey.UI.Components
 
         protected TextView DescriptionTextView { get; private set; }
 
+        protected TextView TimerTitleTextView { get; private set; }
+
         public View Root { get; private set; }
+
+        public ImageButton ToggleFormButton { get; private set; }
 
         private Activity activity;
 
@@ -46,9 +50,10 @@ namespace Toggl.Joey.UI.Components
         private void FindViews ()
         {
             DurationTextView = Root.FindViewById<TextView> (Resource.Id.DurationTextView).SetFont (Font.RobotoLight);
+            TimerTitleTextView = Root.FindViewById<TextView> (Resource.Id.TimerTitleTextView);
             ProjectTextView = Root.FindViewById<TextView> (Resource.Id.ProjectTextView);
             DescriptionTextView = Root.FindViewById<TextView> (Resource.Id.DescriptionTextView).SetFont (Font.RobotoLight);
-
+            ToggleFormButton = Root.FindViewById<ImageButton> (Resource.Id.ToggleFormButton);
             DurationTextView.Click += OnDurationTextClicked;
         }
 
@@ -186,6 +191,13 @@ namespace Toggl.Joey.UI.Components
             new ChangeTimeEntryDurationDialogFragment (currentEntry).Show (activity.SupportFragmentManager, "duration_dialog");
         }
 
+        public bool IsRunning
+        {
+            get {
+                return ActiveTimeEntry.State == TimeEntryState.Running;
+            }
+        }
+
         private void Rebind ()
         {
             ResetTrackedObservables ();
@@ -201,13 +213,24 @@ namespace Toggl.Joey.UI.Components
             DescriptionTextView.Visibility = ViewStates.Visible;
             DurationTextView.Gravity = GravityFlags.Center;
             var resources = activity.ApplicationContext.Resources;
+
             if (CompactView) {
                 ProjectTextView.Text = currentEntry.Project != null ? currentEntry.Project.Name : resources.GetText (Resource.String.TimerComponentNoProject);
                 DescriptionTextView.Text = currentEntry.Description.Length == 0 ?  resources.GetText (Resource.String.TimerComponentNoDescription) : currentEntry.Description;
+                ToggleFormButton.Visibility = currentEntry.State == TimeEntryState.Running ? ViewStates.Gone : ViewStates.Visible;
+                ToggleFormButton.Alpha = 1;
+                TimerTitleTextView.Visibility = currentEntry.State == TimeEntryState.Running ? ViewStates.Gone : ViewStates.Visible;
+
+                ToggleFormButton.SetImageResource (Resource.Drawable.IcManualMode);
+            } else {
+                ToggleFormButton.Visibility = ViewStates.Visible;
+                TimerTitleTextView.Visibility = ViewStates.Visible;
+                ToggleFormButton.SetImageResource (Resource.Drawable.IcCloseManual);
             }
 
             var duration = currentEntry.GetDuration ();
             DurationTextView.Text = TimeSpan.FromSeconds ((long)duration.TotalSeconds).ToString ();
+
             // Schedule next rebind:
             handler.RemoveCallbacks (Rebind);
             handler.PostDelayed (Rebind, 1000 - duration.Milliseconds);
@@ -215,10 +238,20 @@ namespace Toggl.Joey.UI.Components
 
         private void AnimateTo ()
         {
-            int rightRoom = Root.Width - DurationTextView.Width - DurationTextView.Left;
-            DurationTextView.TranslationX = rightRoom * animateState;
-            DescriptionTextView.Alpha = animateState * animateState;
-            ProjectTextView.Alpha = animateState * animateState;
+            if (IsRunning) {
+                int rightRoom = Root.Width - DurationTextView.Width - DurationTextView.Left;
+                DurationTextView.Alpha = 1;
+                DurationTextView.TranslationX = rightRoom * animateState;
+                DescriptionTextView.Alpha = animateState * animateState;
+                ProjectTextView.Alpha = animateState * animateState;
+                ToggleFormButton.Alpha = 1 - animateState * animateState;
+                TimerTitleTextView.Visibility = ViewStates.Gone;
+            } else {
+                DescriptionTextView.Alpha = 0;
+                ProjectTextView.Alpha = 0;
+                DurationTextView.Alpha = 1 - animateState * animateState;
+                TimerTitleTextView.Alpha = animateState * animateState;
+            }
         }
 
         public bool CompactView
@@ -246,6 +279,7 @@ namespace Toggl.Joey.UI.Components
             get { return animateState;}
             set {
                 animateState = value;
+                CompactView = animateState == 1f;
                 AnimateTo ();
             }
         }

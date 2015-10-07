@@ -5,6 +5,7 @@ using Android.Graphics;
 using Android.OS;
 using Android.Support.Design.Widget;
 using Android.Support.V4.App;
+using Android.Support.V4.View;
 using Android.Support.V7.Widget;
 using Android.Support.V7.Widget.Helper;
 using Android.Views;
@@ -74,38 +75,10 @@ namespace Toggl.Joey.UI.Fragments
             }
             appBar.AddOnOffsetChangedListener (this);
             startStopBtn.Click += OnActionClick;
-            timerComponent.Root.Click += OnToolbarClick;
+            timerComponent.ToggleFormButton.Click += OnToggleClick;
+            timerComponent.Root.Click += OnTimerComponentClick;
             manualEditFragment.FABStateChange += OnFABChange;
             timerComponent.CompactView = true;
-        }
-
-        private void OnFABChange (object sender, EventArgs e)
-        {
-            startStopBtn.ButtonAction = manualEditFragment.EntryState;
-        }
-
-        private void OnActionClick (object sender, EventArgs e)
-        {
-            manualEditFragment.RequestAction();
-        }
-
-        private void OnToolbarClick (object sender, EventArgs e)
-        {
-            appBar.Expand();
-        }
-
-        public bool EditFormVisible
-        {
-            get {
-                return isEditShowed;
-            } set {
-                if (isEditShowed == value) {
-                    return;
-                }
-                isEditShowed = value;
-                var activity = (MainDrawerActivity)Activity;
-                activity.ToolbarMode = isEditShowed ? MainDrawerActivity.ToolbarModes.DurationOnly : MainDrawerActivity.ToolbarModes.Compact;
-            }
         }
 
         public override void OnResume ()
@@ -149,7 +122,6 @@ namespace Toggl.Joey.UI.Fragments
 
             manualEditFragment.FABStateChange -= OnFABChange;
             startStopBtn.Click -= OnActionClick;
-            appBar.Click -= OnToolbarClick;
             ReleaseRecyclerView ();
 
             base.OnDestroyView ();
@@ -189,6 +161,8 @@ namespace Toggl.Joey.UI.Fragments
             shadowDecoration.Dispose ();
         }
 
+        #region appbar-manualform behavior
+
         private void SetupCoordinatorViews ()
         {
             var fabLayoutParams = new CoordinatorLayout.LayoutParams (startStopBtn.LayoutParameters);
@@ -198,10 +172,67 @@ namespace Toggl.Joey.UI.Fragments
             startStopBtn.LayoutParameters = fabLayoutParams;
 
             var appBarLayoutParamaters = new CoordinatorLayout.LayoutParams (appBar.LayoutParameters);
-            appBarLayoutParamaters.Behavior = new AppBarBehavior (Activity);
+            appBarLayoutParamaters.Behavior = new AppBarLayout.Behavior ();
             appBar.LayoutParameters = appBarLayoutParamaters;
-
+            appBar.Collapse();
         }
+
+        private void OnFABChange (object sender, EventArgs e)
+        {
+            startStopBtn.ButtonAction = manualEditFragment.EntryState;
+        }
+
+        private void OnActionClick (object sender, EventArgs e)
+        {
+            manualEditFragment.RequestAction();
+        }
+
+        private void OnTimerComponentClick (object sender, EventArgs e)
+        {
+            appBar.Expand();
+            ViewCompat.SetNestedScrollingEnabled (recyclerView, true);
+        }
+
+        private void OnToggleClick (object sender, EventArgs e)
+        {
+            ViewCompat.SetNestedScrollingEnabled (recyclerView, appBar.Collapsed);
+            appBar.Toggle();
+        }
+
+        public bool EditFormVisible
+        {
+            get {
+                return isEditShowed;
+            } set {
+                if (isEditShowed == value) {
+                    return;
+                }
+                isEditShowed = value;
+                var activity = (MainDrawerActivity)Activity;
+                activity.ToolbarMode = isEditShowed ? MainDrawerActivity.ToolbarModes.DurationOnly : MainDrawerActivity.ToolbarModes.Compact;
+            }
+        }
+
+        public void OnOffsetChanged (AppBarLayout layout, int verticalOffset)
+        {
+            float progress = (float)Math.Abs (verticalOffset) / (float) appBar.TotalScrollRange;
+            timerComponent.AnimateState = progress;
+            manualEntry.Alpha = 1 - progress;
+            manualEntry.TranslationY = -verticalOffset;
+            if (progress == 1) {
+                ViewCompat.SetNestedScrollingEnabled (recyclerView, false);
+            }
+        }
+
+        private TimerComponent timerComponent
+        {
+            get {
+                var activity = (MainDrawerActivity)Activity;
+                return activity.Timer;
+            }
+        }
+
+        #endregion
 
         private void OnSettingChanged (SettingChangedMessage msg)
         {
@@ -278,22 +309,6 @@ namespace Toggl.Joey.UI.Fragments
                         t.SetTextColor (Resources.GetColor (Resource.Color.material_green));
                     }
                 }
-            }
-        }
-
-        public void OnOffsetChanged (AppBarLayout layout, int verticalOffset)
-        {
-            float progress = (float)Math.Abs (verticalOffset) / (float) appBar.TotalScrollRange;
-            timerComponent.AnimateState = progress;
-            manualEntry.Alpha = 1 - progress;
-            manualEntry.TranslationY = -verticalOffset;
-        }
-
-        private TimerComponent timerComponent
-        {
-            get {
-                var activity = (MainDrawerActivity)Activity;
-                return activity.Timer;
             }
         }
     }
