@@ -210,4 +210,6 @@
     <string name="ProjectListToolbarMenuTitle">SORT BY</string>
     <string name="ProjectListToolbarMenuProjects">Projects</string>
     <string name="ProjectListToolbarMenuClients">Clients</string>
+    <string name="TimerComponentNoProject">(no project)</string>
+    <string name="TimerComponentNoDescription">(no description)</string>
 </resources>
