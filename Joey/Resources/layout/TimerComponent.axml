@@ -1,23 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="match_parent"
-    android:orientation="horizontal">
-    <TextView
-        android:text="00:00:00"
-        android:textAppearance="?android:attr/textAppearanceMedium"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:gravity="center"
-        android:id="@+id/DurationTextView"
-        android:textColor="@color/action_bar_duration_time"
-        android:layout_marginRight="25dp" />
-    <Button
-        android:text="@string/TimerStopButtonText"
-        android:layout_width="100dp"
+        android:orientation="vertical"
+        android:id="@+id/TimeEntryDataView"
+        android:gravity="center_vertical">
+        <TextView
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:layout_width="190dp"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:id="@+id/ProjectTextView"
+            android:textColor="@color/material_black" />
+        <TextView
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:layout_width="190dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/DescriptionTextView"
+            android:singleLine="true"
+            android:textColor="@color/material_black" />
+    </LinearLayout>
+    <TextView
+        android:id="@+id/TimerTitleTextView"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:id="@+id/ActionButton"
-        android:background="@color/bright_red"
-        android:textColor="@android:color/white" />
-</LinearLayout>
+        android:text="Timer"
+        android:textColor="@color/material_black"
+        android:singleLine="true"
+        android:textSize="20sp"
+        android:textStyle="normal"
+        android:layout_gravity="left"
+        android:gravity="center" />
+    <TextView
+        android:id="@+id/DurationTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginRight="@dimen/rightMargin"
+        android:text="00:00:00"
+        android:textColor="@color/material_black"
+        android:singleLine="true"
+        android:textSize="32dp"
+        android:textStyle="normal"
+        android:fontFamily="sans-serif-light"
+        android:layout_gravity="right"
+        android:gravity="center" />
+    <ImageButton
+        android:id="@+id/AddManuallyButton"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:background="@drawable/buttonnoframe"
+        android:src="@drawable/icmanualmode"
+        android:layout_gravity="right" />
+</FrameLayout>

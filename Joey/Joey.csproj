@@ -701,6 +701,10 @@
     <AndroidResource Include="Resources\drawable-xhdpi\ic_menu_black_24dp.png" />
     <AndroidResource Include="Resources\drawable-xxhdpi\ic_menu_black_24dp.png" />
     <AndroidResource Include="Resources\drawable\TabsBgPattern.xml" />
+    <AndroidResource Include="Resources\drawable-mdpi\IcManualMode.png" />
+    <AndroidResource Include="Resources\drawable-hdpi\IcManualMode.png" />
+    <AndroidResource Include="Resources\drawable-xhdpi\IcManualMode.png" />
+    <AndroidResource Include="Resources\drawable-xxhdpi\IcManualMode.png" />
   </ItemGroup>
   <Import Project="..\packages\Xamarin.Insights.1.10.6\build\MonoAndroid10\Xamarin.Insights.targets" Condition="Exists('..\packages\Xamarin.Insights.1.10.6\build\MonoAndroid10\Xamarin.Insights.targets')" />
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
