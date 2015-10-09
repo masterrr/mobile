@@ -1,13 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using Android.Content;
 using Android.OS;
 using Android.Views;
 using Android.Widget;
+<<<<<<< Updated upstream
 using Toggl.Joey.Data;
 using Toggl.Joey.UI.Activities;
-using Toggl.Joey.UI.Fragments;
+=======
+    >>>>>>> Stashed changes
+    using Toggl.Joey.UI.Fragments;
 using Toggl.Joey.UI.Utils;
 using Toggl.Joey.UI.Views;
 using Toggl.Phoebe;
