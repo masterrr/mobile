@@ -31,7 +31,6 @@ namespace Toggl.Joey.UI.Components
         private ActiveTimeEntryManager timeEntryManager;
         private ITimeEntryModel backingActiveTimeEntry;
         private FABButtonState entryState;
-        private float animateState;
         private bool isProcessingAction;
         private bool canRebind;
         private bool compact;
@@ -60,7 +59,7 @@ namespace Toggl.Joey.UI.Components
             ProjectTextView = Root.FindViewById<TextView> (Resource.Id.ProjectTextView);
             DescriptionTextView = Root.FindViewById<TextView> (Resource.Id.DescriptionTextView).SetFont (Font.RobotoLight);
             AddManualEntry = Root.FindViewById<ImageButton> (Resource.Id.AddManuallyButton);
-            DurationTextView.Click += OnDurationTextClicked;
+            AddManualEntry.Click += CreateTimeEntryManually;
         }
 
         public void OnCreate (Activity activity)
@@ -216,19 +215,6 @@ namespace Toggl.Joey.UI.Components
             }
         }
 
-        void OnDurationTextClicked (object sender, EventArgs e)
-        {
-            var currentEntry = ActiveTimeEntry;
-            if (currentEntry == null) {
-                return;
-            }
-            if (animateState == 1) {
-                Root.PerformClick ();
-                return;
-            }
-            new ChangeTimeEntryDurationDialogFragment (currentEntry).Show (activity.SupportFragmentManager, "duration_dialog");
-        }
-
         private void Rebind ()
         {
             ResetTrackedObservables ();
@@ -320,6 +306,19 @@ namespace Toggl.Joey.UI.Components
             i.PutStringArrayListExtra (EditTimeEntryActivity.ExtraGroupedTimeEntriesGuids, new List<string> {model.Id.ToString ()});
             activity.StartActivity (i);
         }
+
+        private void CreateTimeEntryManually (object sender, EventArgs e)
+        {
+            var intent = new Intent (activity, typeof (EditTimeEntryActivity));
+
+            // Pass a single empty string
+            IList<string> guids = new List<string> {string.Empty};
+            intent.PutStringArrayListExtra (EditTimeEntryActivity.ExtraGroupedTimeEntriesGuids, guids);
+            intent.PutExtra (EditTimeEntryActivity.IsGrouped, guids.Count > 1);
+
+            activity.StartActivity (intent);
+        }
+
 
         public bool CompactView
         {

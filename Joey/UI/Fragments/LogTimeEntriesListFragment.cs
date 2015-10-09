@@ -218,18 +218,6 @@ namespace Toggl.Joey.UI.Fragments
 
         #endregion
 
-        private void CreateTimeEntryManually ()
-        {
-            var intent = new Intent (Activity, typeof (EditTimeEntryActivity));
-
-            // Pass a single empty string
-            IList<string> guids = new List<string> {string.Empty};
-            intent.PutStringArrayListExtra (EditTimeEntryActivity.ExtraGroupedTimeEntriesGuids, guids);
-            intent.PutExtra (EditTimeEntryActivity.IsGrouped, guids.Count > 1);
-
-            StartActivity (intent);
-        }
-
         // Temporal hack to change the
         // action color in snack bar
         private void ChangeSnackBarColor (Snackbar snack)
