@@ -28,4 +28,12 @@
             android:text="@string/NoItemsText"
             android:gravity="center" />
     </LinearLayout>
+    <Toggl.Joey.UI.Views.StartStopFab
+        android:id="@+id/StartStopBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:src="@drawable/IcPlayArrowWhite"
+        android:layout_gravity="bottom|right|end"
+        android:layout_margin="@dimen/fab_margin" />
 </android.support.design.widget.CoordinatorLayout>

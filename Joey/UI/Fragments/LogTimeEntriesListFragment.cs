@@ -11,6 +11,7 @@ using Android.Widget;
 using Toggl.Joey.Data;
 using Toggl.Joey.UI.Activities;
 using Toggl.Joey.UI.Adapters;
+using Toggl.Joey.UI.Components;
 using Toggl.Joey.UI.Utils;
 using Toggl.Joey.UI.Views;
 using Toggl.Phoebe;
@@ -27,7 +28,9 @@ namespace Toggl.Joey.UI.Fragments
         private View emptyMessageView;
         private Subscription<SettingChangedMessage> subscriptionSettingChanged;
         private LogTimeEntriesAdapter logAdapter;
+        private StartStopFab startStopBtn;
         private CoordinatorLayout coordinatorLayout;
+        private FABButtonState entryState;
 
         private TimeEntriesCollectionView collectionView;
 
@@ -47,6 +50,8 @@ namespace Toggl.Joey.UI.Fragments
             recyclerView = view.FindViewById<RecyclerView> (Resource.Id.LogRecyclerView);
             recyclerView.SetLayoutManager (new LinearLayoutManager (Activity));
             coordinatorLayout = view.FindViewById<CoordinatorLayout> (Resource.Id.logCoordinatorLayout);
+            startStopBtn = view.FindViewById<StartStopFab> (Resource.Id.StartStopBtn);
+
             return view;
         }
 
@@ -56,6 +61,40 @@ namespace Toggl.Joey.UI.Fragments
 
             var bus = ServiceContainer.Resolve<MessageBus> ();
             subscriptionSettingChanged = bus.Subscribe<SettingChangedMessage> (OnSettingChanged);
+            startStopBtn.Click += timerComponent.OnActionButtonClicked;
+        }
+
+        public EventHandler FABStateChange;
+
+        public FABButtonState EntryState
+        {
+            get {
+                return entryState;
+            }
+        }
+
+        private void SendState ()
+        {
+            if (timerComponent.ActiveTimeEntry == null) {
+                entryState = FABButtonState.Start;
+            } else if (timerComponent.ActiveTimeEntry.State == TimeEntryState.New && timerComponent.ActiveTimeEntry.StopTime.HasValue) {
+                entryState = FABButtonState.Save;
+            } else if (timerComponent.ActiveTimeEntry.State == TimeEntryState.Running) {
+                entryState = FABButtonState.Stop;
+            } else {
+                entryState = FABButtonState.Start;
+            }
+            if (FABStateChange != null) {
+                FABStateChange.Invoke (this, EventArgs.Empty); // Initial rendering
+            }
+        }
+
+        private TimerComponent timerComponent
+        {
+            get {
+                var activity = (MainDrawerActivity)Activity;
+                return activity.Timer;
+            }
         }
 
         public override void OnResume ()

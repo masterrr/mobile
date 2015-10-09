@@ -14,7 +14,7 @@ namespace Toggl.Joey.UI.Views
     {
         private AnimatorSet switchAnimation;
 
-        private int action;
+        private FABButtonState action;
 
         private Drawable playDraw;
         private Drawable stopDraw;
@@ -47,7 +47,7 @@ namespace Toggl.Joey.UI.Views
             Initialize (context, attrs);
         }
 
-        public int ButtonAction
+        public FABButtonState ButtonAction
         {
             get {
                 return action;
@@ -59,9 +59,9 @@ namespace Toggl.Joey.UI.Views
                 }
                 action = value;
 
-                if (action == 0) {
+                if (action == FABButtonState.Start) {
                     Switch (playDraw, backgroundTintPlay);
-                } else if (action == 1) {
+                } else if (action == FABButtonState.Stop) {
                     Switch (stopDraw, backgroundTintStop);
                 } else {
                     Switch (saveDraw, backgroundTintSave);
@@ -144,6 +144,11 @@ namespace Toggl.Joey.UI.Views
             switchAnimation.PlaySequentially (outSet, inSet);
             switchAnimation.Start ();
         }
+
+    }
+    public enum FABButtonState {
+        Start,
+        Stop,
+        Save
     }
 }
-
