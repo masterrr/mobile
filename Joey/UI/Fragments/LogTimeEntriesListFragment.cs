@@ -62,31 +62,13 @@ namespace Toggl.Joey.UI.Fragments
             var bus = ServiceContainer.Resolve<MessageBus> ();
             subscriptionSettingChanged = bus.Subscribe<SettingChangedMessage> (OnSettingChanged);
             startStopBtn.Click += timerComponent.OnActionButtonClicked;
+            timerComponent.FABStateChange += OnFABChange;
+
         }
 
-        public EventHandler FABStateChange;
-
-        public FABButtonState EntryState
+        private void OnFABChange (object sender, EventArgs e)
         {
-            get {
-                return entryState;
-            }
-        }
-
-        private void SendState ()
-        {
-            if (timerComponent.ActiveTimeEntry == null) {
-                entryState = FABButtonState.Start;
-            } else if (timerComponent.ActiveTimeEntry.State == TimeEntryState.New && timerComponent.ActiveTimeEntry.StopTime.HasValue) {
-                entryState = FABButtonState.Save;
-            } else if (timerComponent.ActiveTimeEntry.State == TimeEntryState.Running) {
-                entryState = FABButtonState.Stop;
-            } else {
-                entryState = FABButtonState.Start;
-            }
-            if (FABStateChange != null) {
-                FABStateChange.Invoke (this, EventArgs.Empty); // Initial rendering
-            }
+            startStopBtn.ButtonAction = timerComponent.EntryState;
         }
 
         private TimerComponent timerComponent

@@ -30,6 +30,7 @@ namespace Toggl.Joey.UI.Components
         private PropertyChangeTracker propertyTracker;
         private ActiveTimeEntryManager timeEntryManager;
         private ITimeEntryModel backingActiveTimeEntry;
+        private FABButtonState entryState;
         private float animateState;
         private bool isProcessingAction;
         private bool canRebind;
@@ -138,6 +139,31 @@ namespace Toggl.Joey.UI.Components
             return shouldRebind;
         }
 
+        public EventHandler FABStateChange;
+
+        public FABButtonState EntryState
+        {
+            get {
+                return entryState;
+            }
+        }
+
+        private void SendState ()
+        {
+            if (ActiveTimeEntry == null) {
+                entryState = FABButtonState.Start;
+            } else if (ActiveTimeEntry.State == TimeEntryState.New && ActiveTimeEntry.StopTime.HasValue) {
+                entryState = FABButtonState.Save;
+            } else if (ActiveTimeEntry.State == TimeEntryState.Running) {
+                entryState = FABButtonState.Stop;
+            } else {
+                entryState = FABButtonState.Start;
+            }
+            if (FABStateChange != null) {
+                FABStateChange.Invoke (this, EventArgs.Empty); // Initial rendering
+            }
+        }
+
         public bool IsRunning
         {
             get {
@@ -206,6 +232,7 @@ namespace Toggl.Joey.UI.Components
         private void Rebind ()
         {
             ResetTrackedObservables ();
+            SendState();
 
             Root.Visibility = Hide ? ViewStates.Gone : ViewStates.Visible;
 
