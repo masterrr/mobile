@@ -28,6 +28,8 @@ namespace Toggl.Joey.UI.Fragments
         private bool canRebind;
         private bool descriptionChanging;
         private bool autoCommitScheduled;
+        private bool manualMode;
+        private StartStopFab ActionFAB;
 
         public event EventHandler OnPressedProjectSelector;
 
@@ -215,7 +217,7 @@ namespace Toggl.Joey.UI.Fragments
                 StopTimeEditText.Visibility = ViewStates.Visible;
             } else {
                 StopTimeEditText.Text = Time.Now.ToDeviceTimeString ();
-                if (TimeEntry.StartTime.IsMinValue () || TimeEntry.State == TimeEntryState.Running) {
+                if (TimeEntry.State == TimeEntryState.Running) {
                     StopTimeEditText.Visibility = ViewStates.Invisible;
                     StopTimeEditLabel.Visibility = ViewStates.Invisible;
                 } else {
@@ -246,6 +248,11 @@ namespace Toggl.Joey.UI.Fragments
                 BillableCheckBox.Visibility = ViewStates.Gone;
             } else {
                 BillableCheckBox.Visibility = ViewStates.Visible;
+            }
+            if (TimeEntry.State == TimeEntryState.Running) {
+                ActionFAB.ButtonAction = FABButtonState.Stop;
+            } else {
+                ActionFAB.ButtonAction = TimeEntry.StopTime.HasValue ? FABButtonState.Save : FABButtonState.Start;
             }
         }
 
@@ -308,8 +315,9 @@ namespace Toggl.Joey.UI.Fragments
             Toolbar.SetDisplayShowCustomEnabled (true);
             Toolbar.SetDisplayShowTitleEnabled (false);
 
-            HasOptionsMenu = true;
+            HasOptionsMenu = false;
 
+            ActionFAB = view.FindViewById<StartStopFab> (Resource.Id.StartStopBtn);
             StartTimeEditText = view.FindViewById<EditText> (Resource.Id.StartTimeEditText).SetFont (Font.Roboto);
             StopTimeEditText = view.FindViewById<EditText> (Resource.Id.StopTimeEditText).SetFont (Font.Roboto);
             StopTimeEditLabel = view.FindViewById<TextView> (Resource.Id.StopTimeEditLabel);
