@@ -63,19 +63,20 @@ namespace Toggl.Joey.UI.Fragments
             subscriptionSettingChanged = bus.Subscribe<SettingChangedMessage> (OnSettingChanged);
             startStopBtn.Click += timerComponent.OnActionButtonClicked;
             timerComponent.FABStateChange += OnFABChange;
-
         }
 
         private void OnFABChange (object sender, EventArgs e)
         {
-            startStopBtn.ButtonAction = timerComponent.EntryState;
+            if (timerComponent != null) {
+                startStopBtn.ButtonAction = timerComponent.EntryState;
+            }
         }
 
         private TimerComponent timerComponent
         {
             get {
                 var activity = (MainDrawerActivity)Activity;
-                return activity.Timer;
+                return activity.Timer ?? null;
             }
         }
 
