@@ -76,12 +76,11 @@ namespace Toggl.Joey.UI.Fragments
             base.OnViewCreated (view, savedInstanceState);
 
             viewModel = new NewProjectViewModel (TimeEntryList);
-            await viewModel.Init ();
+            binding = Binding.Create (() =>
+                                      projectBit.TextField.Text == viewModel.ProjectName &&
+                                      colorPicker.Adapter.SelectedColor == viewModel.ProjectColor);
 
-            binding = Binding.Create (() => projectBit.TextField.Text == viewModel.ProjectName);
-            colorPicker.SelectedColorChanged += (sender, e) => {
-                viewModel.ProjectColor = e;
-            };
+            await viewModel.Init ();
         }
 
         public override void OnDestroyView ()

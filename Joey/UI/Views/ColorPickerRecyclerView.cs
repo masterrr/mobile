@@ -38,18 +38,12 @@ namespace Toggl.Joey.UI.Views
         public ColorPickerAdapter Adapter { get; private set; }
         public RecyclerView.LayoutManager LayoutManager { get; private set; }
 
-        public event EventHandler<int> SelectedColorChanged
-        {
-            add { Adapter.SelectedColorChanged += value; }
-            remove { Adapter.SelectedColorChanged -= value; }
-        }
-
         public static int ColumnsCount = 5;
         public static int RowsCount = 5;
 
         private void Initialize ()
         {
-            LayoutInflater inflater = (LayoutInflater)Context.GetSystemService (Context.LayoutInflaterService);
+            var inflater = (LayoutInflater)Context.GetSystemService (Context.LayoutInflaterService);
             inflater.Inflate (Resource.Layout.ColorPicker, this);
 
             Recycler = FindViewById<RecyclerView> (Resource.Id.ColorPickerRecyclerView);
@@ -63,9 +57,9 @@ namespace Toggl.Joey.UI.Views
 
         public class ColorPickerAdapter : RecyclerView.Adapter
         {
-
-            public int SelectedColor { get; private set; }
+            // SelectedColorChanged is needed for binding!
             public event EventHandler<int> SelectedColorChanged;
+            public int SelectedColor { get; private set; }
 
             public ColorPickerAdapter()
             {
@@ -113,7 +107,7 @@ namespace Toggl.Joey.UI.Views
 
                 public ColorPickerViewHolder (View v, Action<int> listener) : base (v)
                 {
-                    v.Click += (sender, e) => listener (base.Position);
+                    v.Click += (sender, e) => listener (AdapterPosition);
                     Tick = v.FindViewById<ImageView> (Resource.Id.ColorPickerViewTick);
                     Tick.BringToFront();
                     Button = v.FindViewById<View> (Resource.Id.ColorPickerViewButton);
