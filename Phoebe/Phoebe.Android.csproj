@@ -65,6 +65,9 @@
     <Compile Include="Threading\**\*.cs" />
     <Compile Include="Analytics\**\*.cs" />
     <Compile Include="Logging\**\*.cs" />
+    <Compile Include="..\Contrib\Bind\Bind.cs">
+      <Link>Contrib\Bind\Bind.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Contrib\" />

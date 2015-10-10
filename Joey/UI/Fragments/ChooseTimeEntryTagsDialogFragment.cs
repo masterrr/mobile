@@ -134,7 +134,7 @@ namespace Toggl.Joey.UI.Fragments
                 // Commit changes the user has made thusfar
                 viewModel.SaveChanges (SelectedTags);
 
-                new CreateTagDialogFragment (WorkspaceId, viewModel.TimeEntryList).Show (FragmentManager, "new_tag_dialog");
+                CreateTagDialogFragment.NewInstace (WorkspaceId, viewModel.TimeEntryList).Show (FragmentManager, "new_tag_dialog");
                 Dismiss ();
             }
         }

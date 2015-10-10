@@ -6,6 +6,7 @@ using Android.Content;
 using Android.OS;
 using Android.Text;
 using Android.Widget;
+using Praeclarum.Bind;
 using Toggl.Phoebe.Data.DataObjects;
 using Toggl.Phoebe.Data.Utils;
 using Toggl.Phoebe.Data.ViewModels;
@@ -20,24 +21,7 @@ namespace Toggl.Joey.UI.Fragments
         private EditText nameEditText;
         private Button positiveButton;
         private CreateTagViewModel viewModel;
-
-        public CreateTagDialogFragment ()
-        {
-        }
-
-        public CreateTagDialogFragment (IntPtr jref, Android.Runtime.JniHandleOwnership xfer) : base (jref, xfer)
-        {
-        }
-
-        public CreateTagDialogFragment (Guid workspaceId, IList<TimeEntryData> timeEntryList)
-        {
-            var ids = timeEntryList.Select ( t => t.Id.ToString ()).ToList ();
-
-            var args = new Bundle ();
-            args.PutString (WorkspaceIdArgument, workspaceId.ToString ());
-            args.PutStringArrayList (TimeEntriesIdsArgument, ids);
-            Arguments = args;
-        }
+        private Binding binding;
 
         private Guid WorkspaceId
         {
@@ -53,31 +37,42 @@ namespace Toggl.Joey.UI.Fragments
         private IList<string> TimeEntryIds
         {
             get {
-                return Arguments != null ? Arguments.GetStringArrayList (TimeEntriesIdsArgument) : new List<string>();
+                return Arguments.GetStringArrayList (TimeEntriesIdsArgument);
             }
         }
 
-        public override async void OnCreate (Bundle savedInstanceState)
+        public CreateTagDialogFragment ()
         {
-            base.OnCreate (savedInstanceState);
+        }
 
-            if (viewModel == null) {
-                var timeEntryList = await TimeEntryGroup.GetTimeEntryDataList (TimeEntryIds);
-                viewModel = new CreateTagViewModel (WorkspaceId, timeEntryList);
-            }
-            viewModel.OnIsLoadingChanged += OnModelLoaded;
-            viewModel.Init ();
+        public CreateTagDialogFragment (IntPtr jref, Android.Runtime.JniHandleOwnership xfer) : base (jref, xfer)
+        {
+        }
+
+        public static CreateTagDialogFragment NewInstace (Guid workspaceId, IList<TimeEntryData> timeEntryList)
+        {
+            var fragment = new CreateTagDialogFragment ();
+
+            var ids = timeEntryList.Select ( t => t.Id.ToString ()).ToList ();
+            var args = new Bundle ();
+            args.PutString (WorkspaceIdArgument, workspaceId.ToString ());
+            args.PutStringArrayList (TimeEntriesIdsArgument, ids);
+            fragment.Arguments = args;
+
+            return fragment;
+        }
+
+        public async override void OnViewCreated (Android.Views.View view, Bundle savedInstanceState)
+        {
+            base.OnViewCreated (view, savedInstanceState);
+
+            var timeEntryList = await TimeEntryGroup.GetTimeEntryDataList (TimeEntryIds);
+
+            viewModel = new CreateTagViewModel (WorkspaceId, timeEntryList);
+            binding = Binding.Create (() => nameEditText.Text == viewModel.TagName);
+            await viewModel.Init ();
 
             ValidateTagName ();
-        }
-
-        private void OnModelLoaded (object sender, EventArgs e)
-        {
-            if (!viewModel.IsLoading) {
-                if (viewModel == null) {
-                    Dismiss ();
-                }
-            }
         }
 
         public override Dialog OnCreateDialog (Bundle savedInstanceState)
@@ -99,6 +94,13 @@ namespace Toggl.Joey.UI.Fragments
             base.OnStart ();
             positiveButton = ((AlertDialog)Dialog).GetButton ((int)DialogButtonType.Positive);
             ValidateTagName ();
+        }
+
+        public override void OnDestroy ()
+        {
+            binding.Unbind ();
+            viewModel.Dispose ();
+            base.OnDestroy ();
         }
 
         private void OnNameEditTextTextChanged (object sender, TextChangedEventArgs e)
@@ -125,16 +127,6 @@ namespace Toggl.Joey.UI.Fragments
             }
 
             positiveButton.Enabled = valid;
-        }
-
-        public override void OnDestroy ()
-        {
-            if (viewModel != null) {
-                viewModel.OnIsLoadingChanged += OnModelLoaded;
-                viewModel.Dispose ();
-            }
-
-            base.OnDestroy ();
         }
     }
 }
