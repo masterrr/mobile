@@ -1,9 +1,7 @@
-﻿using System.Collections.Generic;
-using Android.App;
+﻿using Android.App;
 using Android.Content.PM;
 using Android.OS;
 using Toggl.Joey.UI.Fragments;
-using Toggl.Phoebe.Data.DataObjects;
 using Activity = Android.Support.V7.App.AppCompatActivity;
 using Fragment = Android.Support.V4.App.Fragment;
 
@@ -21,10 +19,8 @@ namespace Toggl.Joey.UI.Activities
             base.OnCreateActivity (state);
             SetContentView (Resource.Layout.NewProjectActivity);
 
-            var timeEntryList = BaseActivity.GetDataFromIntent <List<TimeEntryData>> (Intent, ExtraTimeEntryDataListId);
-
             SupportFragmentManager.BeginTransaction ()
-            .Add (Resource.Id.NewProjectActivityLayout, new NewProjectFragment (timeEntryList))
+            .Add (Resource.Id.NewProjectActivityLayout, NewProjectFragment.NewInstance ())
             .Commit ();
         }
     }

@@ -1,6 +1,4 @@
-﻿using System;
-using Android.Content;
-using Android.Text;
+﻿using Android.Content;
 using Android.Util;
 using Android.Views;
 using Android.Views.InputMethods;
