@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using PropertyChanged;
 using Toggl.Phoebe.Analytics;
 using Toggl.Phoebe.Data.DataObjects;
 using Toggl.Phoebe.Data.Models;
@@ -9,13 +10,13 @@ using XPlatUtils;
 
 namespace Toggl.Phoebe.Data.ViewModels
 {
-    public class CreateTagViewModel : IViewModel<ITimeEntryModel>
+    [ImplementPropertyChanged]
+    public class CreateTagViewModel : IVModel<ITimeEntryModel>
     {
         private ITimeEntryModel model;
-        private bool isLoading;
         private Guid workspaceId;
         private WorkspaceModel workspace;
-        private IList<TimeEntryData> timeEntryList;
+        private readonly IList<TimeEntryData> timeEntryList;
 
         public CreateTagViewModel (Guid workspaceId, IList<TimeEntryData> timeEntryList)
         {
@@ -24,26 +25,32 @@ namespace Toggl.Phoebe.Data.ViewModels
             ServiceContainer.Resolve<ITracker> ().CurrentScreen = "New Tag Screen";
         }
 
-        public async void Init ()
+        public void Dispose ()
+        {
+            workspace = null;
+            model = null;
+        }
+
+        public bool IsLoading { get; set; }
+
+        public string TagName { get; set; }
+
+        public async Task Init ()
         {
             IsLoading = true;
 
             // Create workspace.
             workspace = new WorkspaceModel (workspaceId);
 
-            // Create model.
+            // Create time entry
             if (timeEntryList.Count > 1) {
-                Model = new TimeEntryGroup (timeEntryList);
+                model = new TimeEntryGroup (timeEntryList);
             } else if (timeEntryList.Count == 1) {
-                Model = new TimeEntryModel (timeEntryList [0]);
+                model = new TimeEntryModel (timeEntryList [0]);
             }
 
-            // Load models.
-            if (timeEntryList.Count > 1) {
-                await Task.WhenAll (workspace.LoadAsync (), Model.LoadAsync ());
-            } else {
-                await workspace.LoadAsync ();
-            }
+            // Load models
+            await Task.WhenAll (workspace.LoadAsync (), model.LoadAsync ());
 
             IsLoading = false;
         }
@@ -97,50 +104,6 @@ namespace Toggl.Phoebe.Data.ViewModels
 
                     model.Touch ();
                     await model.SaveAsync ().ConfigureAwait (false);
-                }
-            }
-        }
-
-        public void Dispose ()
-        {
-
-        }
-
-        public event EventHandler OnModelChanged;
-
-        public ITimeEntryModel Model
-        {
-            get {
-                return model;
-            }
-
-            private set {
-
-                model = value;
-
-                if (OnModelChanged != null) {
-                    OnModelChanged (this, EventArgs.Empty);
-                }
-            }
-        }
-
-        public event EventHandler OnIsLoadingChanged;
-
-        public bool IsLoading
-        {
-            get {
-                return isLoading;
-            }
-            private set {
-
-                if (isLoading  == value) {
-                    return;
-                }
-
-                isLoading = value;
-
-                if (OnIsLoadingChanged != null) {
-                    OnIsLoadingChanged (this, EventArgs.Empty);
                 }
             }
         }
