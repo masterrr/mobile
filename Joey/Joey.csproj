@@ -178,7 +178,6 @@
   <ItemGroup>
     <AndroidResource Include="Resources\values\Strings.xml" />
     <AndroidResource Include="Resources\layout\LoginActivity.axml" />
-    <AndroidResource Include="Resources\menu\LogTimeEntriesContextMenu.axml" />
     <AndroidResource Include="Resources\values\Plurals.xml" />
     <AndroidResource Include="Resources\drawable-hdpi\IcDialogAlertHoloLight.png" />
     <AndroidResource Include="Resources\drawable-mdpi\IcDialogAlertHoloLight.png" />

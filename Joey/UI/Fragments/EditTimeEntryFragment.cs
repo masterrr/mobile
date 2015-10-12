@@ -123,11 +123,6 @@ namespace Toggl.Joey.UI.Fragments
             base.OnSaveInstanceState (outState);
         }
 
-        public override void OnCreateOptionsMenu (IMenu menu, MenuInflater inflater)
-        {
-            menu.Add (Resource.String.NewProjectSaveButtonText).SetShowAsAction (ShowAsAction.Always);
-        }
-
         public override bool OnOptionsItemSelected (IMenuItem item)
         {
             if (item.ItemId == Android.Resource.Id.Home) {
