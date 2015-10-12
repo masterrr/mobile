@@ -217,7 +217,6 @@ namespace Toggl.Joey.UI.Components
 
         private void Rebind ()
         {
-            Console.WriteLine ("Rebind");
             ResetTrackedObservables ();
             SendState();
 
