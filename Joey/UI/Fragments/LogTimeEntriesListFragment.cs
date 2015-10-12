@@ -17,8 +17,10 @@ using Toggl.Joey.UI.Views;
 using Toggl.Phoebe;
 using Toggl.Phoebe.Data;
 using Toggl.Phoebe.Data.Utils;
+using Toggl.Phoebe.Data.ViewModels;
 using Toggl.Phoebe.Data.Views;
 using XPlatUtils;
+using Praeclarum.Bind;
 
 namespace Toggl.Joey.UI.Fragments
 {
@@ -30,14 +32,37 @@ namespace Toggl.Joey.UI.Fragments
         private LogTimeEntriesAdapter logAdapter;
         private StartStopFab startStopBtn;
         private CoordinatorLayout coordinatorLayout;
-        private FABButtonState entryState;
 
+        private bool isRunning;
         private TimeEntriesCollectionView collectionView;
+        private LogTimeEntriesViewModel viewModel;
+        private Binding binding;
 
         // Recycler setup
         private DividerItemDecoration dividerDecoration;
         private ShadowItemDecoration shadowDecoration;
         private ItemTouchListener itemTouchListener;
+
+        private TimeEntriesCollectionView CollectionView
+        {
+            get {
+                return collectionView;
+            } set {
+                collectionView = value;
+                logAdapter = new LogTimeEntriesAdapter (recyclerView, collectionView);
+                recyclerView.SetAdapter (logAdapter);
+            }
+        }
+
+        private bool IsRunning
+        {
+            get {
+                return isRunning;
+            } set {
+                isRunning = value;
+                startStopBtn.ButtonAction = isRunning ? FABButtonState.Stop : FABButtonState.Start;
+            }
+        }
 
         public override View OnCreateView (LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
@@ -55,54 +80,18 @@ namespace Toggl.Joey.UI.Fragments
             return view;
         }
 
-        public override void OnViewCreated (View view, Bundle savedInstanceState)
+        public async override void OnViewCreated (View view, Bundle savedInstanceState)
         {
             base.OnViewCreated (view, savedInstanceState);
+            viewModel = new LogTimeEntriesViewModel ();
+            viewModel.Init ();
 
-            var bus = ServiceContainer.Resolve<MessageBus> ();
-            subscriptionSettingChanged = bus.Subscribe<SettingChangedMessage> (OnSettingChanged);
-            startStopBtn.Click += timerComponent.OnActionButtonClicked;
-            timerComponent.FABStateChange += OnFABChange;
+            binding = Binding.Create (() =>
+                                      collectionView == viewModel.CollectionView);
 
-        }
-
-        private void OnFABChange (object sender, EventArgs e)
-        {
-            startStopBtn.ButtonAction = timerComponent.EntryState;
-        }
-
-        private TimerComponent timerComponent
-        {
-            get {
-                var activity = (MainDrawerActivity)Activity;
-                return activity.Timer;
-            }
-        }
-
-        public override void OnResume ()
-        {
-            EnsureAdapter ();
-            base.OnResume ();
-        }
-
-        public override bool UserVisibleHint
-        {
-            get { return base.UserVisibleHint; }
-            set {
-                base.UserVisibleHint = value;
-                EnsureAdapter ();
-            }
-        }
-
-        private void EnsureAdapter ()
-        {
-            if (recyclerView.GetAdapter() == null) {
-                var isGrouped = ServiceContainer.Resolve<SettingsStore> ().GroupedTimeEntries;
-                collectionView = isGrouped ? (TimeEntriesCollectionView)new GroupedTimeEntriesView () : new LogTimeEntriesView ();
-                logAdapter = new LogTimeEntriesAdapter (recyclerView, collectionView);
-                recyclerView.SetAdapter (logAdapter);
-                SetupRecyclerView ();
-            }
+            startStopBtn.Click += async (sender, e) => {
+                await viewModel.StartStopTimeEntry ();
+            };
         }
 
         public override void OnDestroyView ()
@@ -121,6 +110,15 @@ namespace Toggl.Joey.UI.Fragments
             ReleaseRecyclerView ();
 
             base.OnDestroyView ();
+        }
+
+        private void EnsureAdapter ()
+        {
+            if (recyclerView.GetAdapter() == null) {
+                var isGrouped = ServiceContainer.Resolve<SettingsStore> ().GroupedTimeEntries;
+                collectionView = isGrouped ? (TimeEntriesCollectionView)new GroupedTimeEntriesView () : new LogTimeEntriesView ();
+                SetupRecyclerView ();
+            }
         }
 
         private void SetupRecyclerView ()
