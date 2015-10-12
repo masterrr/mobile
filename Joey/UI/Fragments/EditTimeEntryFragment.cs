@@ -3,9 +3,14 @@ using System.Collections.Generic;
 using Android.Content;
 using Android.OS;
 using Android.Views;
+using Toggl.Joey.Data;
 using Toggl.Joey.UI.Activities;
+using Toggl.Phoebe;
+using Toggl.Phoebe.Analytics;
+using Toggl.Phoebe.Data;
 using Toggl.Phoebe.Data.DataObjects;
 using Toggl.Phoebe.Data.Views;
+using XPlatUtils;
 using Fragment = Android.Support.V4.App.Fragment;
 
 namespace Toggl.Joey.UI.Fragments
@@ -14,6 +19,7 @@ namespace Toggl.Joey.UI.Fragments
     {
         private static readonly string TimeEntryIdArgument = "com.toggl.timer.time_entry_id";
         private static readonly string UseDraftKey = "com.toggl.timer.draft_used";
+        private bool isProcessingAction;
         private EditTimeEntryView viewModel;
 
         private Guid TimeEntryId
@@ -81,12 +87,51 @@ namespace Toggl.Joey.UI.Fragments
                     viewModel.OnModelChanged += OnModelChanged;
                     OnPressedProjectSelector += OnProjectSelected;
                     OnPressedTagSelector += OnTagSelected;
+                    OnPressedFABButton += OnFABButtonPress;
                 } else {
                     Activity.Finish ();
                 }
             }
         }
 
+
+        public async void OnFABButtonPress (object sender, EventArgs e)
+        {
+            // Protect from double clicks
+            if (isProcessingAction) {
+                return;
+            }
+
+            isProcessingAction = true;
+            try {
+                try {
+
+                    if (TimeEntry.State == TimeEntryState.New && TimeEntry.StopTime.HasValue) {
+                        await TimeEntry.StoreAsync ();
+
+                        // Ping analytics
+                        ServiceContainer.Resolve<ITracker> ().SendTimerStartEvent (TimerStartSource.AppManual);
+                    } else if (TimeEntry.State == TimeEntryState.Running) {
+                        await TimeEntry.StopAsync ();
+
+                        // Ping analytics
+                        ServiceContainer.Resolve<ITracker> ().SendTimerStopEvent (TimerStopSource.App);
+                    } else {
+                        await TimeEntry.StartAsync ();
+
+                        // Ping analytics
+                        ServiceContainer.Resolve<ITracker> ().SendTimerStartEvent (TimerStartSource.AppNew);
+                    }
+                } catch (Exception ex) {
+                }
+
+                var bus = ServiceContainer.Resolve<MessageBus> ();
+                bus.Send (new UserTimeEntryStateChangeMessage (this, TimeEntry.Data));
+            } finally {
+                isProcessingAction = false;
+                Activity.OnBackPressed ();
+            }
+        }
         private void OnModelChanged (object sender, EventArgs e)
         {
             TimeEntry = viewModel.Model;

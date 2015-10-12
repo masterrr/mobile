@@ -2,9 +2,11 @@
 using Android.OS;
 using Android.Views;
 using Android.Widget;
+using Toggl.Joey.Data;
 using Toggl.Joey.UI.Utils;
 using Toggl.Joey.UI.Views;
 using Toggl.Phoebe;
+using Toggl.Phoebe.Analytics;
 using Toggl.Phoebe.Data;
 using Toggl.Phoebe.Data.Models;
 using Toggl.Phoebe.Data.Utils;
@@ -16,8 +18,6 @@ using Activity = Android.Support.V7.App.AppCompatActivity;
 using Fragment = Android.Support.V4.App.Fragment;
 using MeasureSpec = Android.Views.View.MeasureSpec;
 using Toolbar = Android.Support.V7.Widget.Toolbar;
-using Toggl.Phoebe.Analytics;
-using Toggl.Joey.Data;
 
 namespace Toggl.Joey.UI.Fragments
 {
@@ -30,13 +30,13 @@ namespace Toggl.Joey.UI.Fragments
         private bool canRebind;
         private bool descriptionChanging;
         private bool autoCommitScheduled;
-        private bool manualMode;
-        private bool isProcessingAction;
         private StartStopFab ActionFAB;
 
         public event EventHandler OnPressedProjectSelector;
 
         public event EventHandler OnPressedTagSelector;
+
+        public event EventHandler OnPressedFABButton;
 
         protected BaseEditTimeEntryFragment ()
         {
@@ -349,46 +349,9 @@ namespace Toggl.Joey.UI.Fragments
             ProjectEditText.Click += OnProjectEditTextClick;
             TagsBit.FullClick += OnTagsEditTextClick;
             BillableCheckBox.CheckedChange += OnBillableCheckBoxCheckedChange;
-            ActionFAB.Click += OnActionButtonClicked;
+            ActionFAB.Click += OnFABButtonClick;
 
             return view;
-        }
-
-        public async void OnActionButtonClicked (object sender, EventArgs e)
-        {
-            // Protect from double clicks
-            if (isProcessingAction) {
-                return;
-            }
-
-            isProcessingAction = true;
-            try {
-                try {
-                    if (TimeEntry.State == TimeEntryState.New && TimeEntry.StopTime.HasValue) {
-                        await TimeEntry.StoreAsync ();
-
-                        // Ping analytics
-                        ServiceContainer.Resolve<ITracker> ().SendTimerStartEvent (TimerStartSource.AppManual);
-                    } else if (TimeEntry.State == TimeEntryState.Running) {
-                        await TimeEntry.StopAsync ();
-
-                        // Ping analytics
-                        ServiceContainer.Resolve<ITracker> ().SendTimerStopEvent (TimerStopSource.App);
-                    } else {
-                        await TimeEntry.StartAsync ();
-
-                        // Ping analytics
-                        ServiceContainer.Resolve<ITracker> ().SendTimerStartEvent (TimerStartSource.AppNew);
-                    }
-                } catch (Exception ex) {
-                }
-
-                var bus = ServiceContainer.Resolve<MessageBus> ();
-                bus.Send (new UserTimeEntryStateChangeMessage (this, TimeEntry.Data));
-            } finally {
-                isProcessingAction = false;
-                Activity.OnBackPressed ();
-            }
         }
 
         public override bool OnOptionsItemSelected (IMenuItem item)
@@ -470,6 +433,12 @@ namespace Toggl.Joey.UI.Fragments
             }
         }
 
+        private void OnFABButtonClick (object sender, EventArgs e)
+        {
+            if (OnPressedFABButton != null) {
+                OnPressedFABButton.Invoke (sender, e);
+            }
+        }
         private void OnBillableCheckBoxCheckedChange (object sender, CompoundButton.CheckedChangeEventArgs e)
         {
             if (TimeEntry == null) {
