@@ -60,6 +60,7 @@ namespace Toggl.Joey.UI.Components
             DescriptionTextView = Root.FindViewById<TextView> (Resource.Id.DescriptionTextView).SetFont (Font.RobotoLight);
             AddManualEntry = Root.FindViewById<ImageButton> (Resource.Id.AddManuallyButton);
             AddManualEntry.Click += CreateTimeEntryManually;
+            Root.Click += OnTimerClicked;
         }
 
         public void OnCreate (Activity activity)
@@ -266,9 +267,6 @@ namespace Toggl.Joey.UI.Components
 
                 // Make sure that we work on the copy of the entry to not affect the rest of the logic.
                 entry = (ITimeEntryModel)new TimeEntryModel (new TimeEntryData (entry.Data));
-
-                var showProjectSelection = false;
-
                 try {
                     if (entry.State == TimeEntryState.New && entry.StopTime.HasValue) {
                         await entry.StoreAsync ();
@@ -307,16 +305,16 @@ namespace Toggl.Joey.UI.Components
             activity.StartActivity (i);
         }
 
+        private void OnTimerClicked (object sender, EventArgs e)
+        {
+            if (IsRunning) {
+                OpenTimeEntryEdit (ActiveTimeEntry);
+            }
+        }
+
         private void CreateTimeEntryManually (object sender, EventArgs e)
         {
-            var intent = new Intent (activity, typeof (EditTimeEntryActivity));
-
-            // Pass a single empty string
-            IList<string> guids = new List<string> {string.Empty};
-            intent.PutStringArrayListExtra (EditTimeEntryActivity.ExtraGroupedTimeEntriesGuids, guids);
-            intent.PutExtra (EditTimeEntryActivity.IsGrouped, guids.Count > 1);
-
-            activity.StartActivity (intent);
+            OpenTimeEntryEdit (new TimeEntryModel());
         }
 
 
