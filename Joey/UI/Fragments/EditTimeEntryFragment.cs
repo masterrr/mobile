@@ -7,7 +7,6 @@ using Toggl.Joey.UI.Activities;
 using Toggl.Phoebe.Data.DataObjects;
 using Toggl.Phoebe.Data.Views;
 using Fragment = Android.Support.V4.App.Fragment;
-using System.Threading.Tasks;
 
 namespace Toggl.Joey.UI.Fragments
 {
@@ -40,11 +39,9 @@ namespace Toggl.Joey.UI.Fragments
         {
             var fragment = new EditTimeEntryFragment ();
 
-            if (!string.IsNullOrEmpty (timeEntryId)) {
-                var bundle = new Bundle ();
-                bundle.PutString (TimeEntryIdArgument, timeEntryId);
-                fragment.Arguments = bundle;
-            }
+            var bundle = new Bundle ();
+            bundle.PutString (TimeEntryIdArgument, timeEntryId);
+            fragment.Arguments = bundle;
 
             return fragment;
         }
@@ -61,9 +58,6 @@ namespace Toggl.Joey.UI.Fragments
             viewModel = new EditTimeEntryView (TimeEntryId);
             viewModel.OnIsLoadingChanged += OnModelLoaded;
             viewModel.Init (useDraft);
-
-            // for manual entries, show Save btn
-            HasOptionsMenu = (TimeEntryId == Guid.Empty);
         }
 
         public override void OnDestroyView ()
@@ -121,18 +115,6 @@ namespace Toggl.Joey.UI.Fragments
         {
             outState.PutBoolean (UseDraftKey, viewModel.IsDraft);
             base.OnSaveInstanceState (outState);
-        }
-
-        public override bool OnOptionsItemSelected (IMenuItem item)
-        {
-            if (item.ItemId == Android.Resource.Id.Home) {
-                Activity.OnBackPressed ();
-            } else {
-                Task.Run (async () => {
-                    await viewModel.StoreTimeEntryModel ();
-                });
-            }
-            return base.OnOptionsItemSelected (item);
         }
 
         protected override void ResetModel ()
