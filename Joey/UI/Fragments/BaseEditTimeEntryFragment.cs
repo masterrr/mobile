@@ -318,7 +318,7 @@ namespace Toggl.Joey.UI.Fragments
             Toolbar.SetDisplayShowCustomEnabled (true);
             Toolbar.SetDisplayShowTitleEnabled (false);
 
-            HasOptionsMenu = false;
+            HasOptionsMenu = true;
 
             ActionFAB = view.FindViewById<StartStopFab> (Resource.Id.StartStopBtn);
             StartTimeEditText = view.FindViewById<EditText> (Resource.Id.StartTimeEditText).SetFont (Font.Roboto);
