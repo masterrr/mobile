@@ -320,7 +320,7 @@ namespace Toggl.Joey.UI.Fragments
 
             HasOptionsMenu = true;
 
-            ActionFAB = view.FindViewById<StartStopFab> (Resource.Id.StartStopBtn);
+            ActionFAB = view.FindViewById<StartStopFab> (Resource.Id.EditStartStopBtn);
             StartTimeEditText = view.FindViewById<EditText> (Resource.Id.StartTimeEditText).SetFont (Font.Roboto);
             StopTimeEditText = view.FindViewById<EditText> (Resource.Id.StopTimeEditText).SetFont (Font.Roboto);
             StopTimeEditLabel = view.FindViewById<TextView> (Resource.Id.StopTimeEditLabel);

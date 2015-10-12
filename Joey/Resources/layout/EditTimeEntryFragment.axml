@@ -136,7 +136,7 @@
         </LinearLayout>
     </ScrollView>
     <Toggl.Joey.UI.Views.StartStopFab
-        android:id="@+id/StartStopBtn"
+        android:id="@+id/EditStartStopBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:clickable="true"
