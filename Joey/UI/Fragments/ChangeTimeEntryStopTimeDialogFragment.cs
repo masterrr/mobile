@@ -1,4 +1,5 @@
 ﻿using System;
+using Toggl.Phoebe;
 using Toggl.Phoebe.Analytics;
 using Toggl.Phoebe.Data.Models;
 using XPlatUtils;
@@ -27,7 +28,7 @@ namespace Toggl.Joey.UI.Fragments
 
         protected override DateTime GetInitialDate ()
         {
-            var date = Toggl.Phoebe.Time.Now;
+            var date = Time.Now;
             if (Model != null && Model.StopTime.HasValue) {
                 date = Model.StopTime.Value.ToLocalTime ().Date;
             }
@@ -36,7 +37,7 @@ namespace Toggl.Joey.UI.Fragments
 
         protected override DateTime GetInitialTime ()
         {
-            var time = Toggl.Phoebe.Time.Now;
+            var time = Time.Now;
             if (Model != null && Model.StopTime.HasValue) {
                 time = Model.StopTime.Value.ToLocalTime ();
             }
@@ -46,6 +47,10 @@ namespace Toggl.Joey.UI.Fragments
         protected override async void UpdateDate (DateTime dateTime)
         {
             Model.StopTime = dateTime;
+            if (Model.StartTime.IsMinValue()) {
+                var duration = Model.StopTime - Time.UtcNow;
+                Model.SetDuration ((TimeSpan)duration);
+            }
             await Model.SaveAsync ();
         }
 

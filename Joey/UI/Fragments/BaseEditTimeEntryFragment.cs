@@ -439,6 +439,7 @@ namespace Toggl.Joey.UI.Fragments
                 OnPressedFABButton.Invoke (sender, e);
             }
         }
+
         private void OnBillableCheckBoxCheckedChange (object sender, CompoundButton.CheckedChangeEventArgs e)
         {
             if (TimeEntry == null) {

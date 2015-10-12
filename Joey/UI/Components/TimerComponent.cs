@@ -250,7 +250,6 @@ namespace Toggl.Joey.UI.Components
             handler.PostDelayed (Rebind, 1000 - duration.Milliseconds);
         }
 
-
         public async void OnActionButtonClicked (object sender, EventArgs e)
         {
             // Protect from double clicks
@@ -297,7 +296,6 @@ namespace Toggl.Joey.UI.Components
             }
         }
 
-
         private void OpenTimeEntryEdit (ITimeEntryModel model)
         {
             var i = new Intent (activity, typeof (EditTimeEntryActivity));
@@ -316,7 +314,6 @@ namespace Toggl.Joey.UI.Components
         {
             OpenTimeEntryEdit (new TimeEntryModel());
         }
-
 
         public bool CompactView
         {
