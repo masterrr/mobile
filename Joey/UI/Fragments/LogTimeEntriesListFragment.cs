@@ -30,7 +30,6 @@ namespace Toggl.Joey.UI.Fragments
         private LogTimeEntriesAdapter logAdapter;
         private StartStopFab startStopBtn;
         private CoordinatorLayout coordinatorLayout;
-        private FABButtonState entryState;
 
         private TimeEntriesCollectionView collectionView;
 

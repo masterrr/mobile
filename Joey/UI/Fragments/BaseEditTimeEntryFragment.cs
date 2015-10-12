@@ -356,6 +356,9 @@ namespace Toggl.Joey.UI.Fragments
 
         public override bool OnOptionsItemSelected (IMenuItem item)
         {
+            if (TimeEntry.State == TimeEntryState.New) {
+                TimeEntry.DeleteAsync();
+            }
             Activity.OnBackPressed ();
 
             return base.OnOptionsItemSelected (item);
