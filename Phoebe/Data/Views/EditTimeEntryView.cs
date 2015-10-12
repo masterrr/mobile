@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Threading.Tasks;
 using Toggl.Phoebe.Analytics;
 using Toggl.Phoebe.Data.Models;
 using Toggl.Phoebe.Data.ViewModels;
@@ -130,16 +129,7 @@ namespace Toggl.Phoebe.Data.Views
                 timeEntryManager.PropertyChanged -= OnTimeEntryManagerPropertyChanged;
                 timeEntryManager = null;
             }
-        }
 
-        public async Task StoreTimeEntryModel ()
-        {
-            // Still needs work
-            if (model.State == TimeEntryState.New && model.StopTime.HasValue) {
-                await model.StoreAsync ();
-                // Ping analytics
-                ServiceContainer.Resolve<ITracker> ().SendTimerStartEvent (TimerStartSource.AppManual);
-            }
         }
     }
 }
