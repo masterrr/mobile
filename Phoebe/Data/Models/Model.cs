@@ -2,12 +2,14 @@
 using System.ComponentModel;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using PropertyChanged;
 using Toggl.Phoebe.Data.DataObjects;
 using Toggl.Phoebe.Logging;
 using XPlatUtils;
 
 namespace Toggl.Phoebe.Data.Models
 {
+    [DoNotNotify]
     public abstract class Model<T> : IModel
         where T : CommonData, new()
     {

@@ -1,11 +1,13 @@
 ﻿using System;
 using System.ComponentModel;
+using PropertyChanged;
 
 #if false
 #define NotifyPropertyChanging
 #endif
 namespace Toggl.Phoebe
 {
+    [DoNotNotify]
     public class ObservableObject :
         #if NotifyPropertyChanging
         INotifyPropertyChanging,

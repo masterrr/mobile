@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using PropertyChanged;
 using Toggl.Phoebe.Data.DataObjects;
 using Toggl.Phoebe.Data.Models;
 using Toggl.Phoebe.Net;
@@ -11,6 +12,7 @@ using XPlatUtils;
 
 namespace Toggl.Phoebe.Data
 {
+    [DoNotNotify]
     public sealed class ActiveTimeEntryManager : INotifyPropertyChanged, IDisposable
     {
         private static string GetPropertyName<T> (Expression<Func<ActiveTimeEntryManager, T>> expr)

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
+using PropertyChanged;
 using Toggl.Phoebe.Data.DataObjects;
 using Toggl.Phoebe.Data.Models;
 using XPlatUtils;
@@ -15,6 +16,7 @@ namespace Toggl.Phoebe.Data.Utils
     // The class presents a TimeEntryModel (the last time entry added) to work correclty with
     // the Views created but actually manage a list of TimeEntryData
     /// </summary>
+    [DoNotNotify]
     public class TimeEntryGroup : ITimeEntryModel
     {
         private readonly List<TimeEntryData> dataObjects = new List<TimeEntryData> ();
