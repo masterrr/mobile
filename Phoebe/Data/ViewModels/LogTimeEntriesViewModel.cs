@@ -1,6 +1,6 @@
-﻿using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Threading.Tasks;
+using PropertyChanged;
 using Toggl.Phoebe.Analytics;
 using Toggl.Phoebe.Data.DataObjects;
 using Toggl.Phoebe.Data.Models;
@@ -10,148 +10,106 @@ using XPlatUtils;
 
 namespace Toggl.Phoebe.Data.ViewModels
 {
-    public class LogTimeEntriesViewModel : IViewModel<TimeEntryModel>
+    [ImplementPropertyChanged]
+    public class LogTimeEntriesViewModel : IVModel<TimeEntryModel>
     {
+        private Subscription<SettingChangedMessage> subscriptionSettingChanged;
         private ActiveTimeEntryManager timeEntryManager;
+        private TimeEntryModel model;
 
         public LogTimeEntriesViewModel ()
         {
             ServiceContainer.Resolve<ITracker> ().CurrentScreen = "TimeEntryList Screen";
             timeEntryManager = ServiceContainer.Resolve<ActiveTimeEntryManager> ();
             timeEntryManager.PropertyChanged += OnActiveTimeEntryManagerPropertyChanged;
+
+            var bus = ServiceContainer.Resolve<MessageBus> ();
+            subscriptionSettingChanged = bus.Subscribe<SettingChangedMessage> (OnSettingChanged);
         }
 
-        public async Task Init ()
+        public Task Init ()
         {
             IsLoading = true;
 
-            await Model.LoadAsync ();
-
-            if (Model.Workspace == null || Model.Workspace.Id == Guid.Empty) {
-                Model = null;
-            }
+            SyncModel ();
+            SyncCollectionView ();
 
             IsLoading = false;
         }
 
         public void Dispose ()
         {
-            if (timeEntryManager != null) {
-                timeEntryManager.PropertyChanged -= OnActiveTimeEntryManagerPropertyChanged;
-                timeEntryManager = null;
+            var bus = ServiceContainer.Resolve<MessageBus> ();
+            if (subscriptionSettingChanged != null) {
+                bus.Unsubscribe (subscriptionSettingChanged);
+                subscriptionSettingChanged = null;
             }
-            Model = null;
-        }
 
-        private void OnActiveTimeEntryManagerPropertyChanged (object sender, PropertyChangedEventArgs args)
-        {
-            if (args.PropertyName == ActiveTimeEntryManager.PropertyActive) {
-                var data = timeEntryManager.Active;
-                if (data != null) {
-                    if (Model == null) {
-                        Model = new TimeEntryModel (data);
-                    } else {
-                        Model.Data = data;
-                    }
-                }
-            }
-        }
+            timeEntryManager.PropertyChanged -= OnActiveTimeEntryManagerPropertyChanged;
+            timeEntryManager = null;
 
-        public TimeEntryModel Model { get; set; }
+            model = null;
+        }
 
         public bool IsLoading  { get; set; }
 
         public bool IsProcessingAction { get; set; }
 
-        public TimeEntriesCollectionView TimeEntryList
-        {
-            get {
+        public bool IsTimeEntryRunning { get; set; }
 
+        public bool IsGroupedMode { get; set; }
+
+        public TimeEntriesCollectionView CollectionView { get; set; }
+
+        public async Task StartStopTimeEntry ()
+        {
+            // Protect from double clicks
+            if (IsProcessingAction) {
+                return;
+            }
+
+            IsProcessingAction = true;
+            if (!IsTimeEntryRunning) {
+                await model.StartAsync ();
+            } else {
+                await model.StopAsync ();
+            }
+
+            IsTimeEntryRunning = !IsTimeEntryRunning;
+            IsProcessingAction = false;
+        }
+
+        private void OnActiveTimeEntryManagerPropertyChanged (object sender, PropertyChangedEventArgs args)
+        {
+            if (args.PropertyName == ActiveTimeEntryManager.PropertyActive) {
+                SyncModel ();
             }
         }
 
-        private bool SyncModel ()
+        private void OnSettingChanged (SettingChangedMessage msg)
         {
-            var shouldRebind = true;
+            // Implement a GetPropertyName
+            if (msg.Name == "GroupedTimeEntries") {
+                SyncCollectionView ();
+            }
+        }
 
-            var data = ActiveTimeEntryData;
+        private void SyncModel ()
+        {
+            var data = timeEntryManager.Active;
             if (data != null) {
-                if (backingActiveTimeEntry == null) {
-                    backingActiveTimeEntry = new TimeEntryModel (data);
+                if (model == null) {
+                    model = new TimeEntryModel (data);
                 } else {
-                    backingActiveTimeEntry.Data = data;
-                    shouldRebind = false;
+                    model.Data = data;
                 }
-            }
-
-            return shouldRebind;
-        }
-
-        public async Task StartTimeEntry ()
-        {
-            // Protect from double clicks
-            if (isProcessingAction) {
-                return;
             }
         }
 
-        public async Task StopTimeEntry ()
+        private void SyncCollectionView ()
         {
-            // Protect from double clicks
-            if (isProcessingAction) {
-                return;
-            }
-
-            await entry.StopAsync ();
-
-            // Ping analytics
-            ServiceContainer.Resolve<ITracker> ().SendTimerStopEvent (TimerStopSource.App);
-        }
-
-        private async void OnActionButtonClicked (object sender, EventArgs e)
-        {
-            // Protect from double clicks
-            if (isProcessingAction) {
-                return;
-            }
-
-            isProcessingAction = true;
-            try {
-                var entry = ActiveTimeEntry;
-                if (entry == null) {
-                    return;
-                }
-
-                // Make sure that we work on the copy of the entry to not affect the rest of the logic.
-                entry = new TimeEntryModel (new TimeEntryData (entry.Data));
-
-                var showProjectSelection = false;
-
-                try {
-                    if (entry.State == TimeEntryState.New && entry.StopTime.HasValue) {
-                        await entry.StoreAsync ();
-
-                        // Ping analytics
-                        ServiceContainer.Resolve<ITracker> ().SendTimerStartEvent (TimerStartSource.AppManual);
-                    } else if (entry.State == TimeEntryState.Running) {
-
-                    } else {
-                        await entry.StartAsync ();
-
-                        // Ping analytics
-                        ServiceContainer.Resolve<ITracker> ().SendTimerStartEvent (TimerStartSource.AppNew);
-                        OpenTimeEntryEdit (entry);
-                    }
-                } catch (Exception ex) {
-                    var log = ServiceContainer.Resolve<ILogger> ();
-                    log.Warning (LogTag, ex, "Failed to change time entry state.");
-                }
-
-                var bus = ServiceContainer.Resolve<MessageBus> ();
-                bus.Send (new UserTimeEntryStateChangeMessage (this, entry.Data));
-            } finally {
-                isProcessingAction = false;
-            }
+            IsGroupedMode = ServiceContainer.Resolve<ISettingsStore> ().GroupedTimeEntries;
+            CollectionView = IsGroupedMode ? (TimeEntriesCollectionView)new GroupedTimeEntriesView () : new LogTimeEntriesView ();
         }
     }
 }
