@@ -60,11 +60,11 @@ namespace Toggl.Joey.UI.Views
                 action = value;
 
                 if (action == FABButtonState.Start) {
-                    Switch (playDraw, backgroundTintPlay);
+                    SwitchNoAnimation (playDraw, backgroundTintPlay);
                 } else if (action == FABButtonState.Stop) {
-                    Switch (stopDraw, backgroundTintStop);
+                    SwitchNoAnimation (stopDraw, backgroundTintStop);
                 } else {
-                    Switch (saveDraw, backgroundTintSave);
+                    SwitchNoAnimation (saveDraw, backgroundTintSave);
                 }
             }
         }
@@ -84,7 +84,14 @@ namespace Toggl.Joey.UI.Views
             backgroundTintStop = new ColorStateList (states, stopColorArr);
             backgroundTintSave = new ColorStateList (states, saveColorArr);
 
-            Switch (playDraw, backgroundTintPlay);
+            SwitchNoAnimation (playDraw, backgroundTintPlay);
+        }
+
+        private void SwitchNoAnimation (Drawable src, ColorStateList tint)
+        {
+            SetImageDrawable (src);
+            BackgroundTintList = tint;
+
         }
 
         private void Switch (Drawable src, ColorStateList tint)
