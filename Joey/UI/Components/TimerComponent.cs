@@ -33,7 +33,6 @@ namespace Toggl.Joey.UI.Components
         private FABButtonState entryState;
         private bool isProcessingAction;
         private bool canRebind;
-        private bool compact;
         private bool hide = false;
 
         protected TextView DurationTextView { get; private set; }
@@ -313,17 +312,6 @@ namespace Toggl.Joey.UI.Components
         private void CreateTimeEntryManually (object sender, EventArgs e)
         {
             OpenTimeEntryEdit (new TimeEntryModel());
-        }
-
-        public bool CompactView
-        {
-            get { return compact; }
-            set {
-                if (compact != value) {
-                    compact = value;
-                    Rebind ();
-                }
-            }
         }
 
         public bool Hide

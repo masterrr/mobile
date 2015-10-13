@@ -140,9 +140,6 @@ namespace Toggl.Joey.UI.Activities
             get {
                 return toolbarMode;
             } set {
-                if (toolbarMode == value) {
-                    return;
-                }
                 toolbarMode = value;
                 AdjustToolbar();
             }
@@ -151,16 +148,13 @@ namespace Toggl.Joey.UI.Activities
         private void AdjustToolbar()
         {
             switch (toolbarMode) {
-            case MainDrawerActivity.ToolbarModes.DurationOnly:
-                Timer.CompactView = true;
-                SupportActionBar.SetBackgroundDrawable (null);
+            case MainDrawerActivity.ToolbarModes.Timer:
                 SupportActionBar.SetDisplayShowTitleEnabled (false);
+                Timer.Hide = false;
                 break;
             case MainDrawerActivity.ToolbarModes.Normal:
-                Timer.Hide = false;
-                Timer.CompactView = true;
-                SupportActionBar.SetBackgroundDrawable (Resources.GetDrawable (Resource.Drawable.BgArrows));
-                SupportActionBar.SetDisplayShowTitleEnabled (false);
+                Timer.Hide = true;
+                SupportActionBar.SetDisplayShowTitleEnabled (true);
                 break;
             }
         }
@@ -301,7 +295,6 @@ namespace Toggl.Joey.UI.Activities
                 SupportActionBar.SetTitle (Resource.String.MainDrawerTimer);
                 OpenFragment (trackingFragment.Value);
                 drawerAdapter.ExpandCollapse (DrawerListAdapter.TimerPageId);
-                Timer.Hide = false;
             }
             SetMenuSelection (drawerAdapter.GetItemPosition (id));
 
@@ -342,7 +335,7 @@ namespace Toggl.Joey.UI.Activities
             if (e.Id != DrawerListAdapter.TimerPageId) {
                 ToolbarMode = MainDrawerActivity.ToolbarModes.Normal;
             } else {
-                ToolbarMode = MainDrawerActivity.ToolbarModes.DurationOnly;
+                ToolbarMode = MainDrawerActivity.ToolbarModes.Timer;
             }
 
             if (e.Id == DrawerListAdapter.TimerPageId) {
@@ -428,8 +421,7 @@ namespace Toggl.Joey.UI.Activities
 
         public enum ToolbarModes {
             Normal,
-            Running,
-            DurationOnly
+            Timer
         }
     }
 }
