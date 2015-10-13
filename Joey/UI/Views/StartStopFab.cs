@@ -91,7 +91,6 @@ namespace Toggl.Joey.UI.Views
         {
             SetImageDrawable (src);
             BackgroundTintList = tint;
-
         }
 
         private void Switch (Drawable src, ColorStateList tint)

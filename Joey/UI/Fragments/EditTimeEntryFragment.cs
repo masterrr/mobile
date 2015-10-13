@@ -132,6 +132,7 @@ namespace Toggl.Joey.UI.Fragments
                 Activity.OnBackPressed ();
             }
         }
+
         private void OnModelChanged (object sender, EventArgs e)
         {
             TimeEntry = viewModel.Model;
