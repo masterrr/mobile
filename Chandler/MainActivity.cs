@@ -1,16 +1,14 @@
 ﻿using Android.App;
 using Android.OS;
 using Android.Support.V4.App;
-using Android.Support.Wearable.Views;
 using Android.Widget;
+using Android.Gms.Wearable;
 
 namespace Chandler
 {
     [Activity (Label = "Chandler", MainLauncher = true, Icon = "@drawable/icon")]
-    public class MainActivity : Activity
+    public class MainActivity : Activity, IDataApiDataListener
     {
-        int count = 1;
-
         protected override void OnCreate (Bundle bundle)
         {
             base.OnCreate (bundle);
@@ -18,25 +16,12 @@ namespace Chandler
             // Set our view from the "main" layout resource
             SetContentView (Resource.Layout.Main);
 
-            var v = FindViewById<WatchViewStub> (Resource.Id.watch_view_stub);
-            v.LayoutInflated += delegate {
+            var v = FindViewById<FrameLayout> (Resource.Id.watch_view_stub);
+        }
 
-                // Get our button from the layout resource,
-                // and attach an event to it
-                Button button = FindViewById<Button> (Resource.Id.myButton);
-
-                button.Click += delegate {
-                    var notification = new NotificationCompat.Builder (this)
-                    .SetContentTitle ("Button tapped")
-                    .SetContentText ("Button tapped " + count++ + " times!")
-                    .SetSmallIcon (Android.Resource.Drawable.StatNotifyVoicemail)
-                    .SetGroup ("group_key_demo").Build ();
-
-                    var manager = NotificationManagerCompat.From (this);
-                    manager.Notify (1, notification);
-                    button.Text = "Check Notification!";
-                };
-            };
+        public void OnDataChanged (DataEventBuffer dataEvents)
+        {
+            throw new System.NotImplementedException ();
         }
     }
 }
