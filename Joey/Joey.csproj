@@ -714,6 +714,11 @@
       <Project>{FF67B529-C11B-4FE0-AA1B-CD77141816BB}</Project>
       <Name>Phoebe.Android</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Chandler\Chandler.csproj">
+      <Project>{76D0B75F-C05C-4852-A9AA-8151618256EF}</Project>
+      <Name>Chandler</Name>
+      <IsAppExtension>True</IsAppExtension>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="UI\" />
