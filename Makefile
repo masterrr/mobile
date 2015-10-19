@@ -17,4 +17,4 @@ setup:
 	git update-index --assume-unchanged Phoebe/Build.cs
 
 format:
-	@astyle --options=.astylerc --formatted --suffix=none $$(find Joey Ross Phoebe Emma Tests -type f -name '*.cs')
+	@astyle --options=.astylerc --formatted --suffix=none $$(find Joey Ross Phoebe Emma Chandler Tests -type f -name '*.cs')
