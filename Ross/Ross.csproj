@@ -320,6 +320,7 @@
     <Compile Include="Views\TableViewRefreshView.cs" />
     <Compile Include="ViewControllers\WebViewController.cs" />
     <Compile Include="Net\APNSManager.cs" />
+    <Compile Include="QuickActions.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Phoebe\Phoebe.iOS.csproj">

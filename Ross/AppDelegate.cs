@@ -31,6 +31,8 @@ namespace Toggl.Ross
         private int systemVersion;
         private const int minVersionWidget = 7;
 
+        public UIApplicationShortcutItem LaunchedShortcutItem { get; set; }
+
         public override bool FinishedLaunching (UIApplication application, NSDictionary launchOptions)
         {
             var versionString = UIDevice.CurrentDevice.SystemVersion;
@@ -55,8 +57,20 @@ namespace Toggl.Ross
             ServiceContainer.Resolve<LoggerUserManager> ();
             ServiceContainer.Resolve<ITracker> ();
             ServiceContainer.Resolve<APNSManager> ();
+            ServiceContainer.Resolve<QuickActions> ();
 
-            return true;
+            if (launchOptions != null) {
+                LaunchedShortcutItem = launchOptions [UIApplication.LaunchOptionsShortcutItemKey] as UIApplicationShortcutItem;
+            }
+
+            return LaunchedShortcutItem == null;
+        }
+
+
+        public override void PerformActionForShortcutItem (UIApplication application, UIApplicationShortcutItem shortcutItem, UIOperationHandler completionHandler)
+        {
+            var quickActions = ServiceContainer.Resolve<QuickActions> ();
+            completionHandler (quickActions.HandleShortcut (shortcutItem));
         }
 
         public override void RegisteredForRemoteNotifications (UIApplication application, NSData deviceToken)
@@ -91,8 +105,13 @@ namespace Toggl.Ross
                 var widgetService = ServiceContainer.Resolve<WidgetUpdateService>();
                 widgetService.SetAppOnBackground (false);
             }
-        }
 
+            if (LaunchedShortcutItem != null) {
+                ServiceContainer.Resolve<QuickActions> ().HandleShortcut (LaunchedShortcutItem, true);
+                LaunchedShortcutItem = null;
+            }
+        }
+                 
         public override bool OpenUrl (UIApplication application, NSUrl url, string sourceApplication, NSObject annotation)
         {
             if (systemVersion > minVersionWidget) {
@@ -164,6 +183,7 @@ namespace Toggl.Ross
             ServiceContainer.Register<NetworkIndicatorManager> ();
             ServiceContainer.Register<TagChipCache> ();
             ServiceContainer.Register<APNSManager> ();
+            ServiceContainer.Register<QuickActions> ();
         }
 
         private void SetupGoogleServices ()
